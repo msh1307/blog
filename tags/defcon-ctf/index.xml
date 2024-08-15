@@ -6,11 +6,11 @@
     <description>Recent content in DEFCON CTF on msh1307</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 20 Dec 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/defcon-ctf/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 15 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/defcon-ctf/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>DEFCON 32</title>
       <link>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</link>
-      <pubDate>Wed, 20 Dec 2023 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 15 Aug 2024 00:00:00 +0000</pubDate>
       
       <guid>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</guid>
       <description>컨퍼런스 티켓도 구매했었는데 대회랑 겹쳐서 전날에 구경밖에 못했다. 숙소 1층에서 DEFCON 셔틀이 있어서 그거 타고 라스베가스 컨벤션 센터로 갈 수 있었다. 1, 2일차에는 여러 문제들 보면서 잡다한 버그들 찾다가 상대팀 패치도 분석해보고 공격 패킷도 분석하면서 시간을 보냈다. 2일차에 마지막으로 release된 Attack &amp;amp; Defense 문제중에 cloud cache를 잡았다.
