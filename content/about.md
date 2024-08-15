@@ -27,10 +27,11 @@ showToc: false
 ## CTF & Award
 ---
 > 2024
+> - 9th, DEFCON 32 Finals (Team Cold Fusion)
 > - 18th, Google CTF Quals (Team Cold Fusion)
 > - 미래기술연구소 장학생 선정 (₩1,000,000)
 > - 2nd, Hspace Cyberwar pwn (₩80,000)
-> - 6th, DEFCON 2024 Quals (Team Cold Fusion)
+> - 6th, DEFCON 32 Quals (Team Cold Fusion)
 > - 7th, LINE CTF 2024 (Team Cold Fusion)
 > - Whitehat 10, Best of the Best (₩3,000,000)
 > - 1st, Hspace Cyberwar pwn (₩160,000)
