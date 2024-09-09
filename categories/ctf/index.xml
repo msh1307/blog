@@ -71,17 +71,6 @@ sqlite3 sqlite3의 vmcode들을 분석해야한다.
     </item>
     
     <item>
-      <title>Dreamhack Kaist Postech CTF</title>
-      <link>https://msh1307.kr/blog/dreamhack_kaist_postech_ctf_2023/</link>
-      <pubDate>Wed, 20 Dec 2023 00:00:00 +0000</pubDate>
-      
-      <guid>https://msh1307.kr/blog/dreamhack_kaist_postech_ctf_2023/</guid>
-      <description>개인전으로 2위를 했다. 2022, 2023 kaist postech ctf 모든 포너블 챌린지를 해결했고 리버싱 챌린지 하나를 해결했다.
-sonofthec Analysis 인터넷 검색을 통해 enum을 복구한다. methods_fn[0] = (__int64)exit_with_code; methods_fn[1] = (__int64)register; methods_fn[2] = (__int64)login; methods_fn[3] = (__int64)token_status; methods_fn[4] = (__int64)update; methods_fn[5] = (__int64)logout; result = upload; methods_fn[6] = (__int64)upload; json으로 입력을 받고 그에 따른 핸들러를 호출한다.
-read_secret(); args = json_object_object_get(json_obj, &amp;#34;args&amp;#34;); STR = (std::chrono::_V2::system_clock *)json_object_object_get(args, &amp;#34;username&amp;#34;); chk_string((__int64)STR); object.username = json_object_get_string(STR); usr_name_len = strlen((const char *)object.</description>
-    </item>
-    
-    <item>
       <title>CODEGATE 2023 Quals</title>
       <link>https://msh1307.kr/blog/codegate_junior_2023_quals/</link>
       <pubDate>Sat, 24 Jun 2023 00:00:00 +0000</pubDate>
