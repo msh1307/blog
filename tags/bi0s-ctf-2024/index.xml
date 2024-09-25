@@ -15,7 +15,7 @@
       <guid>https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/</guid>
       <description>Kowaii VM Analysis 문제에서 소스코드를 제공해준다.
 ---- 0x0000 Header data ---- 0x1000 .CODE ---- bss &amp;gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.
-class kowaiiCtx { private: void *genAddr() { u64 r = 0; do r = (u64)rand(); while((int)r &amp;lt; 0); return (void *)(r &amp;lt;&amp;lt; 12); } public: kowaiiBin *bin; kowaiiRegisters *regs; kowaiiFuncEntry **callStack; kowaiiFuncEntry **callStackBase; u8 *bss; u8 *jitBase; u8 *jitEnd; kowaiiCtx() { this-&amp;gt;bin = (kowaiiBin *)mmap(this-&amp;gt;genAddr(), MAX_BIN_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); this-&amp;gt;regs = (kowaiiRegisters *)calloc(1,sizeof(kowaiiRegisters)); if(this-&amp;gt;bin == (void *)-1 || this-&amp;gt;regs == NULL) error(&amp;#34;Memory error!</description>
+void prepareCtx() { this-&amp;gt;prepareFuncTable(); this-&amp;gt;regs-&amp;gt;bp = (u64 *)mmap(this-&amp;gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;regs-&amp;gt;bp == (void *)(-1)) error(&amp;#34;Unable to map stack!&amp;#34;); this-&amp;gt;regs-&amp;gt;bp += (STACK_SIZE)/sizeof(u64); this-&amp;gt;regs-&amp;gt;sp = this-&amp;gt;regs-&amp;gt;bp; this-&amp;gt;jitBase = (u8 *)mmap(this-&amp;gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;jitBase == (void *)(-1)) error(&amp;#34;Unable to allocate executable memory!</description>
     </item>
     
   </channel>

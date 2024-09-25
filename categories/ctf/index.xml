@@ -6,7 +6,17 @@
     <description>Recent content in CTF on msh1307</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 15 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/categories/ctf/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 25 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/categories/ctf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CODEGATE 2024 Finals</title>
+      <link>https://msh1307.kr/blog/codegate_junior_2024/</link>
+      <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/codegate_junior_2024/</guid>
+      <description>작년 코게는 1, 2등이 영국인이였고 이번 예선때도 이스라엘, 싱가포르, 일본이 1, 2, 3등 먹었어서 3등이라도 하고 싶어서 전날에 기도하고 코엑스가서 본선을 치뤘는데 1등을 해버렸다. 해킹 시작하고 항상 코게 1등하는 망상하면서 살았는데 이게 현실이 될줄 몰랐다. 뭔가 오히려 CTF스러운 준비 없이 티오리 인턴하면서 리얼월드 바이너리보고 취약점도 찾았던게 도움이 많이된 것 같다. 예선 라업은 생략한다.
+Lucky Draw 파이썬 모듈이 주어진다. 처음보는거라 분석하는데 시간이 조금 걸렸는데 막상 익스 자체는 쉬웠다. LuckyDraw 모듈에서 이벤트 객체를 생성, 검색, 삭제하는 함수를 지원한다.</description>
+    </item>
+    
     <item>
       <title>DEFCON 32</title>
       <link>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</link>
@@ -33,8 +43,9 @@ Analysis ==== About ==== Unicornel is a multi-process, multi-architecture emulat
       <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
       
       <guid>https://msh1307.kr/blog/hitcon_2018_superhexagon/</guid>
-      <description>오랜만에 한꺼번에 블로그 글을 쓰게 되었다. 이번년도 초에 Theori에서 과제로 superhexagon을 풀면서 관련 CS를 한달간 공부해오는 것을 과제로 받았다. 글에서 언급하는 background 내용은 다른 글에서 따로 정리되어있다.
-Overview diff -Naur &amp;#39;--exclude=tests&amp;#39; &amp;#39;--exclude=roms&amp;#39; &amp;#39;--exclude=capstone&amp;#39; &amp;#39;--exclude=docs&amp;#39; ../temp/qemu-3.0.0/hw/arm/hitcon.c qemu/hw/arm/hitcon.c --- ../temp/qemu-3.0.0/hw/arm/hitcon.c	1969-12-31 16:00:00.000000000 -0800 +++ qemu/hw/arm/hitcon.c	2018-10-19 10:49:59.412023642 -0700 @@ -0,0 +1,208 @@ +#include &amp;#34;qemu/osdep.h&amp;#34; +#include &amp;#34;qapi/error.h&amp;#34; +#include &amp;#34;qemu-common.h&amp;#34; +#include &amp;#34;cpu.h&amp;#34; +#include &amp;#34;hw/sysbus.h&amp;#34; +#include &amp;#34;hw/devices.h&amp;#34; +#include &amp;#34;hw/boards.h&amp;#34; +#include &amp;#34;hw/arm/arm.h&amp;#34; +#include &amp;#34;hw/misc/arm_integrator_debug.h&amp;#34; +#include &amp;#34;net/net.h&amp;#34; +#include &amp;#34;exec/address-spaces.</description>
+      <description>오랜만에 한꺼번에 블로그 글을 쓰게 되었다. 이번년도 초에 Theori에서 과제로 superhexagon을 풀면서 관련 CS를 한달간 공부해오는 것을 과제로 받았다. 글에서 언급하는 background 내용은 다른 글에서 따로 정리되어있다. 익스플로잇 코드나 gdbscript들은 Appendix 섹션으로 밀었다.
+Overview HITCON 2018 SuperHexagon Overview qemu는 메모리 블록을 region과 그에 대한 subregion으로 구성한다. 이러한 region들은 각자의 priority를 가지며 priority 값이 낮을수록 참조가 우선된다.
+... + ARMCPRegInfo hitcon_flag_reginfo[] = { + { .name = &amp;#34;FLAG_WORD_0&amp;#34;, .state = ARM_CP_STATE_BOTH, + .</description>
     </item>
     
     <item>
@@ -45,7 +56,7 @@ Overview diff -Naur &amp;#39;--exclude=tests&amp;#39; &amp;#39;--exclude=roms&am
       <guid>https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/</guid>
       <description>Kowaii VM Analysis 문제에서 소스코드를 제공해준다.
 ---- 0x0000 Header data ---- 0x1000 .CODE ---- bss &amp;gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.
-class kowaiiCtx { private: void *genAddr() { u64 r = 0; do r = (u64)rand(); while((int)r &amp;lt; 0); return (void *)(r &amp;lt;&amp;lt; 12); } public: kowaiiBin *bin; kowaiiRegisters *regs; kowaiiFuncEntry **callStack; kowaiiFuncEntry **callStackBase; u8 *bss; u8 *jitBase; u8 *jitEnd; kowaiiCtx() { this-&amp;gt;bin = (kowaiiBin *)mmap(this-&amp;gt;genAddr(), MAX_BIN_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); this-&amp;gt;regs = (kowaiiRegisters *)calloc(1,sizeof(kowaiiRegisters)); if(this-&amp;gt;bin == (void *)-1 || this-&amp;gt;regs == NULL) error(&amp;#34;Memory error!</description>
+void prepareCtx() { this-&amp;gt;prepareFuncTable(); this-&amp;gt;regs-&amp;gt;bp = (u64 *)mmap(this-&amp;gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;regs-&amp;gt;bp == (void *)(-1)) error(&amp;#34;Unable to map stack!&amp;#34;); this-&amp;gt;regs-&amp;gt;bp += (STACK_SIZE)/sizeof(u64); this-&amp;gt;regs-&amp;gt;sp = this-&amp;gt;regs-&amp;gt;bp; this-&amp;gt;jitBase = (u8 *)mmap(this-&amp;gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;jitBase == (void *)(-1)) error(&amp;#34;Unable to allocate executable memory!</description>
     </item>
     
     <item>
@@ -120,8 +131,8 @@ diff --git a/Makefile b/Makefile index d265d7e..d495e84 100644 --- a/Makefile ++
       
       <guid>https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/</guid>
       <description>NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.
-Analysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.
-FROM ubuntu:22.04 ENV DEBIAN_FRONTEND noninteractive RUN apt-get update &amp;amp;&amp;amp;\ apt-get install -y --no-install-recommends wget unzip gcc make libc6-dev gnutls-dev uuid RUN mkdir -p /server/data/ &amp;amp;&amp;amp;\ echo &amp;#34;hello from LightFTP&amp;#34; &amp;gt;&amp;gt; /server/data/hello.txt &amp;amp;&amp;amp;\ cd /server &amp;amp;&amp;amp;\ wget --no-check-certificate https://codeload.github.com/hfiref0x/LightFTP/zip/refs/tags/v2.2 -O LightFTP-2.2.zip &amp;amp;&amp;amp;\ unzip LightFTP-2.2.zip &amp;amp;&amp;amp;\ cd LightFTP-2.2/Source/Release &amp;amp;&amp;amp;\ make &amp;amp;&amp;amp;\ cp -a .</description>
+Analysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다. /flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다. https://github.com/hfiref0x/LightFTP 그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다. 탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다. 소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.
+// positive sp value has been detected, the output may be wrong!</description>
     </item>
     
   </channel>

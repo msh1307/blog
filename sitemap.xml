@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://msh1307.kr/blog/codegate_junior_2024/</loc>
+    <lastmod>2024-09-25T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</loc>
     <lastmod>2024-08-15T00:00:00+00:00</lastmod>
   </url><url>
@@ -60,21 +63,24 @@
     <lastmod>2023-01-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://msh1307.kr/blog/</loc>
-    <lastmod>2024-08-15T00:00:00+00:00</lastmod>
+    <lastmod>2024-09-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://msh1307.kr/categories/</loc>
-    <lastmod>2024-08-15T00:00:00+00:00</lastmod>
+    <lastmod>2024-09-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://msh1307.kr/tags/codegate-2024/</loc>
+    <lastmod>2024-09-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://msh1307.kr/categories/ctf/</loc>
-    <lastmod>2024-08-15T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://msh1307.kr/tags/defcon-ctf/</loc>
-    <lastmod>2024-08-15T00:00:00+00:00</lastmod>
+    <lastmod>2024-09-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://msh1307.kr/</loc>
-    <lastmod>2024-08-15T00:00:00+00:00</lastmod>
+    <lastmod>2024-09-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://msh1307.kr/tags/</loc>
+    <lastmod>2024-09-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://msh1307.kr/tags/defcon-ctf/</loc>
     <lastmod>2024-08-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://msh1307.kr/categories/etc/</loc>

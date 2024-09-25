@@ -13,8 +13,9 @@
       <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
       
       <guid>https://msh1307.kr/blog/hitcon_2018_superhexagon/</guid>
-      <description>오랜만에 한꺼번에 블로그 글을 쓰게 되었다. 이번년도 초에 Theori에서 과제로 superhexagon을 풀면서 관련 CS를 한달간 공부해오는 것을 과제로 받았다. 글에서 언급하는 background 내용은 다른 글에서 따로 정리되어있다.
-Overview diff -Naur &amp;#39;--exclude=tests&amp;#39; &amp;#39;--exclude=roms&amp;#39; &amp;#39;--exclude=capstone&amp;#39; &amp;#39;--exclude=docs&amp;#39; ../temp/qemu-3.0.0/hw/arm/hitcon.c qemu/hw/arm/hitcon.c --- ../temp/qemu-3.0.0/hw/arm/hitcon.c	1969-12-31 16:00:00.000000000 -0800 +++ qemu/hw/arm/hitcon.c	2018-10-19 10:49:59.412023642 -0700 @@ -0,0 +1,208 @@ +#include &amp;#34;qemu/osdep.h&amp;#34; +#include &amp;#34;qapi/error.h&amp;#34; +#include &amp;#34;qemu-common.h&amp;#34; +#include &amp;#34;cpu.h&amp;#34; +#include &amp;#34;hw/sysbus.h&amp;#34; +#include &amp;#34;hw/devices.h&amp;#34; +#include &amp;#34;hw/boards.h&amp;#34; +#include &amp;#34;hw/arm/arm.h&amp;#34; +#include &amp;#34;hw/misc/arm_integrator_debug.h&amp;#34; +#include &amp;#34;net/net.h&amp;#34; +#include &amp;#34;exec/address-spaces.</description>
+      <description>오랜만에 한꺼번에 블로그 글을 쓰게 되었다. 이번년도 초에 Theori에서 과제로 superhexagon을 풀면서 관련 CS를 한달간 공부해오는 것을 과제로 받았다. 글에서 언급하는 background 내용은 다른 글에서 따로 정리되어있다. 익스플로잇 코드나 gdbscript들은 Appendix 섹션으로 밀었다.
+Overview HITCON 2018 SuperHexagon Overview qemu는 메모리 블록을 region과 그에 대한 subregion으로 구성한다. 이러한 region들은 각자의 priority를 가지며 priority 값이 낮을수록 참조가 우선된다.
+... + ARMCPRegInfo hitcon_flag_reginfo[] = { + { .name = &amp;#34;FLAG_WORD_0&amp;#34;, .state = ARM_CP_STATE_BOTH, + .</description>
     </item>
     
   </channel>
