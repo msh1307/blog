@@ -27,6 +27,9 @@ showToc: false
 ## CTF & Award
 ---
 > 2024
+> - 1st, CODEGATE Junior 2024 (₩3,000,000)
+> - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (₩2,000,000) (Team 냥코)
+> - 4th, YISF CTF 2024 (₩500,000)
 > - 9th, DEFCON 32 Finals (Team Cold Fusion)
 > - 18th, Google CTF Quals (Team Cold Fusion)
 > - 미래기술연구소 장학생 선정 (₩1,000,000)
