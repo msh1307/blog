@@ -24,86 +24,6 @@ Header data
 위와 같은 바이너리 구조를 입력으로 받는다.
 
 ```c++
-class kowaiiCtx
-{
-    private:
-        void *genAddr()
-        {
-            u64 r = 0;
-            do r = (u64)rand();
-            while((int)r < 0);
-
-            return (void *)(r << 12);
-        }
-
-    public:
-        kowaiiBin *bin;
-        kowaiiRegisters *regs;
-        kowaiiFuncEntry **callStack;
-        kowaiiFuncEntry **callStackBase;
-        u8 *bss;
-        u8 *jitBase;
-        u8 *jitEnd;
-
-        kowaiiCtx()
-        {
-            this->bin = (kowaiiBin *)mmap(this->genAddr(), MAX_BIN_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-            this->regs = (kowaiiRegisters *)calloc(1,sizeof(kowaiiRegisters));
-            if(this->bin == (void *)-1 || this->regs == NULL) error("Memory error!");
-        }
-
-        void readBin()
-        {
-            u8 *ptr = (u8 *)this->bin;
-            u8 chr = 0xa;
-            u8 eof = 0x0;
-            u32 i = 0;
-
-            cout << "Send your kowaii binary" << endl;
-            cout << "> " << flush;
-            while(i < MAX_BIN_SIZE)
-            {
-                if(read(0,&chr,1) < 0) error("Read error!");
-                if(chr == 0xa)
-                {
-                    if(eof)
-                    {
-                        ptr[i-1] = 0x0;
-                        break;
-                    }
-                    ptr[i++] = chr;
-                    eof = 1;
-                }
-                else
-                {
-                    ptr[i++] = chr;
-                    eof = 0;
-                }
-            }
-        }
-
-        void checkBin()
-        {
-            if(memcmp(this->bin->kowaii,"KOWAII",6)) error("Invalid file format!");
-            if(this->bin->entry < CODE_START_ADDR || this->bin->entry > this->bin->bss) error("Invalid entry point!");
-            if(this->bin->magic != 0xdeadc0de) error("Corrupted file!");
-            if(this->bin->bss < MAX_BIN_SIZE-BSS_SIZE) error("Invalid .bss!");
-            if(this->bin->no_funcs > MAX_FUNC_ENTRIES) error("Invalid function table!");
-        }
-
-        void prepareFuncTable()
-        {
-            for(int i = 0; i < this->bin->no_funcs; i++)
-            {
-                u64 addr = (u64)(this->bin->funct[i].addr);
-                
-                if(addr > this->bin->bss || addr < CODE_START_ADDR) error("Invalid function table!");
-
-                this->bin->funct[i].addr = (u64)(this->bin)+addr;
-                this->bin->funct[i].callCount = 0;
-            }
-        }
-
         void prepareCtx()
         {
             this->prepareFuncTable();
@@ -130,84 +50,8 @@ class kowaiiCtx
 커스텀 바이너리를 입력으로 받는다.
 text, bss 영역이 존재한다.
 vm context를 세팅하는 함수가 있는데 stack, jit page, callStack 모두 주소가 랜덤화된다.
-
-```c++
-		void virtual callFunc()
-        {
-            u16 hash = *(u16 *)(this->ctx.regs->pc+1);
-            kowaiiFuncEntry *fe = NULL;
-
-            for(int i = 0; i < this->ctx.bin->no_funcs; i++)
-            {
-                if(hash == this->ctx.bin->funct[i].hash)
-                {
-                    fe = &this->ctx.bin->funct[i];
-                    break;
-                }
-            }
-            if(!fe) error("Invalid function call!");
-
-            *(--this->ctx.regs->sp) = (u64)(this->ctx.regs->pc+3);
-            this->ctx.regs->pc = (u8 *)fe->addr;
-            *(++this->ctx.callStack) = fe;
-            return;
-        }
-
-        void virtual retFunc()
-        {
-            this->ctx.regs->pc = (u8 *)(*this->ctx.regs->sp++);
-            *(this->ctx.callStack--) = NULL; 
-            return;
-        }
-
-        void checkState()
-        {
-            switch(*this->ctx.regs->pc)
-            {
-                case ADD:
-                case SUB:
-                case MUL:
-                    this->dst = *(this->ctx.regs->pc+1);
-                    this->src1 = *(this->ctx.regs->pc+2);
-                    this->src2 = *(this->ctx.regs->pc+3);
-                    if(this->dst >= MAX_REGS || this->src1 >= MAX_REGS | this->src2 >= MAX_REGS) error("Invalid register!");
-                    this->stepSize = 4;
-                    break;
-
-                case SHR:
-                case SHL:
-                    this->dst = *(this->ctx.regs->pc+1);
-                    this->imm = *(this->ctx.regs->pc+2);
-                    if(this->dst >= MAX_REGS) error("Invalid register!");
-                    this->stepSize = 3;
-                    break;
-
-                case PUSH:
-                    this->src1 = *(this->ctx.regs->pc+1);
-                    if(this->src1 >= MAX_REGS) error("Invalid register!");
-                    if((u64)(this->ctx.regs->bp - this->ctx.regs->sp) >= STACK_SIZE) error("Stack Overflow (┛ಠ_ಠ)┛彡┻━┻");
-                    this->stepSize = 2;
-                    break;
-
-                case POP:
-                    this->dst = *(this->ctx.regs->pc+1);
-                    if(this->dst >= MAX_REGS) error("Invalid register!");
-                    if(this->ctx.regs->bp <= this->ctx.regs->sp) error("Stack Underflow ┳━┳ ヽ(ಠل͜ಠ)ﾉ");
-                    this->stepSize = 2;
-                    break;
-
-                case GET:
-                case SET:
-                    this->src1 = *(this->ctx.regs->pc+1);
-                    if(this->src1 >= MAX_REGS) error("Invalid register!");
-                    this->imm = *(u32 *)(this->ctx.regs->pc+2);
-                    if(this->imm >= (((u64)this->ctx.bin+MAX_BIN_SIZE)-(u64)this->ctx.bss)) error("Out Of Bounds on .bss ヽ(°ロ°)ﾉ");
-                    this->stepSize = 6;
-                    break;
-```
 vm은 checkState에서 검증을 모두 수행하고 취약점이 발생하지 않는다.
 그리고 JIT compile이 활성화되었는지 아닌지에 따라서 callFunc, retFunc가 오버라이딩된다.
-
 ```c++
         void virtual callFunc()
         {
@@ -249,8 +93,7 @@ vm은 checkState에서 검증을 모두 수행하고 취약점이 발생하지 �
 JIT이 활성화된 클래스를 확인해보면 retFunc에서 callStack을 빼면서 callCount를 수집한다.
 또한 CallCount를 JIT_CC와 비교해서 네이티브로 컴파일해 최적화를 수행한다.
 이미 앞서 vm에서 충분히 검증되었다고 믿고, JIT에선 검증없이 컴파일한다.
-
-```c
+```c++
         void jitEmitIns(u64 INS, u16 reg1, u16 reg2, u16 reg3)
         {
             u8 insSize = 0;
@@ -283,14 +126,7 @@ JIT이 활성화된 클래스를 확인해보면 retFunc에서 callStack을 빼�
 
         void jitGen(kowaiiFuncEntry *fe)
         {
-            u8 *code = (u8 *)fe->addr;
-            u8 reg1, reg2, reg3;
-            u64 imm;
-            int i = 0;
-            u16 hash;
-            kowaiiFuncEntry *kfe;
-            vector<char> stackBalance;
-
+            ...
             mprotect(this->ctx.jitEnd-JIT_SIZE, JIT_SIZE, PROT_READ | PROT_WRITE);
 
             fe->addr = (u64)this->ctx.jitBase;
@@ -320,118 +156,7 @@ JIT이 활성화된 클래스를 확인해보면 retFunc에서 callStack을 빼�
                         }
                         i += 4;
                         break;
-
-                    case SUB:
-
-                        if(reg1 != reg2 && reg1 != reg3)
-                        {
-                            this->jitEmitIns(x64_MOVNN, reg1, reg2, x64_NOREG);
-                            this->jitEmitIns(x64_ADD, reg1, reg3, x64_NOREG);
-                        }
-                        else
-                        {
-                            if(reg1 == reg2) this->jitEmitIns(x64_ADD, reg1, reg3, x64_NOREG);  // sub r0, r0, r1 
-                            else this->jitEmitIns(x64_SUB, reg1, reg2, x64_NOREG);
-                        }
-                        i += 4;
-                        break;
-
-                    case MUL:
-
-                        this->jitEmitIns(x64_MOVAN, x64_RAX, reg2, x64_NOREG);
-                        this->jitEmitIns(x64_MUL, reg3, x64_NOREG, x64_NOREG);
-                        this->jitEmitIns(x64_XCHGAN, reg1, x64_NOREG, x64_NOREG);
-                        i += 4;
-                        break;
-
-                    case SHR:
-
-                        this->jitEmitIns(x64_MOVALI, x64_RCX, x64_NOREG, x64_NOREG);
-                        *this->ctx.jitBase++ = (u8)imm; 
-                        this->jitEmitIns(x64_SHR, reg1, x64_NOREG, x64_NOREG);
-                        i += 3;
-                        break;
-
-                    case SHL:
-
-                        this->jitEmitIns(x64_MOVALI, x64_RCX, x64_NOREG, x64_NOREG);
-                        *this->ctx.jitBase++ = (u8)imm; 
-                        this->jitEmitIns(x64_SHL, reg1, x64_NOREG, x64_NOREG);
-                        i += 3;
-                        break;
-
-                    case PUSH:
-
-                        this->jitEmitIns(x64_PUSH, reg1, x64_NOREG, x64_NOREG);
-                        stackBalance.push_back('x');
-                        i += 2;
-                        break;
-
-                    case POP:
-
-                        this->jitEmitIns(x64_POP, reg1, x64_NOREG, x64_NOREG);
-                        stackBalance.pop_back();
-                        i += 2;
-                        break;
-
-                    case GET:
-
-                        this->jitEmitIns(x64_MOVNP, x64_RDX, reg1, x64_NOREG);
-                        *(u32 *)this->ctx.jitBase = (u32)imm;
-                        this->ctx.jitBase += 4;
-                        i += 6;
-                        break;
-
-                    case SET:
-
-                        this->jitEmitIns(x64_MOVPN, x64_RDX, reg1, x64_NOREG);
-                        *(u32 *)this->ctx.jitBase = (u32)imm;
-                        this->ctx.jitBase += 4;
-                        i += 6;
-                        break;
-                    
-                    case MOV:
-
-                        this->jitEmitIns(x64_MOVNI, reg1, x64_NOREG, x64_NOREG);
-                        *(u32 *)this->ctx.jitBase = imm;
-                        this->ctx.jitBase += 4;
-                        i += 6;
-                        break;
-
-                    case CALL:
-
-                        for(int i = 0; i < this->ctx.bin->no_funcs; i++)
-                        {
-                            if(hash == this->ctx.bin->funct[i].hash)
-                            {
-                                kfe = &this->ctx.bin->funct[i];
-                                break;
-                            }
-                        }
-                        
-                        if(!kfe) error("Invalid function call!");
-                        if(kfe->addr >= (u64)this->ctx.jitEnd || kfe->addr < (u64)this->ctx.jitEnd - JIT_SIZE) error("This shouldn't happen O__O");
-
-                        this->jitEmitIns(x64_MOVAI, x64_RAX, x64_NOREG, x64_NOREG);
-                        *(u64 *)this->ctx.jitBase = kfe->addr;
-                        this->ctx.jitBase += 8;
-                        this->jitEmitIns(x64_CALLA, x64_RAX, x64_NOREG, x64_NOREG);
-                        i += 3;
-                        break;
-
-                    case HLT: // too lazy to implement :)
-                    case RET:
-                        goto cleanup;
-
-                    case NOP:
-                        i++;
-                        break;
-
-                    default:
-                        error("NANI?!");
-                        break;
-                }
-            }
+        ...
 cleanup:
             *this->ctx.jitBase++ = x64_RET;
             mprotect(this->ctx.jitEnd-JIT_SIZE, JIT_SIZE, PROT_READ | PROT_EXEC);
@@ -449,9 +174,11 @@ void prepareFuncTable()
                 if(addr > this->bin->bss || addr < CODE_START_ADDR) error("Invalid function table!");
 ```
 근데 앞서 검증할때 code address < this->bin->bss 여야하고, 이에 부정은 code address >= this->bin->bss 이기 때문에 bss 영역에 코드를 작성하고 call hash를 통해 런타임에 수정되는 코드를 만들 수 있다.
-
+### Vulnerability
+사실 bss에 쓰기 가능한 코드를 이용해 JIT gen 함수의 취약점을 악용할 필요도 없이 설계상의 문제로도 그냥 익스플로잇이 가능했다.
 한번 JIT 컴파일이 되면, push / pop 같은 스택 조작 명령을 통해 실제 레지스터 rip에 대한 컨트롤이 가능하다.
-
+근본적으로 vm에서 host rsp를 그대로 이용하는거 자체가 문제이다.
+## Exploit
 ```c++
         __attribute__((noinline))
         __attribute__((naked))
@@ -510,8 +237,6 @@ void prepareFuncTable()
 JIT compile된 함수는 이미 JIT compile된 함수만 call이 가능하다.
 call 이전에 이미 rsp는 vm stack의 주소로 변경되었으니 이를 이용해 JIT page leak이 가능하다.
 그리고 pop ret 가젯을 만들고 push ret 가젯을 만들어서 pop으로 binary base를 구하고 push ret으로 context 복구가 가능하다.
-
-사실 bss에 쓰기 가능한 코드를 이용해 JIT gen 함수의 취약점을 악용할 필요도 없이 설계상의 문제로도 그냥 익스플로잇이 가능했다.
 ```c++
 #ifdef SECCOMP
 void kowaiiSeccomp()
@@ -535,7 +260,7 @@ void kowaiiSeccomp()
 #endif
 
 ```
-seccomp bypass를 위해서 JIT에 mov imm32를 통해서 4바이트씩 쉘코드를 작성하고 \\xeb\\x02로 쉘코드를 이을 수 있다.
+seccomp bypass를 위해서 JIT에 mov imm32를 통해서 4바이트씩 쉘코드를 작성하고 \\xeb\\x02로 쉘코드를 이었다.
 
 ## Exploit
 ```python
