@@ -13,7 +13,8 @@
       <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
       
       <guid>https://msh1307.kr/blog/background_arm/</guid>
-      <description>Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다. 다음과 같은 특징이 있다.
+      <description>Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.
+다음과 같은 특징이 있다.
 많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.
 Armv8의 중요한 특징은 호환성이다.
 64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다.</description>
