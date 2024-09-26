@@ -28,15 +28,15 @@ showToc: false
 ---
 > 2024
 > - 1st, CODEGATE Junior 2024 (₩3,000,000)
-> - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (₩2,000,000) (Team 냥코)
-> - 4th, YISF CTF 2024 (₩500,000)
 > - 9th, DEFCON 32 Finals (Team Cold Fusion)
-> - 18th, Google CTF Quals (Team Cold Fusion)
+> - 6th, DEFCON 32 Quals (Team Cold Fusion)
+> - Whitehat 10, Best of the Best (₩3,000,000)
+> - 1st, 육군 Cyber Security challenge (₩1,000,000) (Team 냥코)
+> - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (₩2,000,000) (Team 냥코)
 > - 미래기술연구소 장학생 선정 (₩1,000,000)
 > - 2nd, Hspace Cyberwar pwn (₩80,000)
-> - 6th, DEFCON 32 Quals (Team Cold Fusion)
+> - 4th, YISF CTF 2024 (₩500,000)
 > - 7th, LINE CTF 2024 (Team Cold Fusion)
-> - Whitehat 10, Best of the Best (₩3,000,000)
 > - 1st, Hspace Cyberwar pwn (₩160,000)
 > - 1st, Cyber Apocalypse 2024: Hacker Royale (Team Friendly Maltese Citizens)
 
