@@ -51,7 +51,7 @@ showToc: false
 > - 3rd, KOSPO CTF 2023 (₩500,000) (Team cats save the world)
 > - 3rd, CCE, Cyber Conflict Exercise Junior 2023 (₩1,000,000) (Team 가끔씩 툭하고 어셈블리어로 부끄러워하는 옆자리의 서현 군)
 > - 2nd, JBU CTF 2023 (₩100,000) (Team 달)
-> - 8th, Codegate Junior 2023
+> - Finalist, Codegate Junior 2023
 > - 1st, 선린 모의해킹방어대회 2023
 
 > 2022
