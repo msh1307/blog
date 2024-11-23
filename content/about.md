@@ -36,10 +36,10 @@ showToc: false
 > - 1st, 한양대 HCTF 2024 (Team 한양대특기자권율)
 > - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (₩2,000,000) (Team 냥코)
 > - 미래기술연구소 장학생 선정 (₩1,000,000)
-> - 2nd, Hspace Cyberwar pwn (₩80,000)
+> - 2nd, Hspace Cyberwar pwn 
 > - 4th, YISF CTF 2024 (₩500,000)
 > - 7th, LINE CTF 2024 (Team Cold Fusion)
-> - 1st, Hspace Cyberwar pwn (₩160,000)
+> - 1st, Hspace Cyberwar pwn 
 > - 1st, Cyber Apocalypse 2024: Hacker Royale (Team Friendly Maltese Citizens)
 
 > 2023
@@ -52,7 +52,7 @@ showToc: false
 > - 4th, YISF CTF 2023 (₩500,000)
 > - 3rd, KOSPO CTF 2023 (₩500,000) (Team cats save the world)
 > - 3rd, CCE, Cyber Conflict Exercise Junior 2023 (₩1,000,000) (Team 가끔씩 툭하고 어셈블리어로 부끄러워하는 옆자리의 서현 군)
-> - 2nd, JBU CTF 2023 (₩100,000) (Team 달)
+> - 2nd, JBU CTF 2023 (Team 달)
 > - Finalist, Codegate Junior 2023
 > - 1st, 선린 모의해킹방어대회 2023
 
