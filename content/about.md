@@ -32,6 +32,8 @@ showToc: false
 > - 6th, DEFCON 32 Quals (Team Cold Fusion)
 > - Whitehat 10, Best of the Best (₩3,000,000)
 > - 1st, 육군 Cyber Security challenge (₩1,000,000) (Team 냥코)
+> - 1st, WITHCON, Whitehat Contest Junior 2024 (₩6,000,000) (Team 야옹)
+> - 1st, 한양대 HCTF 2024 (Team 한양대특기자권율)
 > - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (₩2,000,000) (Team 냥코)
 > - 미래기술연구소 장학생 선정 (₩1,000,000)
 > - 2nd, Hspace Cyberwar pwn (₩80,000)
