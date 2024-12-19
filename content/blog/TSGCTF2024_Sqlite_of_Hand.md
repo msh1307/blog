@@ -4,7 +4,7 @@ dateString: December 2024
 draft: false
 tags: ["TSGCTF 2024 Pwn","Sqlite of Hand"]
 weight: 30
-date: 2024-12-19
+date: 2024-12-18
 categories: ["CTF"]
 # cover:
     # image: ""

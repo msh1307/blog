@@ -4,7 +4,7 @@ dateString: December 2024
 draft: false
 tags: ["cat", "CAT", "goyang2", "goyang3"]
 weight: 30
-date: 2024-12-20
+date: 2024-12-19
 categories: ["ETC"]
 cover:
  image: "/blog/geunwang/123123.jpg"
