@@ -2,7 +2,7 @@
 title: "goyang2"
 dateString: December 2024
 draft: false
-tags: ["cat", "CAT", "goyang2"]
+tags: ["cat", "CAT", "goyang2", "goyang3"]
 weight: 30
 date: 2024-12-20
 categories: ["ETC"]
