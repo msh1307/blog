@@ -7,7 +7,7 @@ weight: 30
 date: 2024-12-20
 categories: ["ETC"]
 cover:
- image: ""
+ image: "/blog/geunwang/123123.jpg"
 ---
 
 고1 후반쯤에 한반도의 끝자락에서 고양이를 줏어왔다.
