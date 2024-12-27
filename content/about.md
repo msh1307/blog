@@ -36,10 +36,8 @@ showToc: false
 > - 1st, 한양대 HCTF 2024 (Team 한양대특기자권율)
 > - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (₩2,000,000) (Team 냥코)
 > - 미래기술연구소 장학생 선정 (₩1,000,000)
-> - 2nd, Hspace Cyberwar pwn 
 > - 4th, YISF CTF 2024 (₩500,000)
 > - 7th, LINE CTF 2024 (Team Cold Fusion)
-> - 1st, Hspace Cyberwar pwn 
 > - 1st, Cyber Apocalypse 2024: Hacker Royale (Team Friendly Maltese Citizens)
 
 > 2023
@@ -65,10 +63,3 @@ showToc: false
 > - 5th, Whitehat Contest Junior 2022
 > - 5th, CCE, Cyber Conflict Exercise Junior 2022
 > - 한림장학재단 장학생 선정 (₩1,000,000)
-
-> 2021
-> - 창의적 산출물 발표회 금상 2021
-> - SW 영재 창작대회 장려상 2021
-
-> 2020
-> - 창의적 산출물 발표회 우수상 2020
