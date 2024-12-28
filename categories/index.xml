@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Categories on msh1307</title>
+    <link>https://msh1307.kr/categories/</link>
+    <description>Recent content in Categories on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 19 Dec 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ETC</title>
+      <link>https://msh1307.kr/categories/etc/</link>
+      <pubDate>Thu, 19 Dec 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/categories/etc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CTF</title>
+      <link>https://msh1307.kr/categories/ctf/</link>
+      <pubDate>Wed, 18 Dec 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/categories/ctf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Notes</title>
+      <link>https://msh1307.kr/categories/notes/</link>
+      <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/categories/notes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Linux Kernel</title>
+      <link>https://msh1307.kr/categories/linux-kernel/</link>
+      <pubDate>Tue, 12 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/categories/linux-kernel/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CVE Analysis</title>
+      <link>https://msh1307.kr/categories/cve-analysis/</link>
+      <pubDate>Sun, 10 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/categories/cve-analysis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Malware</title>
+      <link>https://msh1307.kr/categories/malware/</link>
+      <pubDate>Sat, 24 Feb 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/categories/malware/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

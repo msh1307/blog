@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>firmware extraction on msh1307</title>
+    <link>https://msh1307.kr/tags/firmware-extraction/</link>
+    <description>Recent content in firmware extraction on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 19 Jul 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/firmware-extraction/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Router firmware extraction &amp; ld based emulator development</title>
+      <link>https://msh1307.kr/blog/router_firmware_extraction_emulator_dev/</link>
+      <pubDate>Fri, 19 Jul 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/router_firmware_extraction_emulator_dev/</guid>
+      <description>계기 BoB 교육기간중에 갑자기 흥미가 생겨서 친구 라우터를 빼았고 UART에 땜질한다고 나대다가 부숴먹고 새로 구매했다.
+시도 당연하지만 알리산 3천원 땜질기로는 제대로된 땜질을 할 수 없었고 이걸로 열심히 기판을 지지다 망가뜨렸다.
+유튜브보고 대충 땜질을 배우고 알리에서 열풍기를 포함한 땜질 키트와 방진 마스크를 샀다.
+열풍기 써보려고 테스트하다 또 하나 더 부숴먹었다.
+납 발라놓고 열풍기로 조지니까 잘 달라붙는다.
+Firmware 추출 쿠팡에서 제일 위에 떠있는 라우터를 사왔다.
+제일 기본적으로 디버깅 인터페이스부터 찾으려고 했다.
+JTAG나 UART가 어디 없나 찾던중 UART를 찾은것 같았다.</description>
+    </item>
+    
+  </channel>
+</rss>

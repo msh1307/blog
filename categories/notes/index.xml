@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Notes on msh1307</title>
+    <link>https://msh1307.kr/categories/notes/</link>
+    <description>Recent content in Notes on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 25 Jun 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/categories/notes/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Background ARM</title>
+      <link>https://msh1307.kr/blog/background_arm/</link>
+      <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/background_arm/</guid>
+      <description>Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.
+다음과 같은 특징이 있다.
+많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.
+Armv8의 중요한 특징은 호환성이다.
+64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다.</description>
+    </item>
+    
+    <item>
+      <title>Linux kernel SLUB allocator</title>
+      <link>https://msh1307.kr/blog/linux-kernel-slub-allocator/</link>
+      <pubDate>Tue, 12 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/linux-kernel-slub-allocator/</guid>
+      <description>SLUB Allocator Userland에선 ptmalloc2가 있는 반면, Kernelland에선 SLUB이 있다.
+초기엔 SLAB Allocator를 사용했지만, 현재 대부분의 배포판은 SLUB을 이용한다.
+기존 SLAB allocator의 단점을 개선한 버전이다.
+kmem_cache_create로 slab cache를 생성하고 kmem_cache_alloc으로 지정된 slab cache에서 object를 할당한다.
+kmem_cache_free로 free하고 kmem_cache_destroy로 slab cache를 제거한다.
+kmalloc, kzalloc 같은 함수는 kmalloc-N 캐시에서 적합한 size인 object를 할당한다.
+Terms slab SLAB allocator랑 다른말이다.
+slab cache (= kmem_cache)를 확보하고 관리하는 주체다.
+slab cache msh@raspberrypi:~ $ sudo cat /proc/slabinfo slabinfo - version: 2.</description>
+    </item>
+    
+    <item>
+      <title>Linux kernel module programming</title>
+      <link>https://msh1307.kr/blog/linux_kernel_module_programming/</link>
+      <pubDate>Fri, 20 Jan 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/linux_kernel_module_programming/</guid>
+      <description>Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.
+커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.
+모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.
+lsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.
+이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다.</description>
+    </item>
+    
+  </channel>
+</rss>

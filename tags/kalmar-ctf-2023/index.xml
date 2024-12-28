@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Kalmar CTF 2023 on msh1307</title>
+    <link>https://msh1307.kr/tags/kalmar-ctf-2023/</link>
+    <description>Recent content in Kalmar CTF 2023 on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 13 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/kalmar-ctf-2023/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kalmar CTF 2023 - MJS</title>
+      <link>https://msh1307.kr/blog/kalmar_ctf_2023_mjs/</link>
+      <pubDate>Mon, 13 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/kalmar_ctf_2023_mjs/</guid>
+      <description>MJS CTF 당시에는 warm-up인데 자바스크립트 엔진이라 도망갔다.
+구글링 잘했으면 바로 풀 수 있었을 것 같다.
+Analysis FROM ubuntu:22.04 ENV DEBIAN_FRONTEND noninteractive RUN apt-get update RUN apt-get install -y xinetd python3 xxd COPY mjs / COPY ynetd / COPY remote.py / RUN echo &amp;#34;kalmar{redacted}&amp;#34; &amp;gt; /flag-$(head -c 16 /dev/urandom | xxd -p).txt USER 1000:1000 EXPOSE 10002 CMD ./ynetd -p 10002 &amp;#34;timeout 60 ./remote.py&amp;#34; 22.04이다.
+diff --git a/Makefile b/Makefile index d265d7e..d495e84 100644 --- a/Makefile +++ b/Makefile @@ -5,6 +5,7 @@ BUILD_DIR = build RD ?</description>
+    </item>
+    
+  </channel>
+</rss>

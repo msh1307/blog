@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>CCE 2023 Junior Quals on msh1307</title>
+    <link>https://msh1307.kr/tags/cce-2023-junior-quals/</link>
+    <description>Recent content in CCE 2023 Junior Quals on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 10 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/cce-2023-junior-quals/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CCE 2023 Quals</title>
+      <link>https://msh1307.kr/blog/cce_2023_junior_quals/</link>
+      <pubDate>Sat, 10 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/cce_2023_junior_quals/</guid>
+      <description>K-Exploit 처음으로 잡아본 커널 문제다.
+대회끝나고 50분뒤에 플래그가 나왔다.
+아침에 BoB 필기랑 인적성보고 풀려했는데, 대회가 너무 빨리 끝났다. ;;
+Analysis rootfs.img.gz 파일 시스템이 주어지고 bzImage가 주어진다.
+local_run.sh #!/bin/sh qemu-system-x86_64 \ -m 128M \ -cpu kvm64,+smep,+smap \ -kernel bzImage \ -initrd rootfs.img.gz \ -snapshot \ -nographic \ -monitor /dev/null \ -no-reboot \ -append &amp;#34;console=ttyS0 kaslr kpti=1 quiet panic=1&amp;#34; \ -s kaslr, kpti, smep, smap 다 빡세게 걸려있다.
+server_run.sh #!/bin/sh qemu-system-x86_64 \ -m 128M \ -cpu kvm64,+smep,+smap \ -kernel bzImage \ -initrd $1 \ -snapshot \ -nographic \ -monitor /dev/null \ -no-reboot \ -append &amp;#34;console=ttyS0 kaslr kpti=1 quiet panic=1&amp;#34; 똑같은데 디버깅 옵션만 빠진거같다.</description>
+    </item>
+    
+  </channel>
+</rss>

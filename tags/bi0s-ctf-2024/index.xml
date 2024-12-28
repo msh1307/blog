@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Bi0s CTF 2024 on msh1307</title>
+    <link>https://msh1307.kr/tags/bi0s-ctf-2024/</link>
+    <description>Recent content in Bi0s CTF 2024 on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 20 Mar 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/bi0s-ctf-2024/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bi0s CTF 2024 - KowaiiVM</title>
+      <link>https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/</link>
+      <pubDate>Wed, 20 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/</guid>
+      <description>Kowaii VM Analysis 문제에서 소스코드를 제공해준다.
+---- 0x0000 Header data ---- 0x1000 .CODE ---- bss &amp;gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.
+void prepareCtx() { this-&amp;gt;prepareFuncTable(); this-&amp;gt;regs-&amp;gt;bp = (u64 *)mmap(this-&amp;gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;regs-&amp;gt;bp == (void *)(-1)) error(&amp;#34;Unable to map stack!&amp;#34;); this-&amp;gt;regs-&amp;gt;bp += (STACK_SIZE)/sizeof(u64); this-&amp;gt;regs-&amp;gt;sp = this-&amp;gt;regs-&amp;gt;bp; this-&amp;gt;jitBase = (u8 *)mmap(this-&amp;gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;jitBase == (void *)(-1)) error(&amp;#34;Unable to allocate executable memory!</description>
+    </item>
+    
+  </channel>
+</rss>

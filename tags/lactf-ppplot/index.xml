@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>LACTF ppplot on msh1307</title>
+    <link>https://msh1307.kr/tags/lactf-ppplot/</link>
+    <description>Recent content in LACTF ppplot on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 09 Mar 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/lactf-ppplot/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LACTF 2024 - ppplot</title>
+      <link>https://msh1307.kr/blog/lactf_2024_ppplot/</link>
+      <pubDate>Sat, 09 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/lactf_2024_ppplot/</guid>
+      <description>ppplot Analysis int __fastcall arith(int flag) { uint64_t *v1; // rax unsigned int res; // eax char v3; // cl int i; // [rsp+1Ch] [rbp-14h] int idx; // [rsp+20h] [rbp-10h] unsigned int v7; // [rsp+24h] [rbp-Ch] eq_obj *obj; // [rsp+28h] [rbp-8h] printf(&amp;#34;idx: &amp;#34;); idx = read_int(); if ( (unsigned int)idx &amp;lt; 128 ) { v1 = (uint64_t *)obj_list_[idx]; obj = (eq_obj *)v1; for ( i = 0; i &amp;lt;= 63; ++i ) { res = calc(obj, i - 0x20); v7 = res + 0x20; LODWORD(v1) = printf(&amp;#34;(%d, %d)\n&amp;#34;, (unsigned int)(i - 0x20), res); if ( v7 &amp;lt;= 0x3F ) { if ( flag ) v3 = &amp;#39;.</description>
+    </item>
+    
+  </channel>
+</rss>

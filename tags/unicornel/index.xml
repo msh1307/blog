@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Unicornel on msh1307</title>
+    <link>https://msh1307.kr/tags/unicornel/</link>
+    <description>Recent content in Unicornel on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 25 Jun 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/unicornel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Google CTF 2024 - UNICORNEL</title>
+      <link>https://msh1307.kr/blog/google_ctf_2024_unicornel/</link>
+      <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/google_ctf_2024_unicornel/</guid>
+      <description>UNICORNEL Cold Fusion 연합팀으로 Google ctf에 참여했다.
+늦잠자서 늦게 합류했는데, 이미 팀원분이 취약점을 찾아놓으셔서 어떻게 악용할지를 중점적으로 생각하고 익스플로잇을 작성해서 챌린지를 해결했다.
+Analysis ==== About ==== Unicornel is a multi-process, multi-architecture emulator server with concurrency and system call support. All processes of any architecture share the underlying kernel, and can interact with each other via system calls and in particular a lightweight shared memory interface. ==== Starting processes ==== In order to start a new process, you must first send a unicornelf header, which naturally bears no resemblance whatsoever to the actual ELF standard: struct unicornelf { uc_arch arch; //Desired unicorn-supported ISA uc_mode mode; //Desired unicorn-supported mode struct { unsigned long va; //Virtual address to map unsigned long length; //Length of memory to map } maps[4]; //Up to 4 mappings supported unsigned short code_length; //The length of the code to follow the unicornelf header unsigned char num_maps; //The number of mappings initialized in the maps array }; Following the unicornelf header should be &amp;lt;code length&amp;gt; bytes of assembled machine code in the specified instruction set architecture.</description>
+    </item>
+    
+  </channel>
+</rss>

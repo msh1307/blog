@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>jse dropper on msh1307</title>
+    <link>https://msh1307.kr/tags/jse-dropper/</link>
+    <description>Recent content in jse dropper on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 24 Feb 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/jse-dropper/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kimsuky malware analysis</title>
+      <link>https://msh1307.kr/blog/jse_dropper_kimsuky/</link>
+      <pubDate>Sat, 24 Feb 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/jse_dropper_kimsuky/</guid>
+      <description>Overview 북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.
+Analysis Procmon 외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.
+vm안에서 실행하고 process create로 필터링해서 확인해보면,
+WScript.exe가 돌면서 프로세스를 생성한다.
+dll를 regsvr32.exe로 등록한다.
+그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.
+하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.
+regsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.
+이러한 형태는 백신을 우회하기 위해 사용된다.
+Dll Extraction pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다.</description>
+    </item>
+    
+  </channel>
+</rss>

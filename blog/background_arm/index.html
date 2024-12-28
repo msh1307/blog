@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Background ARM | msh1307</title>
+<meta name="keywords" content="ARM Manual">
+<meta name="description" content="Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.
+다음과 같은 특징이 있다.
+많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.
+Armv8의 중요한 특징은 호환성이다.
+64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다.">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/background_arm/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Background ARM" />
+<meta property="og:description" content="Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.
+다음과 같은 특징이 있다.
+많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.
+Armv8의 중요한 특징은 호환성이다.
+64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/background_arm/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-06-25T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2024-06-25T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Background ARM"/>
+<meta name="twitter:description" content="Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.
+다음과 같은 특징이 있다.
+많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.
+Armv8의 중요한 특징은 호환성이다.
+64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Background ARM",
+      "item": "https://msh1307.kr/blog/background_arm/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Background ARM",
+  "name": "Background ARM",
+  "description": "Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.\n다음과 같은 특징이 있다.\n많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.\nArmv8의 중요한 특징은 호환성이다.\n64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다.",
+  "keywords": [
+    "ARM Manual"
+  ],
+  "articleBody": "Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.\n다음과 같은 특징이 있다.\n많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.\nArmv8의 중요한 특징은 호환성이다.\n64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다. A1.2 Architecture profiles Arm은 다음과 같이 아키텍처 프로필을 나타낸다.\nA - Application profile MMU를 기반으로 Virtual Memory System Architecture를 지원한다. ex) Armv8-A 구현은 AArchv8-A로도 불린다. A64, A32, T32 명령어 세트를 지원한다. R - Real-time profile MPU를 기반으로 Protected Memory System Architecture를 지원한다. A32, T32 명령어 세트를 지원한다. M - Microcontroller profile 저지연 인터럽트 처리를 위해 설계된 프로그래머를 위한 프로필이다. R 프로필 PMSA(Protected Memory System Architecture)의 다른 아키텍처를 구현한다. T32 변종 명령어 세트를 지원한다. 다음은 추가적으로 알아야할 정보들이다.\nMMU Memory Management Unit 가상 메모리 주소를 물리 메모리 주소로 변환한다. 다음과 같은 구조이다. 옛날에는 따로 CPU와 분리되어있었다. 동작 방식 가상 메모리를 2^n 비트의 크기로 나누고, 특정 페이지는 실제 물리 메모리의 하나의 프레임에 대응된다. CPU는 가상 주소를 MMU로 넘긴다. MMU는 TLB를 확인해서 변환 정보를 확인하고 만약 해당 데이터가 있다면 그 데이터를 이용한다. TLB에 원하는 데이터가 없다면 (TLB miss) 페이지 테이블을 이용해서 가상 메모리 주소의 뒤쪽 n 비트는 건들지 않고 앞쪽 나머지 비트를 물리 메모리의 프레임으로 변환한다. TLB나 페이지 테이블을 통해 실제로 주소를 가져오지 못하는 상황을 page fault라고 부른다. 이 경우엔 여유 공간에 페이지를 할당해서 연결시키거나, 디스크로 페이지를 내리고 할당한다. MPU Memory Protection Unit 4gb 메모리 공간 내에서 다양한 메모리 영역별로 권한을 설정할 수 있게 해주는 프로그래밍 가능한 유닛이다. 모든 메모리 액세스는 MPU에 의해 모니터링된다. 절대 명령어 fetch가 일어나지 않는 영역을 설정하여 Memory corruption으로 인해 악의적인 코드가 실행되는 것을 방지한다. 다음과 같은 모습으로 동작한다. MPU_MAIR에는 XN (Execute Never) 같은 속성들이 정의되고 MPU_RLAR은 MPU_MAIR 레지스터를 가리킨다. TrustZone이 지원된다면, Secure state에서의 MPU 레지스터들도 존재한다. 반대 Non-secure state에서도 이러한 MPU 레지스터들이 존재한다. A1.3 Armv8 architectural concepts armv8의 네 가지 중요한 feature가 있다.\nExecution state Instruction sets System registers Debug A1.3.1 Execution state Execution state는 Processing Element, PE의 실행 환경을 정의한다.\nExecution state 지원되는 레지스터의 widths - ex) 64bit, 32bit … 지원되는 명령어 세트 중요한 측면 Execution model VMSA (Virtual Memory System Architecture) 프로그래머 모델 AArch64 64 bit Execution state PC, SP, … , X30 레지스터, ELR 정확히는 SP 레지스터들과 Exception Link 레지스터들도 지원한다. ELR의 의의는 따로 직접 메모리에 Exception 발생시 리턴 주소를 기록하지 않고 따로 리턴 주소를 기록하는 레지스터를 둬서 퍼포먼스를 올리는 것에 있다. A64 라는 하나의 명령어 셋만 지원된다. armv8의 Exception model을 4개의 Exception level, EL0 ~ EL3를 정의한다. Execution privilege hierarchy 로 권한의 level을 지정한다. System register에 접미사를 붙여서 가장 낮은 Exception level만 레지스터에 접근할 수 있도록 한다. PE의 현재 state를 정의하는 PSTATE 원소의 개수를 정의한다. A64에선 이 PSTATE 원소를 수정하는 명령어가 지원된다. AArch32 32 bit Execution state 32-bit PC, SP, LR, … , 32 bit 범용 레지스터 AArch64와 다르게 하나의 LR 레지스터를 ELR 레지스터로도 이용한다. SP도 하나이다. PE의 모드에 따라서 복수개의 banked 레지스터가 존재할 수 있다. 겉으로는 안보이지만 프로세서 모드가 변경됨에 따라 일대일로 매핑된다. A32, T32 명령어 세트가 지원된다. Armv7 Exception model을 지원한다. AArch64와 동일하게 PSTATE 를 수정하는 명령이 지원된다. APSR (Application Program Status Register)나 CPSR (Current Program Status Register)를 이용해서 접근한다. 공통적으로 Exception level에 대한 정보나 조건 플래그 등이 포함된다. PSTATE의 필드는 다음과 같다.\nCPSR은 현재 프로그램의 status를 저장하는 레지스터이다. CPSR은 다음과 같다. SPSR은 Saved Program Status Register로 CPSR을 백업해놓는 레지스터이다. exception이 발생했을때 SPSR에 CPSR을 백업하고 나중에 끝나면 CPSR을 CPSR로 복사해서 복원한다. PSTATE는 CPSR과 1:1 대응되는 개념은 아니지만 AArch64에선 CPSR 필드의 각 값을 PSTATE로 정의한다. AArch64나 AArch32로 Execution state를 변경하는 것은 Exception level의 변경만으로도 수행이 가능하다.\n다른 OS나 application, kernel, hypervisor가 다른 exception level이라면 다른 execution state에서 돌 수도 있다는 뜻이다.\nA1.3.2 The Armv8 instruction sets AArch64 A64 32 bit 인코딩을 이용한 고정 길이 명령어를 이용한다. AArch32 A32 32 bit 인코딩을 이용한 고정 길이 명령어를 이용한다. T32 16 bit 와 32 bit 명령어 인코딩을 이용한 가변 길이 명령어를 이용한다. 이전 문서에선 Thumb mode라고도 말했다. A1.3.3 System registers 대부분의 시스템 레지스터들은 _ELx의 형태를 취하고 있다.\n뒤에 x는 EL0같이 그 레지스터를 접근할 수 있는 최소의 Exception level이 명시되어있다.\nB1 The AArch64 Application Level Programmers’ Model B1.3 Software control features and EL0 EL0에서의 software control feature에 대해 설명한다.\nB1.3.1 Exception handling Arm 아키텍처에서 exception은 프로그램의 실행흐름을 바꾼다.\n그리고 이를 처리하는 특정 exception handler는 EL0 보다 높은 exception level에서 동작하며 vector에 정의되어있다.\nException 들은 다음을 포함한다.\nInterrupts. Memory system aborts. UNDEFINED 명령에 대한 실행으로 발생하는 exceptions. System calls. Secure monitor or Hypervisor traps. Debug exceptions. D1 The AArch64 System Level Programmers’ Model D1.1 Exception levels Armv8-A 아키텍처는 EL0 ~ EL3 까지의 Exception level이 존재한다.\nELn ELn에서 n이 증가할 수록 execution privilege는 증가한다. EL0에서의 실행은 unprivileged execution이라고 불린다. EL2부터는 가상화를 지원한다. EL3에선 Secure state와 Normal state 변경을 지원한다. EL3에선 Secure monitor를 포함한 저수준 펌웨어가 위치한다.\n위와 같은 구조를 가지고 있다.\nEL2와 EL3는 하이퍼바이저가 지원되는지, secure monitor가 지원되는지에 따라 없을수도 있을 수도 있다.\n또한 PE는 무조건 연속적으로 Exception level을 구현할 필요가 없다.\n예를 들어서 EL0, EL1, EL3만 구현하는 것도 가능하다.\n위처럼 EL2만 빼고 구현되는 경우도 있다. D1.1.1 Typical Exception level usage model 일반적으로 다음과 같은 전형적인 사용 모델이 존재한다.\nEL0 - Applications EL1 - OS kernel EL2 - Hypervisor EL3 - Secure Monitor D1.2 Exception terminology exception의 용어에 대해서 설명한다.\nexception과 interrupt는 ARM에서 엄밀하게 구분하지 않는다.\n왜냐하면 exception도 일종의 synchronous interrupt라고 부르기도 하기 때문이다.\nB1.3.1에서 exceptions에는 interrupts도 포함된다고 명시해놓기도 했다.\nexception - 프로그램 실행 도중 동기적으로 발생하는 이벤트이다.\n딱 정해진 기준이 있는 synchronous interrupt이다. 예를 들어서 system call이나 division by zero 같은 명확한 기준이 존재한다. interrupt - 비동기적으로 발생하는 이벤트이다.\nhardware interrupt 하드웨어에서 비동기적으로 이벤트가 일어나서 명령어 흐름이 방해받는 경우를 말한다. software interrupt 명령어로 실행되는 interrupt이다. ex) x86의 INT\n그리고 여기서의 동기 비동기를 조금 다르게 보면 exception은 CPU 내부 요인에 의해 발생했고, interrupt는 외부 요인에 의해 발생했다고도 볼 수 있다. Interrupt Request (IRQ)\n일반적인 interrupt가 여기에 속한다. Fast Interrupt Request (FIQ)\nIRQ보다 우선순위가 높다. 별도의 레지스터가 있어 처리가 빠르다. 이는 banked register를 말한다. ex) R7_fiq, …, R14_fiq 이런식의 banked register를 둬서 context switching 비용을 아낄 수 있다. 빠른 처리를 위해 쓰이기도 한다. D1.2.3 Exception level ELn에서 n이 크면 높은 Exception level이라고 하고, 반대도 마찬가지다.\n다음과 같이 표현한다.\nAArch64 Execution state에선 AArch64의 Exception level을 사용한다. AArch32 Execution state에선 AArch32의 Exception level을 사용한다. D1.2.4 Definition of a precise exception 위 사진은 precise exception과 imprecise exception에 대해서 나와있다.\nprecise exception exception handler가 PE state와 memory system state를 넘겨받는 경우이다. 이때 PE의 전 명령어들은 모두 실행되었다는 것이 보장된다. imprecise exception 전 명령들이 실행되었다는 보장이 없다. 현대 프로세서들은 파이프라이닝같은 병렬 실행을 통해 퍼포먼스를 향상시키기 이러한 imprecise exception도 발생할 수 있다. AArch64의 LDP, STP 같이 하나 이상의 single-copy atomic memory 액세스를 하는 경우엔 레지스터나 메모리에 값이 반영이 안될 수 있다.\nD1.2.5 Definitions of synchronous and asynchronous exceptions synchronous exception\nexception이 명령어의 실행 or 실행 시도에 의해 생성되는 동기 exception이다. return address가 exception handler에게 넘어가는 것이 보장된다. 즉 어떤 명령어가 exception을 발생시켰는지 식별할 수 있다. precise exception에 해당한다. asynchronous exception\nexception이 명령어 스트림의 실행 or 실행 시도에 의해 생성되는 경우이다. return address가 exception handler에게 넘어가는 것이 보장되지 않는다. 어떤 명령어가 exception을 발생시켰는지 식별할 수 없다. imprecise exception에 해당한다. D1.3 Execution state AArch64 - 64bit execution state AArch32 - 32bit execution state Exception levels는 Exception state를 이용한다.\n예를 들어서 EL0, EL1, EL2는 모두 AArch32를 이용할 수 있고 EL3 혼자 AArch64에서 돌아갈 수 있다.\n그 뜻은 다음과 같다.\n다른 software 계층, 각자 다른 exception level에서 동작하는 application, os kernel, hypervisor 들은 다른 execution state에서 실행될 수 있다. PE는 execution state를 다음과 같은 경우에 한해서만 변경 가능하다 . Reset시 Exception level의 변경 D1.4 Security state Armv8-A 아키텍처는 두 가지 security states를 지원한다.\nsecurity states는 Non-secure state와 Secure state로 나뉜다.\n물리 메모리 주소 공간 차이 Secure state PE가 Non-secure physical address와 Secure physical address 모두 접근이 가능하다. Non-secure state PE는 오직 Non-secure physical address만 접근 가능하다. Secure system이 관리하는 자원에 접근은 불가능하다. D1.4.1 The Armv8-A security model 만약 EL3가 구현에 포함되어있다면, 무조건 두 가지의 security states가 포함된다. EL3는 오직 Secure state에만 존재한다. Non-secure state에서 Secure state로의 전환은 오직 EL3로의 Exception에 의해서만 발생한다. FEAT_SEL2가 구현되지 않았다면 EL2는 Non-secure state에만 존재한다. 만약 구현되었다면, EL2는 secure state에서 존재한다. 어떻게 virtual address가 Non-secure physical address와 secure physical address로 변환되는지는 D5에서 후술한다. D1.5 Virtualization 가상화 기술은 모두 가상화 소프트웨어의 성능을 높히고자 하드웨어단에서 여러 옵션을 추가한 것이다.\n가상화 지원은 EL2를 포함한 구현에만 적용된다.\n기본적인 가상화 모델은 다음과 같다.\nHypervisor 는 EL2에서 돌아가며 EL0와 EL1을 포함하는 가상 머신의 switching을 담당한다. Guest OS는 EL1에서 동작한다. Application은 주로 EL0에서 동작한다. 하이퍼바이저는 VMID를 각자의 가상머신에 할당한다.\nEL2는 Guest OS 관리와 다음과 같은 제어를 한다.\nGuest OS에 의해 레지스터 읽기가 일어나면 가상 값을 리턴한다. Various Trap operations 메모리 관리와 다른 레지스터에 접근한다. Trap된 operation은 EL2에 exception을 발생시키게된다. interrupt들의 라우팅 현재의 Guest OS에게 라우팅되는 경우가 있다. 현재 돌고 있지 않은 Guest OS에게 라우팅되는 경우가 있다. 그리고 마지막으로 하이퍼바이저에게 라우팅되는 경우가 존재한다. Armv8.1은 Virtualization Host Extensions (VHE)을 통해 Type 2 hypervisor를 지원한다.\n간단하게 설명하자면 Host OS가 EL2에서 동작하도록 하는 extension이다.\n그런데 도대체 상식적으로 어떻게 Host OS가 EL2에서 동작할지 이해가 되지 않을 수 있는데, 이는 뒤에서 마저 설명한다.\nEL2는 다음과 같은 요소들을 구현한다.\n구현은 EL2와 EL2 변환 과정의 독립적인 메모리 액세스를 보장한다. FEAT_VHE가 지원되면 EL2, EL0에서의 액세스에 변환 과정을 구현한다. EL1\u00260의 translation regime는 크게 두 가지 스텝을 거친다. Virtual Address (VA)를 Intermediate Physical Address (IPA)로 변환한다. 이는 EL1에서 처리되는데, Guest OS는 이 IPA를 PA로 믿고 처리한다. IPA를 실제 PA에 매핑한다. 이는 EL2에서 처리되며 당연하지만 Guest OS는 이를 알 수 없다. 이를 stage-2 translation이라고도 부른다. 다이어그램으로 나타내면 다음과 같다. 이는 나중에 VMSA 아키텍처에 대해서 설명하면서 2 단계 변환이라는 용어로 다시 나온다. FEAT_NV가 지원된다면 Guest hypervisor가 EL1에서 돌 수 있게 된다. ( Nested virtualization ) Hypervisor type 따로 메뉴얼에 나오는 내용은 아니지만, 나중에 이해를 위해서 꼭 필요한 내용이다.\nType 1이 가장 퍼포먼스가 좋다.\nType 1은 베어메탈 방식이라고도 불리는데, 그 이유는 하드웨어 위에 하이퍼바이저가 설치되기 때문이다.\nType2는 Host OS 위에 하이퍼바이저가 설치되는데, 개인용 교육용으로 자주 쓰인다.\nHosted hypervisor라고도 자주 부른다..\n추가적으로 요즘에 자주 보이는 컨테이너는 Host OS를 공유하고 그 위에 하이퍼바이저 대신 컨테이너 엔진을 통해 퍼포먼스를 높힌다.\n하드웨어 수준으로는 가상화되지 않고 OS 수준으로 가상화가 된다.\n그래서 Host OS와 Guest OS는 동일한 OS여야 한다.\n이를 Type 3 hypervisor라고도 한다.\n모두 이렇게 전형적인 type으로 분류되는건 아니지만 대부분은 이렇게 나눈다.\nhypervisor mode ARM에서 Hypervisor mode를 따로 추가하게 된 배경은 앞에서 설명한 type 1 hypervisor, standalone hypervisor 때문이다.\nCPU가 user와 supervisor mode만 지원하는 상태에서 standalone hypervisor를 구조적으로 설계하려면 user와 supervisor mode 두 가지로 나눈것으로는 부족하다.\n당연하겠지만 만약 hypervisor를 supervisor mode에서 돌리고 기존 guest os를 user mode에 올리면 supervisor mode를 염두에 두고 설계된 OS가 동작할 수 없게 된다.\n그렇다고 Guest os와 hypervisor를 같은 supervisor mode에 공존하게 하면 기본적으로 격리를 염두에 두고 만들어진 hypervisor의 의미가 없어진다.\n이런 문제를 해결하기 위해서 ARM은 Hypervisor mode를 따로 넣어서 Guest os와의 교통정리를 끝냈다.\n그런데 KVM같은 Type 2 hypervisor, hosted hypervisor의 경우엔 좀 애매하다.\nHost OS의 모듈의 형태로 동작하는 KVM의 특성상 hypervisor는 일부 기능을 무조건 Host os에게 가져와야한다.\n그런데 전통적으로 Host OS는 EL1에서 동작했다.\nHost os가 EL1에서 동작하면 KVM도 EL1에서 동작해야한다.\nGuest os보다 더 높은 권한을 가지려면 무조건 EL2에서 동작해야하는데, 기존 Host os가 EL1에서 동작해서 문제가 발생한다.\n이러한 문제를 해결하기 위해서 KVM은 구조를 Lowvisor와 Highvisor로 분할했다.\nLowvisor를 hypervisor mode에서 돌리고, VM의 명령을 trap해서 highvisor로 넘긴다.\n이런 구조로 나눠버리면, EL1에서 돌도록 설계된 OS 별다른 문제없이 그대로 동작하면 되고 동시에 Hypervisor의 동작도 수행할 수 있다.\nintel, amd, arm에서 하드웨어적으로 지원해주면, kernel module을 올려서 이러한 lowvisor까지 구현해줄 수 있다.\n겉 모습으로는 기존 하이퍼바이저처럼 권한 체계가 분리된 것으로 보인다.\nHighvisor가 커널에서 동작하기 때문에 VM을 돌리면서 필요한 기능은 host kernel code를 이용해서 처리할 수 있게 되었다.\n그래서 이런식으로 trap이 이중으로 넘어간다.\n이러한 Lowvisor은 EL2의 exception vector와 world switch에 대한 코드만 구현하면 되기 때문에 highvisor에 비해서 더 코드가 작다.\n이런 구조가 동작하려면 bootloader에서 처음부터 Hypervisor mode에서 trap handler를 설치해서 나중에 KVM이 돌 수 있도록 해줘야한다.\n논문 저자들은 vendor와 얘기해서 새로운 ABI를 어떻게 맞출지 고민하다가 결국 무산되었지만 좀 더 효율적이고 간단한 방법을 찾았다고 한다.\n그냥 처음부터 ABI 신경쓰지 않고 bootloader recommendation으로 hypervisor mode로 부팅을 추가하고, kernel 코드를 조금만 수정해서 hypervisor mode 지원 유무를 파악하고 만약 지원된다면 그때 그냥 바로 hypervisor mode에 trap handler install을 해주면 되고 아니면 그냥 원래 legacy kernel 처럼 부팅하고 kvm 지원을 안하면 된다.\n그러면 굳이 복잡한 bootloader ABI를 논의할 필요가 아예 없어진다.\nVirtualization host extensions (VHE) 앞서 kvm을 예시로 type 2 hypervisor가 겪을 수 있는 문제를 어떻게 해결했는지에 대해서 알아보았다.\nVHE는 앞서 Type 2 hypervisor를 지원하기 위해서 생겼다고 했다.\n왜 이 얘기를 했냐면 원래 일반적으로 standalone hypervisor에선 다음과 같이 Exception level이 매핑된다.\n만약 이런 구조가 type 2에서도 유지된다면 앞에서 다루었던 문제가 생긴다.\n전통적으로 kernel은 EL1에서 돌고, 가상화 컨트롤은 EL2에서 담당했다.\n이런 문제는 앞서 해결 방법을 이미 다루었다.\nVHE는 이러한 문제 해결 방법을 더 최적화시키기 위해 개발되었다.\n기존의 방법은 추가적인 context switching이 필요할 수 밖에 없기에 비효율적이다.\n위와 같은 방식으로 설계하면 더 좋은 퍼포먼스를 얻을 수 있다.\n전에는 kernel -\u003e hypervisor -\u003e guest로 이중 트랩이 걸렸었다면 이제는 host os가 hypervisor에서 돌게 되었으니 훨씬 빨라지게 된다.\nHost OS를 EL2에서 동작시키기 위해서 ARM에선 HCR_EL2의 E2H와 TGE 비트를 추가했다.\nE2H - VHE의 활성화 여부를 결정한다. TGE - VHE가 활성화 되었을 때 EL0가 Guest인지 Host인지를 결정한다.\nHost OS가 EL2에서 돌더라도 Host application은 EL0에서 돌기 때문에 이를 구분하려면 하드웨어적으로 TGE 비트를 만들어야할 필요가 생긴다. 다음 다이어그램처럼 구분이 된다.\n위 다이어그램의 내용을 표로 정리하자면 다음처럼 정리할 수 있다.\nVHE가 활성화되면 Virtual address space도 달라지게 된다.\nVHE 이전에는 위처럼 EL0/EL1에는 두 개의 VA range를 지원했고 EL2, EL3에서는 전통적으로 application이 존재하지 않으므로 single VA range 만을 지원했다.\n원래 EL0/EL1에선 ASID를 둬서 application별 주소 공간을 명시했다.\n때문에 같은 VA에 대한 TLB를 flush할 필요가 없었다.\nASID에 대한 자세한 설명은 뒤에 D5.2.1에서 후술한다.\nEL2에는 host application이 없어서 원래 ASID가 존재하지 않았다.\n그런데 Host OS가 EL2에서 효율적으로 동작하려면 ASID 지원을 추가해야한다.\n왜냐하면 FEAT_VHE가 활성화되면 커널이 EL2에서 돌아가기 때문에 EL1에서의 이유와 마찬가지로 context switching시에 VA에 대해서 PA로의 변환을 EL2에서 담당하기 때문이다.\nMMU는 동일 VA에 대해서 다른 PA로 변환해야하기에 FEAT_VHE의 경우엔 ASID support가 EL2에도 필요할 수 있다는 것이다.\n위 다이어그램은 E2H == 1 일 때의 모습이다.\nHCR_EL2.TGE 비트가 Host OS 위에서 도는 EL0인지 Guest OS 위에서 도는 EL0인지를 결정한다.\nVHE가 제대로 동작하려면 특정 register에 대한 액세스도 리다이렉팅해야한다.\n당연한 이유지만 unmodified kernel은 EL1을 염두에 두고 개발되었다.\n이를 EL2에서 돌리려면 E2H bit에 따라 TTBR0_EL1의 경우 TTBR0_EL2 혹은 TTBR0_EL1으로 리다이렉팅한다.\n그런데 단순히 커널을 E2H에 따라 TTBR0_EL2로 리다이렉팅 해버리면, 커널 모듈식으로 붙어있는 하이퍼바이저는 EL1에 접근할 수가 없게 되는 문제가 발생한다.\n원래 구조가 Guest OS들이 EL1에서 동작하기 때문에 EL2에서 무조건 EL1에 대한 접근이 필요하다.\n이러한 문제를 해결하기 위해서 따로 EL12와 EL02 접미사를 가진 레지스터들을 추가했다.\n그래서 위와 같이 EL2 하이퍼바이저에서 EL1 레지스터에 접근할 수 있게 된다.\nD1.6 Registers for instruction processing and exception handling Arm 아키텍처에서 레지스터는 다음 두 가지 카테고리로 분류된다.\nsystem control이나 status reporting을 제공하는 System register. 명령 처리에 이용되는 레지스터. ex) 연산이나 exception handling D1.6.2 The stack pointer registers AArch64 state에선 범용 레지스터 외에도 dedicated 스택 포인터 레지스터가 각자의 exception level에 따라 구현된다.\nSP_EL0, SP_EL1 EL2가 구현되었다면, SP_EL2 EL3가 구현되었다면, SP_EL3 이러한 스택 포인터들의 선택은 다음과 같이 이루어진다.\nEL0에선 PE는 SP_EL0를 이용한다. 다른 exception level에선 SP_EL0 혹은 그에 맞는 SP_ELx가 선택될 수 있다. 기본적으로 exception이 받아질때는 그 타겟 exception level에 맞는 SP_ELx가 선택된다. SP_EL0에 액세스하려면 PSTATE SP를 업데이트 함으로써 액세스할 수 있다. 다음과 같은 접미사를 붙여서 스택 포인터를 표현하기도 한다.\nt - SP_EL0 스택 포인터를 이용한다. h - SP_ELx 스택 포인터를 이용한다.\n근데 여기서 궁금했던 점이있었다.\n각자의 ELx에 대해서 SP_ELx 라는 물리 레지스터 하나씩 갖고 있으면 됐지 왜 SP_EL0이 또 필요한가라는 점이 궁금했다.\n근데 이 답에 대한 힌트는 아래 문구에 있었다.\n왜 이 두 가지를 굳이 나눠서 논리 SP_ELxt, SP_ELxh로 나눠서 7개의 논리 SP를 가지도록 만들었을까?\n실제로는 물리 SP_ELx는 단 4개 밖에 없지만 이렇게 나눈 이유가 있었다.\n일단 Exception은 같은 EL에서도 발생할 수 있다고 했었다.\nexception이 raise되면 PE는 현재 exception level 이상, 타겟 exception level에 진입하고 SP_ELxh를 이용한다.\n이때 handler는 최대한 PSTATE.SPSEL= 0으로 SP_ELxt를 이용해서 SP_EL0를 이용하려 시도한다.\n각자의 SP에 대해서 물리적으로 SP_ELx는 필요하다.\nAArch64에서 격리를 유지하면서 exception 발생시 바로 상위 exception level로 뛸때 동작할 스택이 저장되야하기 때문이다.\n그런데 SP_ELxh를 계속 이용하지 않고 현재 SP를 저장하고 SP_EL0를 초기화해서 다시 이용하는 이유는 만약 SP_ELxh만을 SP로 이용했다면 nested exception이 발생했을 때 그전 SP_ELxh를 저장할 수 없기 때문이다.\nSP_ELxh, handler SP를 핸들링에 이용하게 될 때 같은 exception level에 대해서 nested exception이 발생하면 본래의 SP_ELxh는 무조건 날라가는 문제가 생겨서 exception handler는 exception 발생시 최대한 빠르게 레지스터들 백업하고 SP_ELxt로 진입하려 시도한다.\nD1.6.4 Saved Program Status Registers (SPSRs) 앞서 설명했던 SPSR의 용도를 생각해보면 당연히 얘도 Exception level 마다 존재한다.\nAArch64의 EL1에서 exception이 발생했을 때 SPSR_EL1을 이용한다. EL2가 구현되었다면 EL2에서의 exception은 SPSR_EL2를 이용한다. EL3가 구현되었다면 EL3에서의 exception은 SPSR_EL3를 이용한다. 특정 exception level에서 exception이 발생해서 PE가 처리해야할 때 PE state는 SPSR_ELx의 PSTATE에 저장된다.\n즉 다음과 같은 의미를 가진다.\nexception에서 리턴할 때 PE state를 SPSR_ELx의 참조를 통해 복원할 수 있음을 나타낸다. exception 발생 당시의 PSTATE 값을 알 수 있다. 이때 저장되는 모든 PSTATE 필드들은 AArch32에서만 의미있거나 직접 읽기 쓰기 권한이 없더라도 저장된다.\nAArch32에서만 의미있는 필드들은 exception이 AArch32 state에서 AArch64 state로 발생했을 때 저장된다.\nD1.6.5 Exception Link Registers (ELRs) exception link register는 exception return address를 저장한다.\nPE가 exception을 받을 때 마다 ELR_ELx에 return address가 저장된다.\n예를 들어서 EL1에 대한 exception이 발생했을 때에는 return address가 ELR_EL1에 저장되고 return하면 PC는 ELR에 저장된 return address로 복귀한다.\nAArch64 state는 다음과 같은 ELR을 제공한다.\nEL1에 대한 exception은 ELR_EL1을 이용한다. EL2가 구현되었다면, EL2에 대한 exception은 ELR_EL2를 이용한다. EL3가 구현되었다면, EL3에 대한 exception은 ELR_EL3를 이용한다. D1.7 Process state, PSTATE Armv8-A 아키텍처에서 PSTATE는 process state를 나타낸다.\nPSTATE 필드는 다음과 같다.\nThe condition flags N - 음수 플래그 Z - 제로 플래그 C - 캐리 플래그 V - 오버플로우 플래그 The execution state controls SS - Software Step bit 좀 더 높은 exception level에서 lower exception level에 대해서 single-step 명령을 실행시킬 수 있다. 디버거의 single step 생각하면 된다. IL - Illegal Execution state bit PSTATE.IL이 1이면 어떤 명령이 시도되더라도 Illegal Execution state exception이 발생한다. 만약 EL0에서 IL이 1이 되면 EL1에서 이를 처리한다. nRW - Current Execution state AArch64에서 0으로 세팅된다. AArch64를 사용하는 ELx로의 Warm reset 혹은 Exception이 받아질때의 CPSR.nRW는 0이다. 반대로 AArch32 일때는 1이다. EL - Current Exception level AArch64로의 Warm reset시에는 이 필드는 가장 높은 Exception level을 가리키게 된다. SP - Stack pointer selection bit 전에 SP_ELxt SP_ELxh 두 가지 옵션이 지원된다고 설명했었는데, 이때 이 두 가지 옵션을 결정하는 비트가 PSTATE.SP 비트이다. 이때 t 접미사가 붙은 SP_ELxt는 SP_EL0를 가리킨다. Warm reset이나 AArch64 state로의 exception은 이 비트를 1로 만든다. 이는 SP_ELx가 선택된다는 뜻이다. The exception mask bits D - Debug exception mask bit 이 비트가 설정되면 debug exception을 막는다. Warm reset이나 AArch64로의 exception을 받으면 1로 세팅된다. A, I, F - Asynchhronous exception mask bits A - SError, 시스템 에러 interrupt를 막는다. I - IRQ interrupt를 막는다. F - FIQ interrupt를 막는다. Access control bits PAN - Privilege Acess Never state bit PAN가 1일때 어떠한 EL1 or EL2의 가상 메모리 주소 privileged data access D1.9 Reset Cold reset PE가 실행중인 모든 로직을 리셋한다. 이러한 로직은 cold reset domain에 속한다고도 표현한다. power up시에 reset이 cold reset이다. Warm reset PE가 실행중인 일부 로직을 리셋한다. 이러한 로직은 warm reset domain에 속한다고도 표현한다.\nwarm reset에서 리셋되는 로직은 cold reset에서 무조건 리셋된다. RMR_ELx 레지스터가 구현되어있다면, RMR_ELx.RR 비트를 1로 바꿈으로써 warm reset 요청을 할 수 있다.\n이러한 리셋시에는 PE는 구현된 가장 높은 Exception level로 진입한다.\n가장 높은 exception level이 동작할 때 다음과 같은 특징을 가진다.\n무조건 Reset Management Register(RMR)이 구현되어있어야한다. RMR이 하나라면 가장 높은 exception level에 한해서 구현된다. Cold reset 시에 execution state는 configuration input signal에 의해 결정된다. Warm reset 시에는 execution state는 RMR_ELx.AA64에 의해 결정된다. 가장 높은 exception level이 AArch64 state로 설정되어있고, reset(warm, cold)시에 다음이 수행된다.\nSP_ELx가 선택된다. IMPLEMENTATION DEFINED인 PA address에서 실행을 시작한다. 가장 높은 exception level 레지스터 RVBAR_ELx가 그 주소를 가지고 있다. 당연하겠지만, RVBAR_EL0은 없다. 최소가 EL1이기 때문이다. D1.9.1 PE state on reset to AArch64 state reset 이후 대부분의 PE state는 UNKNOWN이다.\n그래도 일부의 PE state는 정의되어있다.\nPE가 reset을 하면서 PE state는 정의된대로 돌아가게 된다.\n예를 들어서 PSTATE.{D, A, I, F} interrupt mask는 1로 세팅된다.\n왜냐하면 reset 시에는 저러한 interrupt를 핸들링할 벡터가 설정되지 않았기 때문이다.\n범용 레지스터, 부동 소수점, SIMD 들도 UNKNOWN 상태로 설정된다.\n이런식으로 초기 세팅의 값으로 돌아가게 된다.\nD1.15 System calls System call은 SVC, HVC, SMC 명령에 의해 발생한다.\nThe Supervisor Call (SVC) 명령은 user mode 프로그램이 os 서비스를 요청할 때 이용한다. EL1을 타겟팅하는 synchronous exception 이다. The Hypervisor Call (HVC) 명령은 guest OS가 hypervisor 서비스를 요청할 때 이용된다. EL2를 타겟팅하는 synchronous exception 이다. HVC 명령은 EL0와 Secure state EL1에서 정의되지 않는다. The Secure monitor Call (SMC) 명령은 Normal world가 Secure world 서비스를 요청할 때 이용된다. EL3를 타겟팅하는 synchronous exception 이다. 당연히 EL0에서 SMC는 정의되지 않는다. 다음과 같은 것들이 가능하다.\nEL2와 EL3는 Hypervisor call exception을 비활성화 할 수 있다. EL2는 SMC로 trap을 걸 수 있다. EL3는 Secure monitor call exception을 비활성화 할 수 있다. D5 The AArch64 Virtual Memory System Architecture D5.1 About the Virtual Memory System Architecture (VMSA) MMU가 VA를 PA 변환한다.\n이러한 VA가 PA로 변환되는 방식은 Exception level과 Security state에 따라 다르다.\nMMU는 단순히 변환만 하는게 아니라 액세스 권한과 속성에 대한 검사도 진행한다.\n이러한 변환 단계는 단일 단계일 수도 있고 두 가지 연속적인 단계가 필요할 수도 있다.\n여기서 Exception level에 따라 독립적으로 주소 변환이 이루어진다는 말은 다음과 같다.\n위와 같이 변환될때 Exception level과 security state에 따라 translation regime가 다른것을 확인할 수 있다.\n각자의 가상 주소 공간을 가진다.\n이런식으로 각자의 가상 공간의 테이블과 설정? 들을 translation regime라고 칭한다.\nD5.1.1 Armv8 VMSA naming VMSA 네이밍은 가능한 주소 변환 단계를 나타낸다.\nVMSAv8 아래 두 가지를 모두 아우르는 scheme이다. VMSAv8-32 AArch32의 Exception level에서 핸들링되는 단일 단계 변환 scheme이다. 가끔 VA를 PA에 매핑하기 위해서 두 단계를 거치기도 한다. 이런 단계들은 모두 AArch32의 Exception level에서 처리된다. VMSAv8-64 VMSAv8-32의 AArch64 버전이다. D5.1.2 The Armv8 VMSA when some Exception levels are using AArch32 Higher exception level에선 AArch64를 사용하는 반면 Lower exception level에서는 AArch32를 사용할 수 있다고 앞에서 설명했다.\nEL0에서 AArch32를 쓰더라도 좀 더 높은 exception level EL1에서는 AArch64를 쓰는 경우에선 EL0는 VMSAv8-64 방식을 이용한다.\nD5.1.3 VMSA address types and address spaces Virtual address (VA)\n명령어 실행에 이용되는 주소이다. AArch64 state 에서 VA는 다음과 같은 최대 address width를 가진다. 48 bits. 52 bits. - FEAT_LVA가 구현되어 주소 변환시 64kb granule를 이용할 때. 52 bits. - 다음이 참일 때. FEAT_LPA2가 구현되었을 때. TCR_ELx.DS == 1 일때 translation regime가 바뀐다. TCR 레지스터는 Translation control register이다. 4kb나 16kb granule를를 사용할 때. 하나의 주소 변환 단계 (Translation stage) 가 하나의 VA 범위를 변환하는 경우 48-bit VA 0x0000000000000000 to 0x0000FFFFFFFFFFFF 52-bit VA 0x0000000000000000 to 0x000FFFFFFFFFFFFF 하나의 주소 변환 단계가 두 개의 VA 범위로 나누어서 변환하는 경우 bottom VA 48-bit VA 0x0000000000000000 to 0x0000FFFFFFFFFFFF 52-bit VA 0x0000000000000000 to 0x000FFFFFFFFFFFFF top VA - 64bit를 모두 사용한다. 48-bit VA 0xFFFF000000000000 to 0xFFFFFFFFFFFFFFFF 52-bit VA 0xFFF0000000000000 to 0xFFFFFFFFFFFFFFFF 이렇게 나눠놓은 이유는 두 개의 subrange에 대해서 다르게 처리해야 할 필요가 있어서 그런 것 같다. Intermediate physical address (IPA)\n주소를 변환하면서 두 가지 주소 변환 단계가 있다. stage 1에서의 OA - 1 단계 변환의 출력 주소 이러한 1단계 변환에선 OS는 IPA를 PA로 착각한다. 처음에 변환되기 때문에 1단계 변환이라고 부른다. stage 2에서의 IA - 2 단계 변환의 입력 주소소 IPA를 PA로 변환하는 단계이다. 1 단계 변환이 변환한 IPA를 PA로 변환해서 2단계 변환이라고 부른다. 변환 과정에서 IPA와 PA는 비슷하다. 가상머신으로 운영체제를 실행했을 때 이러한 두 계층의 주소 변환이 필요하게 되는데 첫 번째 계층의 출력 주소로 볼 수 있다. Physical address (PA)\n실제 물리적인 주소이다. EL3에서 Secure EL1과 FEAT_SEL2가 활성화되면 Secure EL2 exception level은 Secure, Non-secure operation의 독립적인 PA space로 나눈다. Secure state에선 Secure PA space를 이용한다. Non-secure state에선 Non-secure PA space를 이용한다. D5.1.4 Address tagging in AArch64 state AArch64 state에서 address tagging을 지원한다.\n여기서의 Address tagging과 Memory tagging extension을 혼동하면 안된다.\nAddress tagging의 VA의 상위 8비트는 다음을 결정할 때 무시된다.\n변환 시스템이 활성화 되어 있을 때, 그 VA가 범위 밖인지 아닌지 여부. translation fault가 일어난다. 변환 시스템이 활성화 되어 있지 않을 때 주소가 범위 밖인지 여부. address size fault가 일어난다. TLB invalidation 명령 실행시 그 주소가 invalidation이 필요할지 여부. 1 단계 변환에서 두 개의 VA 범위를 지원할 때 다음이 참이다.\nVA의 bit[55]에 따라 다음과 같이 address tag를 사용할지 여부를 결정하는 register bit를 결정한다. VA[55] == 0 TCR_ELx.TBI0 address tag를 사용할지 여부를 결정한다. 1 단계 변환이 활성화되었을 때 TTBR0_ELx는 변환 테이블(translation table)의 base address를 저장한다. TTBR은 Translation table base register로 x86의 CR3처럼 특정 페이지 테이블을 가리킨다. context switching이 일어날 때 마다 바뀌게 되는 특징이 있다. VA[55] == 1 TCR_ELx.TBI1 address tag를 사용할지 여부를 결정한다. 1 단계 변환이 활성화되었을 때 TTBR1_ELx는 변환 테이블(translation table)의 base address를 저장한다.\n이런식으로 두 개의 범위를 tagging을 통해 처리한다. 1단계 변환에서 오직 하나의 VA 범위를 지원할 때 다음이 참이다.\n1단계 변환이 활성화 되었을 때 TCR_ELx.TBI가 address tag가 사용되는 여부를 결정한다. TTBR0_ELx는 변환 테이블의 base address를 저장한다. 왜 조건에 1 단계 변환의 활성화가 적혀있는지 의문을 가질 수 있는데, 그 이유는 TCR_ELx.TBIn bit는 해당 변환 단계의 사용 여부와 무관하게 address tags 사용 여부를 결정되기 때문이다.\n또한 FEAT_PAuth가 구현되어있다면, TBIDn 비트가 TCR_ELx에 추가된다.\nTCR_ELx.TBIn 비트가 켜져있다면, TBIDn 비트가 address tagging이 data address만 적용할 것인지 instruction address까지 적용할지 결정한다.\n이러한 Address tag 활성화 비트는 다음과 같은 예시처럼 PC의 영향을 줄 수 있다.\ncontrolled exception level 에서, TCR_EL3.TBI는 다음과 같은 영향을 제어한다. EL3에서의 분기나 함수 return. EL3로의 exception. exception return, EL3로 debug state exit.\n마지막 debug state에서 나갈때는 정확히 잘 이해가 되지 않는다. TBIn 비트가 어떻게 제어되느냐에 따라 다음과 같은 영향을 가진다.\n1 단계 번역이 두 가지의 VA range를 지원한다. PC에 로딩되는 주소 55비트가 1이고 TBIn 비트가 1이라면 bits[63:56] 부분의 PC는 bit 55에 대한 sign extension이 일어나게된다. 사실 이건 앞에서 범위 얘기하면서 다뤘던 얘기이다. 그냥 같은 얘기. 1 단계 번역이 하나의 VA range를 지원한다. 55비트가 1이여도 bits[63:56]는 0x00으로 고정된다. 깔끔하게 정리하면 다음과 같다.\nTBI(Top byte ignorance) 비트에 따라 55 bit가 무시될지, 두 개의 VA range를 지원하는지 결정된다.\nD5.2 The VMSAv8-64 address translation system VMSAv8-64 주소 변환 시스템에 대해서 설명한다.\nD5.2.1 About the VMSAv8-64 address translation system MMU는 PE에 액세스에 대해 주소 변환과 액세스 권한 그리고 메모리 속성 결정과 체크를 담당한다.\n기본적인 MMU의 동작 모델은 원하는 메모리의 액세스에 대한 정보, 예를 들어서 IA(Input Address)를 받아들여 결과를 리턴한다.\n관련된 OA(Output Address)를 리턴한다. 변환을 완료할 수 없으면, exception이 생성되며 이 exception을 MMU fault라고 부른다. 시스템 레지스터를 이용해서 이러한 발생한 MMU fault를 알린다. IA -\u003e OA로 매핑을 하는 과정을 단일 단계 변환 (single stage translation) 이라고 한다.\nVMSAv8 system에서 translation regime는 VA -\u003e PA 로의 매핑에 하나 혹은 두 개의 단계를 거쳐 변환을 수행한다.\ntranslation granule은 IA -\u003e OA로의 매핑의 세분성을 나타내며 이는 다음 두 가지를 정의한다.\n주소 변환의 단계의 page size IA -\u003e OA 매핑의 최소 단위 메모리 블록. 특정 주소 변환 단계의 변환 테이블 (translation table)의 최대 크기\n지금에선 변환 테이블의 최대 크기가 이해되지 않을 수 있다.\nD5.2.4에서 후술한다.\nMMU는 system register에 의해 주소 변환 단계마다 주소 변환이 제어된다. 변환 단계마다 address translations의 집합과 관련 메모리 속성이 memory mapped table에 존재하며 그 테이블을 translation tables라고 부른다.\n하나의 translation table은 IA를 제한된 특정 비트들을 이용해서 주소를 변환한다.\n그 이유는 하나의 address translation이 여러번의 lookup를 통해 변환을 해야할 수 있기 때문이다.\n그리고 이러한 translation table entry들은 Translation lookaside buffer(TLB)에 캐싱된다.\n메모리 데이터가 L1, L2, L3 캐시에 캐싱되듯이, 주소들은 TLB에 주소 변환에 대한 데이터가 캐싱된다고 볼 수 있다.\nmips 사진이긴 하지만 table entry에는 ASID를 명시해서 다른 프로세스별 주소 공간을 명시한다.\n이를 통해 context switching을 할 때 굳이 tlb flush를 통해 entry를 날리지 않고 유지시켜도 격리가 유지되게 된다.\n그리고 위와 같이 코드를 공유하는 경우에 효율적으로 메모리 공간을 이용할 수 있다.\nIA -\u003e OA 매핑에 대한 정보를 정의하는 translation table entry에서는 다음과 같은 속성들도 정의한다.\nSecure state에서 발생한 메모리 액세스, 즉 액세스가 Secure 혹은 Non-secure address 맵에 접근하는지 여부 액세스 권한 memory region property\n메모리 타입이나 캐시 정책등이 이러한 property에 포함된다. AArch64 아키텍처에서 translation regime는 다음으로 구성된다.\n단일 단계 주소 변환 input VA를 바로 output PA로 변환한다. 연속적인 2 단계 주소 변환 Stage 1 - input VA -\u003e output IPA Stage 2 - input IPA -\u003e output PA 앞에서 이미 봤던 사진인데, 이번엔 좀 더 자세히 알아보겠다.\nEL1\u00260이고 EL2가 비활성화 되었을 때 - 1 단계 변환 같은 PA를 공유하는 OS가 없다. 그러므로 굳이 IPA를 둬서 2 단계 변환을 할 필요가 없다. HCR_EL2.{E2H, TGE}가 {0,0} 일 때 EL1이나 EL0일 때 이러한 변환 regime가 이용된다. HCR은 Hypervisor control register로 하이퍼 바이저( EL2 )의 동작에 대해 나타낸다. E2H는 VHE가 지원되지 않을 때를 뜻하니 단순 VA를 PA로만 변환하면 된다. SCR_EL3.NS == 1 일 때 Non-secure 메모리 액세스가 일어난다. SCR은 Secure configuration register이다. EL1\u00260이고 EL2가 활성화 되었을 때 - 2 단계 변환 같은 PA를 공유하는 OS가 있다. OS가 착각하는 PA를 의미한다. 즉 IPA. 같은 물리 메모리 주소에 대해 다른 값을 리턴해야할 필요가 생긴다. 그래서 2 단계 변환을 통해 guest os의 PA를 IPA로 속여서 변환해야한다. EL2나 EL3 - 1단계 변환 그냥 바로 접근해도 상관없기 때문에 단일 단계 변환을 수행한다. EL2\u00260 변환 - 1 단계 변환 HCR_EL2.{E2H, TGE} 비트가 {1,1} 일 때 적용된다. 즉 host os가 EL2에서 돌고 있고 host application이 EL0에서 돌고 있을때이다. 이런 경우엔 1 단계 변환만으로도 충분하다. 왜냐하면 말은 EL2에서 EL0 변환이지만, 실제로는 FEAT_VHE에 의해서 표면적으로 그렇게 보일뿐이지 실제로의 변환은 단순 VA -\u003e PA만 하면 끝이다. 단일 단계 주소 변환에서 TTBR_ELx는 IA를 OA로 매핑하기 위한 첫 번째 translation table을 가리킨다.\n두 개의 VA range를 지원하는 경우 각자의 VA range는 독립된 IA -\u003e OA 매핑을 가진다.\n이는 다음을 말한다.\n두 개의 IA ranges를 지원하면 두 개의 translation tables가 지원된다. 하나의 IA range를 지원하면 하나의 translation table이 지원된다.\n각자가 다른 table을 이용하게 되면서 각자 독립적인 매핑을 가지게 된다. 여기서 명심해야할 점은 두 개의 IA ranges를 지원하는건 오직 1 단계 변환만 가능하다.\n바꿔말하면 두 개의 IA ranges를 지원한다면, 그 IA는 무조건 VA 라는 것이다.\nVMSAv8-64에서 주소 변환 단계는 Exception level에 영향을 받는다.\nVMSAv8-64에서 translation table안의 descriptor entry는 64 비트이다.\nVMSAv8-64 translation table format은 다음을 제공한다.\n4 단계 이상의 주소 lookups 4kb 혹은 16kb, 64kb인 translation granule 크기 IA/OA 주로 48 비트이지만 특정 FEAT_LPA2같은 feature에 따라 52 비트까지도 늘어날 수 있다. D5.2.3 Controlling address translation stages 위 표에 나와있듯이 각자의 변환 단계에 매칭되는 시스템 레지스터들이 존재한다.\nSCTLR (System control register)는 Exception level 별로 존재한다. 이는 Exception level 마다의 설정이 달라야하니 필요하다. TCR (Translation control register)는 Exception level 별로 존재하고 EL2에서 특정 하이퍼 바이저의 설정에 따라 추가적으로 VSTCR_EL2가 이용될 수 있으며 기본적으로 EL2가 구현되었다면 VTCR_EL2가 이용된다. TTBR (Translation table base register)는 Exception level 별로 존재하며 마찬가지로 EL2의 특정 옵션에 의해 추가적으로 이용될 수 있으며 EL2가 구현되었다면 VTTBR_EL2가 이용된다. 앞서 address tagging에 대해서 설명하면서 TCR_ELx.TBI0와 TCR_ELx.TBI1가 활성화 되었을 때 VA의 55 비트에 따라 TTBR0_ELx를 이용하는지 TTBR1_ELx를 이용지를 결정한다고 했었다. ID_AA64MMFR0_EL1.PARange 비트는 물리 주소 크기를 정한다.\n활성화된 주소 변환 단계는 각자 TCR_ELx 레지스터를 가지며 IPS 비트에 따라 최대 output address의 크기도 정한다.\n활성화된 변환 단계는 마찬가지로 각자의 TCR_ELx 레지스터를 가지며 TCR_ELx의 TxSZ 필드가 input address size를 지정한다.\n두 개의 VA ranges를 지원하는 경우 TCR_ELx는 두 개의 TxSZ 필드를 가지며 각자 하나의 VA range에 대응한다. TCR_ELx.T0SZ는 lower VA인 TTBR0_ELx에 대응한다. TCR_ELx.T1SZ는 higher VA인 TTBR1_ELx에 대응한다. 단일 VA range를 지원하는 경우 TCR_ELx의 T0SZ를 이용하며 TTBR0_ELx가 변환에 이용된다.\n위 사진 single VA range를 지원하는 변환 단계의 메모리 맵이다.\nEL1\u00260 regime에서 EL2가 켜져있으면 여러 OS가 PA를 공유할 가능성이 있으므로 2 단계 변환을 수행한다.\n위 사진은 두 개의 VA ranges를 지원할 때의 메모리 맵이다. D5.2.4 Memory translation granule size granule size는 다음을 정의한다.\n하나의 translation table의 최대 크기 memory 페이지 크기 위 표와 같이 1 단계 변환에선 ID_AA64MMFR0_EL1의 TGran4, 16, 64 필드를 통해 어떤 granule size가 지원되는지 확인할 수 있다.\n2 단계 변환에서도 앞선 1 단계 변환처럼 똑같이 필드를 통해 granule size를 확인할 수 있다.\n위와 같은 범위를 가진다.\n전에 granule size가 page size와 최대 translation table의 크기를 정의한다고 했기 때문에 entry 개수는 2^12 / 2^3 = 2^9 개의 entries를 가지게 된다.\nD5.2.5 Translation tables and the translation process Translation table walk는 하나 혹은 그 이상의 translation table lookups를 말한다.\nTranslation table walk는 VA를 PA로 변환하기 위해 필요한 일련의 lookup들이다.\ntranslation table walk는 가장 처음으로 TTBR_ELx을 읽어서 table의 base 주소를 얻는다.\n그리고 각자의 translation table lookup은 다음중 하나를 포함하는 descriptor를 리턴한다.\ntable entry가 walk의 마지막 entry이면, 그 entry는 OA와 OA에 대한 권한, 속성을 포함한다. 추가적인 lookup이 필요하면, entry는 다음 lookup을 위한 base address를 포함한다. 추가적으로 secure translation regime를 이용할 경우 그 base address가 secure인지 non-secure인지를 나타낸다. 따로 명시적으로 non-secure address space라고 명시할 수도 있다. 여기서 hierarchical attributes 라는게 적용되는데, 이는 일부 속성이 좀 더 높은 레벨의 테이블 descriptor에서 명시될 수 있다. 이는 접근 권한, 실행 권한 그리고 물리 주소 공간에서도 적용된다. PXNTable(실행 권한)으로 예시를 들어보면 좀 더 높은 level의 table에 비트가 세팅되면 좀 더 낮은 레벨의 비트들은 무시되는 것을 알 수 있다. 또한 PXN을 비트를 클리어 시켜서 전 계층의 비트를 보존시킬 수도 있다. descriptor가 유효하지 않다면 translation fault가 발생한다. 앞서 PXN같은 용어가 나왔는데 추가적을 설명하자면 page table entry에서 다음과 같은 4 비트가 인코딩된다. UXN, Unprivileged Execute never - 이 페이지에선 EL0 코드를 실행할 수 없다. PXN, Privileged Execute never - 이 페이지에선 EL1 코드를 실행할 수 없다. AP 2bits, 01이면 커널과 유저모드 모두 접근가능하다. 단일 단계 변환의 translation table walk에 대한 그림이다.\nD_Block은 granule보다 큰 블록에 대한 descriptor이고 D_Page는 granule 크기에 대한 descriptor이다.\n실제로 구현시에는 동일한 구조를 이용하여 구현한다.\n3 level lookups가 필요한 경우에선 마지막에 D_Block 대신 D_Page로 의미상 이용된다고 한다.\n위의 포맷을 보면 둘다 아예 같게 생긴 것을 확인할 수 있다.\nTTBR_ELx는 초기 lookup을 위한 translation table의 base address를 가지고 있다.\nEL2가 활성화 되었을 때 EL1\u00260 translation regime를 제외한 1 단계 변환은 TTBR_ELx의 output address나 어떠한 translation table descriptor에 의해 리턴된 translation table의 base address는 모두 PA이다. EL2가 활성화 되었을 때 EL1\u00260 translation의 1 단계 변환에서 TTBR_ELx의 output address나 어떠한 translation table descriptor에 의해 리턴된 translation table의 base address는 IPA이다. 그리고 2 단계 변환이 활성화 되어있다면 OA는 2 단계 변환의 대상이 된다. D5.2.6 Overview of the VMSAv8-64 address translation stages TCR_ELx의 TnSZ는 IA 범위를 정한다.\n4kb granule 기준으로 위 표처럼 initial lookup level이 결정된다.\nTnSZ에 따라 initial lookup level이 달라진다.\n이렇게 찾아간다.\nVTCR_EL2.T0SZ에 따라 IA 크기가 정해지고 initial lookup level이 결정된다.\n16kb granule도 표로 정리되어있긴 하지만 생략하겠다.\nD5.3 VMSAv8-64 Translation Table format descriptors 일반적으로 descriptor는 다음중 하나에 해당한다.\nAn invalid or fault entry. next-level translation table을 가리키는 table entry. Accesss를 위한 memory의 properties를 정의하는 block entry. 예약된 format. D5.3.1 VMSAv8-64 translation table level -1, level 0, level 1, and level 2 descriptor formats 사실 포맷은 granule size나 최대 OA size 같은 여러 요인에 따라 달라진다.\n그런데 그냥 일반적인 경우 포맷은 거의 비슷하다.\n그래서 실질적으로 포맷은 위와 같다.\nD.5.3.2 Armv8 translation table level 3 descriptor formats 이런식으로 granule size에 따라 포맷은 달라지게 된다.\nD5.3.3 Memory attribute fields in the VMSAv8-64 Translation Table format descriptors stage 1 translation에서 위 비트들은 다음 translation table access를 위한 속성을 정의한다.\nNSTable secure state에서 메모리 액세스할때 NSTable bit를 확인한다. non-secure state에선 EL2나 EL2\u00260을 포함해서 RES0이 되고 PE는 이를 무시한다. APTable 후속 level lookup시에 적용되는 permission bit들이다. 아래와 같이 적용된다. UXNTable or XNTable 후속 level lookup시에 적용되는 XN limit이다. naming은 stage 1 translation regime가 두 VA ranges를 지원하는지 유무에 따라 다르다. Stage 1이 두 개의 VA ranges를 지원할 때 이 필드는 UXNTable로 불린다. lower level lookup에서 그 region에서 fetch된 instruction이 EL0에서 실행되는 것을 허용하는지를 결정한다. Stage 1이 하나의 VA range를 지원할 때 XNTable로 명명된다. PXNTable Privileged execute never. 후속 levels of lookup에 관여한다. 이 필드는 항상 2 VA ranges를 지원하는 stage 1 translation에서만 valid 하다. 당연히 User, Kernel 나눠져야하니까 당연하다. 그래야 다른 translation table 쓰고 각기 다른 처리가 가능하다. 아까 앞에선 table descriptor였는데 얜 page \u0026 block descriptor의 경우이다.\n1 stage block \u0026 page descriptor 모습이다.\n메모리 속성이 upper, lower로 나눠진다. 마찬가지로 1 stage에서 두 VA ranges면 UXN 아니면 XN. PXN도 마찬가지. AP는 data access permission 관리한다. table descriptor format은 AP의 0 번째 비트를 정의하지 않는다. translation regime가 두 VA ranges를 지원하면 얘는 valid하며 singe VA range면 RES1이다. NS는 Non secure bit다. 2 stage block \u0026 page descriptor의 모습이다.\n전이랑 비슷한데 여러 비트들이 많으니 생략한다. S2AP로 이름이 바뀐게 있는데, 그냥 stage 2 data access permission 비트로 AP랑 똑같다. D5.4 Memory access control access control field는 PE가 특정 주소에 접근할 때 그 주소의 접근을 컨트롤한다.\n허용안하면 MMU fault.\n이는 다음에 적용된다.\nsingle exception level에 대한 변환, EL3 translation regime같은 거. EL0 그리고 높은 exception level에 대한 변환, EL1\u00260 translation regime 같은 거. D5.4.1 About access permissions translation table descriptor는 data accesses에 대한 access permissions과 instruction fetches에 대한 access permissions를 정의한다.\nPAN이나 PXN같은거에 대해서 더 자세하게 설명하는 섹션이다.\naccess permission 관련 비트들은 앞서 다뤘던 translation table format에 있었다.\nstage 1 translation, AP가 data access permission을 정의한다. stage 2에선 S2AP가 data access permission을 정의한다. UXN, XN, PXN 필드가 instruction fetches의 access controls를 정의한다. D5.4.2 About PSTATE.PAN PSTATE.PAN이 1이면 EL1, HCR_EL2.E2H가 1 일때 EL2에서 EL0이 액세스 가능한 가상 주소 액세스는 Permission fault를 생성한다.\nPSTATE.PAN 0이면 그 기능은 꺼진다.\n그냥 SMAP랑 똑같은 거 같다.\n세부사항이 있지만 패스한다.\nD5.4.3 About PSTATE.UAO PSTATE.UAO가 1이면 unprivileged instruction load/store가 EL1혹은 HCR_EL2.{E2H, TGE}가 {1,1}일 때 EL2가 EL0가 아닌 현재 exception level에 적용되는 memory access permissions에 적용을 받는다.\n세부사항은 패스한다.\nD5.4.5 Data access permission controls stage 1 translation 에서 AP는 두 개 비트를 포함한다.\nAP 1번 비트 EL0와 더 높은 exception level 중에서 선택한다. AP 2번 비트 read only인지 read/write 가능한지 선택한다.\n다음 액세스 세팅을 나타낼 수 있게 된다. 모든 레벨에서 read-only. 모든 레벨에서 read/write. EL0에선 access 불가능하지만 higher exception level에서 read-only. EL0에선 access 불가능하지만 read/write.\n바로 앞에서 두 개 VA ranges를 지원할 때 higher exception level, EL0에 대한 access permission을 설명했다.\n여기선 1 stage translation에서 single exception level에 대한 data access permission을 설명한다.\nsinge exception level이라 굳이 아까 1번 비트는 있을 필요없어서 reserved 값을 가진다.\n위 표처럼 정의된다. EL2 활성화시 secure / non-secure EL1\u00260 translation regime에서 S2AP는 다음 표처럼 정의된다.\nEL2 활성화 되어있을 때 EL1\u00260 translation regime는 2 stage address translation이 필요하다.\nS2AP는 1 단계 말고 2 단계 translation에 대한 access permission을 정의한다.\n1 stage에서 AP랑 결합되기도 한다.\n이렇게 후속 lookups에서 어떤 영향을 주는지 볼 수 있다.\nD5.4.6 Access permissions for instruction execution Execute-never controls는 어떤 memory region의 instruction이 실행될 수 있는지를 정의한다.\nUXN, Unprivileged execute-never, stage 1 only 당연히 1 stage가 두 VA ranges를 지원해야 UXN을 쓸 수 있다. 이유는 앞서 계속 설명했으니 그냥 생략한다. 0이면 EL0에서의 execution 허용한다. XN, Execute-never single VA range면 UXN이 아니라 XN으로 정의된다. UXN과 같은 자리다. 0이면 실행을 허용한다. 이 translation 적용되는 모든 exception level에 적용된다. PXN, Privileged execute, stage 1 only 두 VA ranges 지원할 때 이용된다. single VA range는 res0으로 정의되고 무시된다. 0이면 실행이 허용된다. 그냥 SMEP랑 똑같다. XN, Execute-never, stage 2 only EL2같은거 구현되었을 때 EL1\u00260 regime 쓰면 2 stage로 해야한다. 두 번째 stage의 XN비트다. FEAT_XNX가 활성화되었을 때 이런식으로 또 나뉜다. FEAT_XNX 아니면 53bit res0이고 하나만 EL0, EL1에 대한 execution 제어를 담당한다. 추가적으로 SCTLR_ELx.WXN이 1이면 어떤 메모리던 간에 writable하면 execute-never하다. 앞에 내용들 종합해서 stage 1 access permission들 정리하면 다음과 같다.\n위 표는 두 VA ranges를 지원할 때 경우이고 아래 표는 single VA range만 지원할 때의 표이다.\n아까랑 똑같은데 AP의 1번 째 비트가 reserved 값이 되면서 무시된다.\nStage 2 instruction execution permissions는 아까 앞서 설명했듯이 stage 2 translation의 XN 필드에 의해 정의된다.\nAP도 S2AP에 의해 정의된다.\nG1.12 Handling exceptions that are taken to an Exception level using AArch32 AArch64와 exception vector tables 형태가 약간 다르다.\n다음과 같은 mode로 변환되게 된다.\n일반적으로 cps를 통해 다시 Supervisor로 돌린다거나 하는식으로 mode switch를 한다.\nG5.4 The VMSAv8-32 Short-descriptor translation table format AArch64와 비슷하지만 그냥 단순히 몇 번째 비트인지만 달라졌다.\n위와 같은 형태이다.\nG7.3VMSAv8-32 organization of registers in the (coproc==0b1111) encoding space arm trustzone을 분석할 때 arm 모드로 동작하는 경우가 있다.\n얘네들이 mrs, msr 같은 명령어를 이용해서 시스템 레지스터를 컨트롤한다.\n위와 같이 테이블이 정의되어있는데, 여기에 맞춰서 mrs, msr을 읽으면 된다.\n",
+  "wordCount" : "6355",
+  "inLanguage": "en",
+  "datePublished": "2024-06-25T00:00:00Z",
+  "dateModified": "2024-06-25T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/background_arm/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      Background ARM
+    </h1>
+    <div class="post-meta">
+
+
+June 2024
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#background---arm" aria-label="Background - arm">Background - arm</a><ul>
+                        
+                <li>
+                    <a href="#a1-introduction-to-the-armv8-architecture" aria-label="A1 Introduction to the Armv8 Architecture">A1 Introduction to the Armv8 Architecture</a><ul>
+                        
+                <li>
+                    <a href="#a11-about-arm-architecture" aria-label="A1.1 About Arm Architecture">A1.1 About Arm Architecture</a></li>
+                <li>
+                    <a href="#a12-architecture-profiles" aria-label="A1.2 Architecture profiles">A1.2 Architecture profiles</a></li>
+                <li>
+                    <a href="#a13-armv8-architectural-concepts" aria-label="A1.3 Armv8 architectural concepts">A1.3 Armv8 architectural concepts</a><ul>
+                        
+                <li>
+                    <a href="#a131-execution-state" aria-label="A1.3.1 Execution state">A1.3.1 Execution state</a></li>
+                <li>
+                    <a href="#a132-the-armv8-instruction-sets" aria-label="A1.3.2 The Armv8 instruction sets">A1.3.2 The Armv8 instruction sets</a></li>
+                <li>
+                    <a href="#a133-system-registers" aria-label="A1.3.3 System registers">A1.3.3 System registers</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#b1-the-aarch64-application-level-programmers-model" aria-label="B1 The AArch64 Application Level Programmers’ Model">B1 The AArch64 Application Level Programmers’ Model</a><ul>
+                        
+                <li>
+                    <a href="#b13-software-control-features-and-el0" aria-label="B1.3 Software control features and EL0">B1.3 Software control features and EL0</a><ul>
+                        
+                <li>
+                    <a href="#b131-exception-handling" aria-label="B1.3.1 Exception handling">B1.3.1 Exception handling</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#d1-the-aarch64-system-level-programmers-model" aria-label="D1 The AArch64 System Level Programmers’ Model">D1 The AArch64 System Level Programmers’ Model</a><ul>
+                        
+                <li>
+                    <a href="#d11-exception-levels" aria-label="D1.1 Exception levels">D1.1 Exception levels</a><ul>
+                        
+                <li>
+                    <a href="#d111-typical-exception-level-usage-model" aria-label="D1.1.1 Typical Exception level usage model">D1.1.1 Typical Exception level usage model</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d12-exception-terminology" aria-label="D1.2 Exception terminology">D1.2 Exception terminology</a><ul>
+                        
+                <li>
+                    <a href="#d123-exception-level" aria-label="D1.2.3 Exception level">D1.2.3 Exception level</a></li>
+                <li>
+                    <a href="#d124-definition-of-a-precise-exception" aria-label="D1.2.4 Definition of a precise exception">D1.2.4 Definition of a precise exception</a></li>
+                <li>
+                    <a href="#d125-definitions-of-synchronous-and-asynchronous-exceptions" aria-label="D1.2.5 Definitions of synchronous and asynchronous exceptions">D1.2.5 Definitions of synchronous and asynchronous exceptions</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d13-execution-state" aria-label="D1.3 Execution state">D1.3 Execution state</a></li>
+                <li>
+                    <a href="#d14-security-state" aria-label="D1.4 Security state">D1.4 Security state</a><ul>
+                        
+                <li>
+                    <a href="#d141-the-armv8-a-security-model" aria-label="D1.4.1 The Armv8-A security model">D1.4.1 The Armv8-A security model</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d15-virtualization" aria-label="D1.5 Virtualization">D1.5 Virtualization</a><ul>
+                        
+                <li>
+                    <a href="#hypervisor-type" aria-label="Hypervisor type">Hypervisor type</a></li>
+                <li>
+                    <a href="#hypervisor-mode" aria-label="hypervisor mode">hypervisor mode</a></li>
+                <li>
+                    <a href="#virtualization-host-extensions-vhe" aria-label="Virtualization host extensions (VHE)">Virtualization host extensions (VHE)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d16-registers-for-instruction-processing-and-exception-handling" aria-label="D1.6 Registers for instruction processing and exception handling">D1.6 Registers for instruction processing and exception handling</a><ul>
+                        
+                <li>
+                    <a href="#d162-the-stack-pointer-registers" aria-label="D1.6.2 The stack pointer registers">D1.6.2 The stack pointer registers</a></li>
+                <li>
+                    <a href="#d164-saved-program-status-registers-spsrs" aria-label="D1.6.4 Saved Program Status Registers (SPSRs)">D1.6.4 Saved Program Status Registers (SPSRs)</a></li>
+                <li>
+                    <a href="#d165-exception-link-registers-elrs" aria-label="D1.6.5 Exception Link Registers (ELRs)">D1.6.5 Exception Link Registers (ELRs)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d17-process-state-pstate" aria-label="D1.7 Process state, PSTATE">D1.7 Process state, PSTATE</a></li>
+                <li>
+                    <a href="#d19-reset" aria-label="D1.9 Reset">D1.9 Reset</a><ul>
+                        
+                <li>
+                    <a href="#d191-pe-state-on-reset-to-aarch64-state" aria-label="D1.9.1 PE state on reset to AArch64 state">D1.9.1 PE state on reset to AArch64 state</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d115-system-calls" aria-label="D1.15 System calls">D1.15 System calls</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d5-the-aarch64-virtual-memory-system-architecture" aria-label="D5 The AArch64 Virtual Memory System Architecture">D5 The AArch64 Virtual Memory System Architecture</a><ul>
+                        
+                <li>
+                    <a href="#d51-about-the-virtual-memory-system-architecture-vmsa" aria-label="D5.1 About the Virtual Memory System Architecture (VMSA)">D5.1 About the Virtual Memory System Architecture (VMSA)</a><ul>
+                        
+                <li>
+                    <a href="#d511-armv8-vmsa-naming" aria-label="D5.1.1 Armv8 VMSA naming">D5.1.1 Armv8 VMSA naming</a></li>
+                <li>
+                    <a href="#d512-the-armv8-vmsa-when-some-exception-levels-are-using-aarch32" aria-label="D5.1.2 The Armv8 VMSA when some Exception levels are using AArch32">D5.1.2 The Armv8 VMSA when some Exception levels are using AArch32</a></li>
+                <li>
+                    <a href="#d513-vmsa-address-types-and-address-spaces" aria-label="D5.1.3 VMSA address types and address spaces">D5.1.3 VMSA address types and address spaces</a></li>
+                <li>
+                    <a href="#d514-address-tagging-in-aarch64-state" aria-label="D5.1.4 Address tagging in AArch64 state">D5.1.4 Address tagging in AArch64 state</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d52-the-vmsav8-64-address-translation-system" aria-label="D5.2 The VMSAv8-64 address translation system">D5.2 The VMSAv8-64 address translation system</a><ul>
+                        
+                <li>
+                    <a href="#d521-about-the-vmsav8-64-address-translation-system" aria-label="D5.2.1 About the VMSAv8-64 address translation system">D5.2.1 About the VMSAv8-64 address translation system</a></li>
+                <li>
+                    <a href="#d523-controlling-address-translation-stages" aria-label="D5.2.3 Controlling address translation stages">D5.2.3 Controlling address translation stages</a></li>
+                <li>
+                    <a href="#d524-memory-translation-granule-size" aria-label="D5.2.4 Memory translation granule size">D5.2.4 Memory translation granule size</a></li>
+                <li>
+                    <a href="#d525-translation-tables-and-the-translation-process" aria-label="D5.2.5 Translation tables and the translation process">D5.2.5 Translation tables and the translation process</a></li>
+                <li>
+                    <a href="#d526-overview-of-the-vmsav8-64-address-translation-stages" aria-label="D5.2.6 Overview of the VMSAv8-64 address translation stages">D5.2.6 Overview of the VMSAv8-64 address translation stages</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d53-vmsav8-64-translation-table-format-descriptors" aria-label="D5.3 VMSAv8-64 Translation Table format descriptors">D5.3 VMSAv8-64 Translation Table format descriptors</a><ul>
+                        
+                <li>
+                    <a href="#d531-vmsav8-64-translation-table-level--1-level-0-level-1-and-level-2-descriptor-formats" aria-label="D5.3.1 VMSAv8-64 translation table level -1, level 0, level 1, and level 2 descriptor formats">D5.3.1 VMSAv8-64 translation table level -1, level 0, level 1, and level 2 descriptor formats</a></li>
+                <li>
+                    <a href="#d532-armv8-translation-table-level-3-descriptor-formats" aria-label="D.5.3.2 Armv8 translation table level 3 descriptor formats">D.5.3.2 Armv8 translation table level 3 descriptor formats</a></li>
+                <li>
+                    <a href="#d533-memory-attribute-fields-in-the-vmsav8-64-translation-table-format-descriptors" aria-label="D5.3.3 Memory attribute fields in the VMSAv8-64 Translation Table format descriptors">D5.3.3 Memory attribute fields in the VMSAv8-64 Translation Table format descriptors</a></li></ul>
+                </li>
+                <li>
+                    <a href="#d54-memory-access-control" aria-label="D5.4 Memory access control">D5.4 Memory access control</a><ul>
+                        
+                <li>
+                    <a href="#d541-about-access-permissions" aria-label="D5.4.1 About access permissions">D5.4.1 About access permissions</a></li>
+                <li>
+                    <a href="#d542-about-pstatepan" aria-label="D5.4.2 About PSTATE.PAN">D5.4.2 About PSTATE.PAN</a></li>
+                <li>
+                    <a href="#d543-about-pstateuao" aria-label="D5.4.3 About PSTATE.UAO">D5.4.3 About PSTATE.UAO</a></li>
+                <li>
+                    <a href="#d545-data-access-permission-controls" aria-label="D5.4.5 Data access permission controls">D5.4.5 Data access permission controls</a></li>
+                <li>
+                    <a href="#d546-access-permissions-for-instruction-execution" aria-label="D5.4.6 Access permissions for instruction execution">D5.4.6 Access permissions for instruction execution</a></li></ul>
+                </li>
+                <li>
+                    <a href="#g112-handling-exceptions-that-are-taken-to-an-exception-level-using-aarch32" aria-label="G1.12 Handling exceptions that are taken to an Exception level using AArch32">G1.12 Handling exceptions that are taken to an Exception level using AArch32</a></li>
+                <li>
+                    <a href="#g54-the-vmsav8-32-short-descriptor-translation-table-format" aria-label="G5.4 The VMSAv8-32 Short-descriptor translation table format">G5.4 The VMSAv8-32 Short-descriptor translation table format</a></li>
+                <li>
+                    <a href="#g73vmsav8-32-organization-of-registers-in-the-coproc0b1111-encoding-space" aria-label="G7.3VMSAv8-32 organization of registers in the (coproc==0b1111) encoding space">G7.3VMSAv8-32 organization of registers in the (coproc==0b1111) encoding space</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="background---arm">Background - arm<a hidden class="anchor" aria-hidden="true" href="#background---arm">#</a></h1>
+<h2 id="a1-introduction-to-the-armv8-architecture">A1 Introduction to the Armv8 Architecture<a hidden class="anchor" aria-hidden="true" href="#a1-introduction-to-the-armv8-architecture">#</a></h2>
+<h3 id="a11-about-arm-architecture">A1.1 About Arm Architecture<a hidden class="anchor" aria-hidden="true" href="#a11-about-arm-architecture">#</a></h3>
+<p>Arm 아키텍처는 RISC로 reduced instruction set computer이다.<br>
+다음과 같은 특징이 있다.</p>
+<ul>
+<li>많은 레지스터터 개수</li>
+<li>load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다.</li>
+<li>간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다.</li>
+</ul>
+<p>매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.</p>
+<p>Armv8의 중요한 특징은 호환성이다.</p>
+<ul>
+<li>64-bit Execution state, AArch64</li>
+<li>32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다.</li>
+</ul>
+<h3 id="a12-architecture-profiles">A1.2 Architecture profiles<a hidden class="anchor" aria-hidden="true" href="#a12-architecture-profiles">#</a></h3>
+<p>Arm은 다음과 같이 아키텍처 프로필을 나타낸다.</p>
+<ul>
+<li>A - Application profile
+<ul>
+<li>MMU를 기반으로 Virtual Memory System Architecture를 지원한다.
+<ul>
+<li>ex) Armv8-A 구현은 AArchv8-A로도 불린다.</li>
+</ul>
+</li>
+<li>A64, A32, T32 명령어 세트를 지원한다.</li>
+</ul>
+</li>
+<li>R - Real-time profile
+<ul>
+<li>MPU를 기반으로 Protected Memory System Architecture를 지원한다.</li>
+<li>A32, T32 명령어 세트를 지원한다.</li>
+</ul>
+</li>
+<li>M - Microcontroller profile
+<ul>
+<li>저지연 인터럽트 처리를 위해 설계된 프로그래머를 위한 프로필이다.</li>
+<li>R 프로필 PMSA(Protected Memory System Architecture)의 다른 아키텍처를 구현한다.</li>
+<li>T32 변종 명령어 세트를 지원한다.</li>
+</ul>
+</li>
+</ul>
+<p>다음은 추가적으로 알아야할 정보들이다.</p>
+<ul>
+<li>MMU
+<ul>
+<li>Memory Management Unit</li>
+<li>가상 메모리 주소를 물리 메모리 주소로 변환한다.</li>
+<li>다음과 같은 구조이다. 옛날에는 따로 CPU와 분리되어있었다.<img loading="lazy" src="/blog/Background_ARM/360abbac5560b0bd0e680344c91c9779.png" alt=""  />
+</li>
+<li>동작 방식
+<ul>
+<li>가상 메모리를 2^n 비트의 크기로 나누고, 특정 페이지는 실제 물리 메모리의 하나의 프레임에 대응된다.</li>
+</ul>
+<ol>
+<li>CPU는 가상 주소를 MMU로 넘긴다.</li>
+<li>MMU는 TLB를 확인해서 변환 정보를 확인하고 만약 해당 데이터가 있다면 그 데이터를 이용한다.</li>
+<li>TLB에 원하는 데이터가 없다면 (TLB miss) 페이지 테이블을 이용해서 가상 메모리 주소의 뒤쪽 n 비트는 건들지 않고 앞쪽 나머지 비트를 물리 메모리의 프레임으로 변환한다.</li>
+<li>TLB나 페이지 테이블을 통해 실제로 주소를 가져오지 못하는 상황을 page fault라고 부른다.</li>
+<li>이 경우엔 여유 공간에 페이지를 할당해서 연결시키거나, 디스크로 페이지를 내리고 할당한다.</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>MPU
+<ul>
+<li>Memory Protection Unit</li>
+<li>4gb 메모리 공간 내에서 다양한 메모리 영역별로 권한을 설정할 수 있게 해주는 프로그래밍 가능한 유닛이다.</li>
+<li>모든 메모리 액세스는 MPU에 의해 모니터링된다.</li>
+<li>절대 명령어 fetch가 일어나지 않는 영역을 설정하여 Memory corruption으로 인해 악의적인 코드가 실행되는 것을 방지한다.</li>
+<li>다음과 같은 모습으로 동작한다.<img loading="lazy" src="/blog/Background_ARM/31cde6560510e3cdd43b126f0d5f4c31.png" alt=""  />
+
+<ul>
+<li>MPU_MAIR에는 XN (Execute Never) 같은 속성들이 정의되고 MPU_RLAR은 MPU_MAIR 레지스터를 가리킨다.</li>
+<li>TrustZone이 지원된다면, Secure state에서의 MPU 레지스터들도 존재한다.</li>
+<li>반대 Non-secure state에서도 이러한 MPU 레지스터들이 존재한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="a13-armv8-architectural-concepts">A1.3 Armv8 architectural concepts<a hidden class="anchor" aria-hidden="true" href="#a13-armv8-architectural-concepts">#</a></h3>
+<p>armv8의 네 가지 중요한 feature가 있다.</p>
+<ul>
+<li>Execution state</li>
+<li>Instruction sets</li>
+<li>System registers</li>
+<li>Debug</li>
+</ul>
+<h4 id="a131-execution-state">A1.3.1 Execution state<a hidden class="anchor" aria-hidden="true" href="#a131-execution-state">#</a></h4>
+<p>Execution state는 Processing Element, PE의 실행 환경을 정의한다.</p>
+<ul>
+<li>Execution state
+<ul>
+<li>지원되는 레지스터의 widths - ex) 64bit, 32bit &hellip;</li>
+<li>지원되는 명령어 세트</li>
+<li>중요한 측면
+<ul>
+<li>Execution model</li>
+<li>VMSA (Virtual Memory System Architecture)</li>
+<li>프로그래머 모델</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>AArch64
+<ul>
+<li>64 bit Execution state</li>
+<li>PC, SP, &hellip; , X30 레지스터, ELR
+<ul>
+<li>정확히는 SP 레지스터들과 Exception Link 레지스터들도 지원한다.</li>
+<li>ELR의 의의는 따로 직접 메모리에 Exception 발생시 리턴 주소를 기록하지 않고 따로 리턴 주소를 기록하는 레지스터를 둬서 퍼포먼스를 올리는 것에 있다.</li>
+</ul>
+</li>
+<li>A64 라는 하나의 명령어 셋만 지원된다.</li>
+<li>armv8의 Exception model을 4개의 Exception level, EL0 ~ EL3를 정의한다.
+<ul>
+<li>Execution privilege hierarchy 로 권한의 level을 지정한다.</li>
+</ul>
+</li>
+<li>System register에 접미사를 붙여서 가장 낮은 Exception level만 레지스터에 접근할 수 있도록 한다.</li>
+<li>PE의 현재 state를 정의하는 PSTATE 원소의 개수를 정의한다.
+<ul>
+<li>A64에선 이 PSTATE 원소를 수정하는 명령어가 지원된다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>AArch32
+<ul>
+<li>32 bit Execution state</li>
+<li>32-bit PC, SP, LR, &hellip; , 32 bit 범용 레지스터
+<ul>
+<li>AArch64와 다르게 하나의 LR 레지스터를 ELR 레지스터로도 이용한다.</li>
+<li>SP도 하나이다.</li>
+<li>PE의 모드에 따라서 복수개의 banked 레지스터가 존재할 수 있다.
+<ul>
+<li>겉으로는 안보이지만 프로세서 모드가 변경됨에 따라 일대일로 매핑된다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>A32, T32 명령어 세트가 지원된다.</li>
+<li>Armv7 Exception model을 지원한다.</li>
+<li>AArch64와 동일하게 PSTATE 를 수정하는 명령이 지원된다.
+<ul>
+<li>APSR (Application Program Status Register)나 CPSR (Current Program Status Register)를 이용해서 접근한다.</li>
+<li>공통적으로 Exception level에 대한 정보나 조건 플래그 등이 포함된다.</li>
+<li>PSTATE의 필드는 다음과 같다.<br>
+<img loading="lazy" src="/blog/Background_ARM/ee69ff1de3398df48a7e6bceb070628a.png" alt=""  />
+</li>
+<li>CPSR은 현재 프로그램의 status를 저장하는 레지스터이다.</li>
+<li>CPSR은 다음과 같다.<img loading="lazy" src="/blog/Background_ARM/a652dd8374aa6b203fdccad743d86cc4.png" alt=""  />
+</li>
+<li>SPSR은 Saved Program Status Register로 CPSR을 백업해놓는 레지스터이다.</li>
+<li>exception이 발생했을때 SPSR에 CPSR을 백업하고 나중에 끝나면 CPSR을 CPSR로 복사해서 복원한다.</li>
+<li>PSTATE는 CPSR과 1:1 대응되는 개념은 아니지만 AArch64에선 CPSR 필드의 각 값을 PSTATE로 정의한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>AArch64나 AArch32로 Execution state를 변경하는 것은 Exception level의 변경만으로도 수행이 가능하다.<br>
+다른 OS나 application, kernel, hypervisor가 다른 exception level이라면 다른 execution state에서 돌 수도 있다는 뜻이다.</p>
+<h4 id="a132-the-armv8-instruction-sets">A1.3.2 The Armv8 instruction sets<a hidden class="anchor" aria-hidden="true" href="#a132-the-armv8-instruction-sets">#</a></h4>
+<ul>
+<li>AArch64
+<ul>
+<li>A64
+<ul>
+<li>32 bit 인코딩을 이용한 고정 길이 명령어를 이용한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>AArch32
+<ul>
+<li>A32
+<ul>
+<li>32 bit 인코딩을 이용한 고정 길이 명령어를 이용한다.</li>
+</ul>
+</li>
+<li>T32
+<ul>
+<li>16 bit 와 32 bit 명령어 인코딩을 이용한 가변 길이 명령어를 이용한다.</li>
+<li>이전 문서에선 Thumb mode라고도 말했다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="a133-system-registers">A1.3.3 System registers<a hidden class="anchor" aria-hidden="true" href="#a133-system-registers">#</a></h4>
+<p>대부분의 시스템 레지스터들은 &lt;register_name&gt;_ELx의 형태를 취하고 있다.<br>
+뒤에 x는 EL0같이 그 레지스터를 접근할 수 있는 최소의 Exception level이 명시되어있다.</p>
+<h2 id="b1-the-aarch64-application-level-programmers-model">B1 The AArch64 Application Level Programmers’ Model<a hidden class="anchor" aria-hidden="true" href="#b1-the-aarch64-application-level-programmers-model">#</a></h2>
+<h3 id="b13-software-control-features-and-el0">B1.3 Software control features and EL0<a hidden class="anchor" aria-hidden="true" href="#b13-software-control-features-and-el0">#</a></h3>
+<p>EL0에서의 software control feature에 대해 설명한다.</p>
+<h4 id="b131-exception-handling">B1.3.1 Exception handling<a hidden class="anchor" aria-hidden="true" href="#b131-exception-handling">#</a></h4>
+<p>Arm 아키텍처에서 exception은 프로그램의 실행흐름을 바꾼다.<br>
+그리고 이를 처리하는 특정 exception handler는 EL0 보다 높은 exception level에서 동작하며 vector에 정의되어있다.</p>
+<p>Exception 들은 다음을 포함한다.</p>
+<ul>
+<li>Interrupts.</li>
+<li>Memory system aborts.</li>
+<li>UNDEFINED 명령에 대한 실행으로 발생하는 exceptions.</li>
+<li>System calls.</li>
+<li>Secure monitor or Hypervisor traps.</li>
+<li>Debug exceptions.</li>
+</ul>
+<h2 id="d1-the-aarch64-system-level-programmers-model">D1 The AArch64 System Level Programmers’ Model<a hidden class="anchor" aria-hidden="true" href="#d1-the-aarch64-system-level-programmers-model">#</a></h2>
+<h3 id="d11-exception-levels">D1.1 Exception levels<a hidden class="anchor" aria-hidden="true" href="#d11-exception-levels">#</a></h3>
+<p>Armv8-A 아키텍처는 EL0 ~ EL3 까지의 Exception level이 존재한다.</p>
+<ul>
+<li>ELn
+<ul>
+<li>ELn에서 n이 증가할 수록 execution privilege는 증가한다.</li>
+<li>EL0에서의 실행은 unprivileged execution이라고 불린다.</li>
+<li>EL2부터는 가상화를 지원한다.</li>
+<li>EL3에선 Secure state와 Normal state 변경을 지원한다.</li>
+<li>EL3에선 Secure monitor를 포함한 저수준 펌웨어가 위치한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/f32f5ea8b978cbfb55306e7925af3536.png" alt=""  />
+<br>
+위와 같은 구조를 가지고 있다.<br>
+EL2와 EL3는 하이퍼바이저가 지원되는지, secure monitor가 지원되는지에 따라 없을수도 있을 수도 있다.<br>
+또한 PE는 무조건 연속적으로 Exception level을 구현할 필요가 없다.<br>
+예를 들어서 EL0, EL1, EL3만 구현하는 것도 가능하다.<br>
+<img loading="lazy" src="/blog/Background_ARM/06f3b153f20c6ee01ad4e93065fc3343.png" alt=""  />
+<br>
+위처럼 EL2만 빼고 구현되는 경우도 있다.</li>
+</ul>
+</li>
+</ul>
+<h4 id="d111-typical-exception-level-usage-model">D1.1.1 Typical Exception level usage model<a hidden class="anchor" aria-hidden="true" href="#d111-typical-exception-level-usage-model">#</a></h4>
+<p>일반적으로 다음과 같은 전형적인 사용 모델이 존재한다.</p>
+<ul>
+<li>EL0 - Applications</li>
+<li>EL1 - OS kernel</li>
+<li>EL2 - Hypervisor</li>
+<li>EL3 - Secure Monitor</li>
+</ul>
+<h3 id="d12-exception-terminology">D1.2 Exception terminology<a hidden class="anchor" aria-hidden="true" href="#d12-exception-terminology">#</a></h3>
+<p>exception의 용어에 대해서 설명한다.</p>
+<p>exception과 interrupt는 ARM에서 엄밀하게 구분하지 않는다.<br>
+왜냐하면 exception도 일종의 synchronous interrupt라고 부르기도 하기 때문이다.<br>
+B1.3.1에서 exceptions에는 interrupts도 포함된다고 명시해놓기도 했다.</p>
+<ul>
+<li>
+<p>exception - 프로그램 실행 도중 동기적으로 발생하는 이벤트이다.</p>
+<ul>
+<li>딱 정해진 기준이 있는 synchronous interrupt이다.
+<ul>
+<li>예를 들어서 system call이나 division by zero 같은 명확한 기준이 존재한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>interrupt - 비동기적으로 발생하는 이벤트이다.</p>
+<ul>
+<li>hardware interrupt
+<ul>
+<li>하드웨어에서 비동기적으로 이벤트가 일어나서 명령어 흐름이 방해받는 경우를 말한다.</li>
+</ul>
+</li>
+<li>software interrupt
+<ul>
+<li>명령어로 실행되는 interrupt이다.</li>
+<li>ex) x86의 INT<br>
+그리고 여기서의 동기 비동기를 조금 다르게 보면 exception은 CPU 내부 요인에 의해 발생했고, interrupt는 외부 요인에 의해 발생했다고도 볼 수 있다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Interrupt Request (IRQ)</p>
+<ul>
+<li>일반적인 interrupt가 여기에 속한다.</li>
+</ul>
+</li>
+<li>
+<p>Fast Interrupt Request (FIQ)</p>
+<ul>
+<li>IRQ보다 우선순위가 높다.</li>
+<li>별도의 레지스터가 있어 처리가 빠르다.
+<ul>
+<li>이는 banked register를 말한다.</li>
+<li>ex) R7_fiq, &hellip;, R14_fiq</li>
+<li>이런식의 banked register를 둬서 context switching 비용을 아낄 수 있다.</li>
+</ul>
+</li>
+<li>빠른 처리를 위해 쓰이기도 한다.</li>
+</ul>
+</li>
+</ul>
+<h4 id="d123-exception-level">D1.2.3 Exception level<a hidden class="anchor" aria-hidden="true" href="#d123-exception-level">#</a></h4>
+<p>ELn에서 n이 크면 높은 Exception level이라고 하고, 반대도 마찬가지다.<br>
+다음과 같이 표현한다.</p>
+<ul>
+<li>AArch64 Execution state에선 AArch64의 Exception level을 사용한다.</li>
+<li>AArch32 Execution state에선 AArch32의 Exception level을 사용한다.</li>
+</ul>
+<h4 id="d124-definition-of-a-precise-exception">D1.2.4 Definition of a precise exception<a hidden class="anchor" aria-hidden="true" href="#d124-definition-of-a-precise-exception">#</a></h4>
+<p><img loading="lazy" src="/blog/Background_ARM/aa854478a3291eb11fc568a4516eb85f.png" alt=""  />
+<br>
+위 사진은 precise exception과 imprecise exception에 대해서 나와있다.</p>
+<ul>
+<li>precise exception
+<ul>
+<li>exception handler가 PE state와 memory system state를 넘겨받는 경우이다.</li>
+<li>이때 PE의 전 명령어들은 모두 실행되었다는 것이 보장된다.</li>
+</ul>
+</li>
+<li>imprecise exception
+<ul>
+<li>전 명령들이 실행되었다는 보장이 없다.</li>
+<li>현대 프로세서들은 파이프라이닝같은 병렬 실행을 통해 퍼포먼스를 향상시키기 이러한 imprecise exception도 발생할 수 있다.</li>
+</ul>
+</li>
+</ul>
+<p>AArch64의 LDP, STP 같이 하나 이상의 single-copy atomic memory 액세스를 하는 경우엔 레지스터나 메모리에 값이 반영이 안될 수 있다.</p>
+<h4 id="d125-definitions-of-synchronous-and-asynchronous-exceptions">D1.2.5 Definitions of synchronous and asynchronous exceptions<a hidden class="anchor" aria-hidden="true" href="#d125-definitions-of-synchronous-and-asynchronous-exceptions">#</a></h4>
+<ul>
+<li>
+<p>synchronous exception</p>
+<ul>
+<li>exception이 명령어의 실행 or 실행 시도에 의해 생성되는 동기 exception이다.</li>
+<li>return address가 exception handler에게 넘어가는 것이 보장된다.</li>
+<li>즉 어떤 명령어가 exception을 발생시켰는지 식별할 수 있다.</li>
+<li>precise exception에 해당한다.</li>
+</ul>
+</li>
+<li>
+<p>asynchronous exception</p>
+<ul>
+<li>exception이 명령어 스트림의 실행 or 실행 시도에 의해 생성되는 경우이다.</li>
+<li>return address가 exception handler에게 넘어가는 것이 보장되지 않는다.</li>
+<li>어떤 명령어가 exception을 발생시켰는지 식별할 수 없다.</li>
+<li>imprecise exception에 해당한다.</li>
+</ul>
+</li>
+</ul>
+<h3 id="d13-execution-state">D1.3 Execution state<a hidden class="anchor" aria-hidden="true" href="#d13-execution-state">#</a></h3>
+<ul>
+<li>AArch64 - 64bit execution state</li>
+<li>AArch32 - 32bit execution state</li>
+</ul>
+<p>Exception levels는 Exception state를 이용한다.<br>
+예를 들어서 EL0, EL1, EL2는 모두 AArch32를 이용할 수 있고 EL3 혼자 AArch64에서 돌아갈 수 있다.</p>
+<p>그 뜻은 다음과 같다.</p>
+<ul>
+<li>다른 software 계층, 각자 다른 exception level에서 동작하는 application, os kernel, hypervisor 들은 다른 execution state에서 실행될 수 있다.</li>
+<li>PE는 execution state를 다음과 같은 경우에 한해서만 변경 가능하다 .
+<ul>
+<li>Reset시</li>
+<li>Exception level의 변경</li>
+</ul>
+</li>
+</ul>
+<h3 id="d14-security-state">D1.4 Security state<a hidden class="anchor" aria-hidden="true" href="#d14-security-state">#</a></h3>
+<p>Armv8-A 아키텍처는 두 가지 security states를 지원한다.<br>
+security states는 Non-secure state와 Secure state로 나뉜다.</p>
+<ul>
+<li>물리 메모리 주소 공간 차이
+<ul>
+<li>Secure state
+<ul>
+<li>PE가 Non-secure physical address와 Secure physical address 모두 접근이 가능하다.</li>
+</ul>
+</li>
+<li>Non-secure state
+<ul>
+<li>PE는 오직 Non-secure physical address만 접근 가능하다.</li>
+<li>Secure system이 관리하는 자원에 접근은 불가능하다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="d141-the-armv8-a-security-model">D1.4.1 The Armv8-A security model<a hidden class="anchor" aria-hidden="true" href="#d141-the-armv8-a-security-model">#</a></h4>
+<ul>
+<li>만약 EL3가 구현에 포함되어있다면, 무조건 두 가지의 security states가 포함된다.
+<ul>
+<li>EL3는 오직 Secure state에만 존재한다.</li>
+<li>Non-secure state에서 Secure state로의 전환은 오직 EL3로의 Exception에 의해서만 발생한다.
+<ul>
+<li>FEAT_SEL2가 구현되지 않았다면 EL2는 Non-secure state에만 존재한다.</li>
+<li>만약 구현되었다면, EL2는 secure state에서 존재한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>어떻게 virtual address가 Non-secure physical address와 secure physical address로 변환되는지는 D5에서 후술한다.</li>
+</ul>
+<h3 id="d15-virtualization">D1.5 Virtualization<a hidden class="anchor" aria-hidden="true" href="#d15-virtualization">#</a></h3>
+<p>가상화 기술은 모두 가상화 소프트웨어의 성능을 높히고자 하드웨어단에서 여러 옵션을 추가한 것이다.</p>
+<p>가상화 지원은 EL2를 포함한 구현에만 적용된다.<br>
+기본적인 가상화 모델은 다음과 같다.</p>
+<ul>
+<li>Hypervisor 는 EL2에서 돌아가며 EL0와 EL1을 포함하는 가상 머신의 switching을 담당한다.</li>
+<li>Guest OS는 EL1에서 동작한다.</li>
+<li>Application은 주로 EL0에서 동작한다.</li>
+</ul>
+<p>하이퍼바이저는 VMID를 각자의 가상머신에 할당한다.</p>
+<p>EL2는 Guest OS 관리와 다음과 같은 제어를 한다.</p>
+<ul>
+<li>Guest OS에 의해 레지스터 읽기가 일어나면 가상 값을 리턴한다.</li>
+<li>Various Trap operations
+<ul>
+<li>메모리 관리와 다른 레지스터에 접근한다.</li>
+<li>Trap된 operation은 EL2에 exception을 발생시키게된다.</li>
+</ul>
+</li>
+<li>interrupt들의 라우팅
+<ul>
+<li>현재의 Guest OS에게 라우팅되는 경우가 있다.</li>
+<li>현재 돌고 있지 않은 Guest OS에게 라우팅되는 경우가 있다.</li>
+<li>그리고 마지막으로 하이퍼바이저에게 라우팅되는 경우가 존재한다.</li>
+</ul>
+</li>
+</ul>
+<p>Armv8.1은 Virtualization Host Extensions (VHE)을 통해 Type 2 hypervisor를 지원한다.<br>
+간단하게 설명하자면 Host OS가 EL2에서 동작하도록 하는 extension이다.<br>
+그런데 도대체 상식적으로 어떻게 Host OS가 EL2에서 동작할지 이해가 되지 않을 수 있는데, 이는 뒤에서 마저 설명한다.</p>
+<p>EL2는 다음과 같은 요소들을 구현한다.</p>
+<ul>
+<li>구현은 EL2와 EL2 변환 과정의 독립적인 메모리 액세스를 보장한다.
+<ul>
+<li>FEAT_VHE가 지원되면 EL2, EL0에서의 액세스에 변환 과정을 구현한다.</li>
+</ul>
+</li>
+<li>EL1&amp;0의 translation regime는 크게 두 가지 스텝을 거친다.
+<ul>
+<li>
+<ol>
+<li>Virtual Address (VA)를 Intermediate Physical Address (IPA)로 변환한다.</li>
+</ol>
+<ul>
+<li>이는 EL1에서 처리되는데, Guest OS는 이 IPA를 PA로 믿고 처리한다.</li>
+</ul>
+</li>
+<li>
+<ol start="2">
+<li>IPA를 실제 PA에 매핑한다.</li>
+</ol>
+<ul>
+<li>이는 EL2에서 처리되며 당연하지만 Guest OS는 이를 알 수 없다.</li>
+</ul>
+</li>
+<li>이를 stage-2  translation이라고도 부른다.</li>
+<li>다이어그램으로 나타내면 다음과 같다.<img loading="lazy" src="/blog/Background_ARM/d58b1c5963f0b60d9405288aa1a90ede.png" alt=""  />
+</li>
+<li>이는 나중에 VMSA 아키텍처에 대해서 설명하면서 2 단계 변환이라는 용어로 다시 나온다.</li>
+</ul>
+</li>
+<li>FEAT_NV가 지원된다면 Guest hypervisor가 EL1에서 돌 수 있게 된다. ( Nested virtualization )</li>
+</ul>
+<h4 id="hypervisor-type">Hypervisor type<a hidden class="anchor" aria-hidden="true" href="#hypervisor-type">#</a></h4>
+<p>따로 메뉴얼에 나오는 내용은 아니지만, 나중에 이해를 위해서 꼭 필요한 내용이다.<br>
+<img loading="lazy" src="/blog/Background_ARM/ed711e55776fe6f6dd875ff9c2ba1644.png" alt=""  />
+<br>
+Type 1이 가장 퍼포먼스가 좋다.<br>
+Type 1은 베어메탈 방식이라고도 불리는데, 그 이유는 하드웨어 위에 하이퍼바이저가 설치되기 때문이다.</p>
+<p>Type2는 Host OS 위에 하이퍼바이저가 설치되는데, 개인용 교육용으로 자주 쓰인다.<br>
+Hosted hypervisor라고도 자주 부른다..</p>
+<p>추가적으로 요즘에 자주 보이는 컨테이너는 Host OS를 공유하고 그 위에 하이퍼바이저 대신 컨테이너 엔진을 통해 퍼포먼스를 높힌다.<br>
+하드웨어 수준으로는 가상화되지 않고 OS 수준으로 가상화가 된다.<br>
+그래서 Host OS와 Guest OS는 동일한 OS여야 한다.<br>
+이를 Type 3 hypervisor라고도 한다.</p>
+<p>모두 이렇게 전형적인 type으로 분류되는건 아니지만 대부분은 이렇게 나눈다.</p>
+<h4 id="hypervisor-mode">hypervisor mode<a hidden class="anchor" aria-hidden="true" href="#hypervisor-mode">#</a></h4>
+<p>ARM에서 Hypervisor mode를 따로 추가하게 된 배경은 앞에서 설명한 type 1 hypervisor, standalone hypervisor 때문이다.</p>
+<p>CPU가 user와 supervisor mode만 지원하는 상태에서 standalone hypervisor를 구조적으로 설계하려면 user와 supervisor mode 두 가지로 나눈것으로는 부족하다.<br>
+당연하겠지만 만약 hypervisor를 supervisor mode에서 돌리고 기존 guest os를 user mode에 올리면 supervisor mode를 염두에 두고 설계된 OS가 동작할 수 없게 된다.<br>
+그렇다고 Guest os와 hypervisor를 같은 supervisor mode에 공존하게 하면 기본적으로 격리를 염두에 두고 만들어진 hypervisor의 의미가 없어진다.</p>
+<p>이런 문제를 해결하기 위해서 ARM은 Hypervisor mode를 따로 넣어서 Guest os와의 교통정리를 끝냈다.</p>
+<p>그런데 KVM같은 Type 2 hypervisor, hosted hypervisor의 경우엔 좀 애매하다.<br>
+Host OS의 모듈의 형태로 동작하는 KVM의 특성상 hypervisor는 일부 기능을 무조건 Host os에게 가져와야한다.<br>
+그런데 전통적으로 Host OS는 EL1에서 동작했다.<br>
+Host os가 EL1에서 동작하면 KVM도 EL1에서 동작해야한다.<br>
+Guest os보다 더 높은 권한을 가지려면 무조건 EL2에서 동작해야하는데, 기존 Host os가 EL1에서 동작해서 문제가 발생한다.</p>
+<p>이러한 문제를 해결하기 위해서 KVM은 구조를 Lowvisor와 Highvisor로 분할했다.<br>
+Lowvisor를 hypervisor mode에서 돌리고, VM의 명령을 trap해서 highvisor로 넘긴다.<br>
+<img loading="lazy" src="/blog/Background_ARM/88f14dc49328275897877c83c531a343.png" alt=""  />
+<br>
+이런 구조로 나눠버리면, EL1에서 돌도록 설계된 OS 별다른 문제없이 그대로 동작하면 되고 동시에 Hypervisor의 동작도 수행할 수 있다.<br>
+intel, amd, arm에서 하드웨어적으로 지원해주면, kernel module을 올려서 이러한 lowvisor까지 구현해줄 수 있다.</p>
+<p>겉 모습으로는 기존 하이퍼바이저처럼 권한 체계가 분리된 것으로 보인다.<br>
+Highvisor가 커널에서 동작하기 때문에 VM을 돌리면서 필요한 기능은 host kernel code를 이용해서 처리할 수 있게 되었다.<br>
+<img loading="lazy" src="/blog/Background_ARM/9ea62682850f41a740d1f8b956f99a9b.png" alt=""  />
+<br>
+그래서 이런식으로 trap이 이중으로 넘어간다.<br>
+이러한 Lowvisor은 EL2의 exception vector와 world switch에 대한 코드만 구현하면 되기 때문에 highvisor에 비해서 더 코드가 작다.</p>
+<p>이런 구조가 동작하려면 bootloader에서 처음부터 Hypervisor mode에서 trap handler를 설치해서 나중에 KVM이 돌 수 있도록 해줘야한다.<br>
+논문 저자들은 vendor와 얘기해서 새로운 ABI를 어떻게 맞출지 고민하다가 결국 무산되었지만 좀 더 효율적이고 간단한 방법을 찾았다고 한다.<br>
+그냥 처음부터 ABI 신경쓰지 않고 bootloader recommendation으로 hypervisor mode로 부팅을 추가하고, kernel 코드를 조금만 수정해서 hypervisor mode 지원 유무를 파악하고 만약 지원된다면 그때 그냥 바로 hypervisor mode에 trap handler install을 해주면 되고 아니면 그냥 원래 legacy kernel 처럼 부팅하고 kvm 지원을 안하면 된다.<br>
+그러면 굳이 복잡한 bootloader ABI를 논의할 필요가 아예 없어진다.</p>
+<h4 id="virtualization-host-extensions-vhe">Virtualization host extensions (VHE)<a hidden class="anchor" aria-hidden="true" href="#virtualization-host-extensions-vhe">#</a></h4>
+<p>앞서 kvm을 예시로 type 2 hypervisor가 겪을 수 있는 문제를 어떻게 해결했는지에 대해서 알아보았다.<br>
+VHE는 앞서 Type 2 hypervisor를 지원하기 위해서 생겼다고 했다.</p>
+<p>왜 이 얘기를 했냐면 원래 일반적으로 standalone hypervisor에선 다음과 같이 Exception level이 매핑된다.<br>
+<img loading="lazy" src="/blog/Background_ARM/c15012e0a0bd323d11cb58462ce7ddbe.png" alt=""  />
+<br>
+만약 이런 구조가 type 2에서도 유지된다면 앞에서 다루었던 문제가 생긴다.<br>
+<img loading="lazy" src="/blog/Background_ARM/95764519c7521a39e07d6b9651fe399e.png" alt=""  />
+<br>
+전통적으로 kernel은 EL1에서 돌고, 가상화 컨트롤은 EL2에서 담당했다.<br>
+이런 문제는 앞서 해결 방법을 이미 다루었다.<br>
+VHE는 이러한 문제 해결 방법을 더 최적화시키기 위해 개발되었다.<br>
+<img loading="lazy" src="/blog/Background_ARM/882d3e858d0c8b5336e2d9e84103df3c.png" alt=""  />
+<br>
+기존의 방법은 추가적인 context switching이 필요할 수 밖에 없기에 비효율적이다.<br>
+<img loading="lazy" src="/blog/Background_ARM/c066c911a360c0cedb610d577513a9b4.png" alt=""  />
+<br>
+위와 같은 방식으로 설계하면 더 좋은 퍼포먼스를 얻을 수 있다.<br>
+전에는 kernel -&gt; hypervisor -&gt; guest로 이중 트랩이 걸렸었다면 이제는 host os가 hypervisor에서 돌게 되었으니 훨씬 빨라지게 된다.</p>
+<p>Host OS를 EL2에서 동작시키기 위해서 ARM에선 HCR_EL2의 E2H와 TGE 비트를 추가했다.</p>
+<ul>
+<li>E2H - VHE의 활성화 여부를 결정한다.</li>
+<li>TGE - VHE가 활성화 되었을 때 EL0가 Guest인지 Host인지를 결정한다.<br>
+Host OS가 EL2에서 돌더라도 Host application은 EL0에서 돌기 때문에 이를 구분하려면 하드웨어적으로 TGE 비트를 만들어야할 필요가 생긴다.</li>
+</ul>
+<p>다음 다이어그램처럼 구분이 된다.<br>
+<img loading="lazy" src="/blog/Background_ARM/f533ff82c3cae1472501244bdf9c4505.png" alt=""  />
+<br>
+위 다이어그램의 내용을 표로 정리하자면 다음처럼 정리할 수 있다.<br>
+<img loading="lazy" src="/blog/Background_ARM/c2a30e2db91f30246088e5f0d5248c75.png" alt=""  />
+</p>
+<p>VHE가 활성화되면 Virtual address space도 달라지게 된다.<br>
+<img loading="lazy" src="/blog/Background_ARM/d78f4a86ccdb2413462ae1405f5ec9d6.png" alt=""  />
+<br>
+VHE 이전에는 위처럼 EL0/EL1에는 두 개의 VA range를 지원했고 EL2, EL3에서는 전통적으로 application이 존재하지 않으므로 single VA range 만을 지원했다.<br>
+원래 EL0/EL1에선 ASID를 둬서 application별 주소 공간을 명시했다.<br>
+때문에 같은 VA에 대한 TLB를 flush할 필요가 없었다.<br>
+ASID에 대한 자세한 설명은 뒤에 D5.2.1에서 후술한다.<br>
+EL2에는 host application이 없어서 원래 ASID가 존재하지 않았다.</p>
+<p>그런데 Host OS가 EL2에서 효율적으로 동작하려면 ASID 지원을 추가해야한다.<br>
+왜냐하면 FEAT_VHE가 활성화되면 커널이 EL2에서 돌아가기 때문에 EL1에서의 이유와 마찬가지로 context switching시에 VA에 대해서 PA로의 변환을 EL2에서 담당하기 때문이다.<br>
+MMU는 동일 VA에 대해서 다른 PA로 변환해야하기에 FEAT_VHE의 경우엔 ASID support가 EL2에도 필요할 수 있다는 것이다.<br>
+<img loading="lazy" src="/blog/Background_ARM/9d7fc807c481b1d422ac39e26398cd9b.png" alt=""  />
+<br>
+위 다이어그램은 E2H == 1 일 때의 모습이다.<br>
+HCR_EL2.TGE 비트가 Host OS 위에서 도는 EL0인지 Guest OS 위에서 도는 EL0인지를 결정한다.</p>
+<p>VHE가 제대로 동작하려면 특정 register에 대한 액세스도 리다이렉팅해야한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/276483a3a5b18ae488a6a81b2217b19b.png" alt=""  />
+<br>
+당연한 이유지만 unmodified kernel은 EL1을 염두에 두고 개발되었다.<br>
+이를 EL2에서 돌리려면 E2H bit에 따라 TTBR0_EL1의 경우 TTBR0_EL2 혹은 TTBR0_EL1으로 리다이렉팅한다.</p>
+<p>그런데 단순히 커널을 E2H에 따라 TTBR0_EL2로 리다이렉팅 해버리면, 커널 모듈식으로 붙어있는 하이퍼바이저는 EL1에 접근할 수가 없게 되는 문제가 발생한다.<br>
+원래 구조가 Guest OS들이 EL1에서 동작하기 때문에 EL2에서 무조건 EL1에 대한 접근이 필요하다.</p>
+<p>이러한 문제를 해결하기 위해서 따로 EL12와 EL02 접미사를 가진 레지스터들을 추가했다.<br>
+<img loading="lazy" src="/blog/Background_ARM/a0564e41461b8c6547a9634cd9915436.png" alt=""  />
+<br>
+그래서 위와 같이 EL2 하이퍼바이저에서 EL1 레지스터에 접근할 수 있게 된다.</p>
+<h3 id="d16-registers-for-instruction-processing-and-exception-handling">D1.6 Registers for instruction processing and exception handling<a hidden class="anchor" aria-hidden="true" href="#d16-registers-for-instruction-processing-and-exception-handling">#</a></h3>
+<p>Arm 아키텍처에서 레지스터는 다음 두 가지 카테고리로 분류된다.</p>
+<ul>
+<li>system control이나 status reporting을 제공하는 System register.</li>
+<li>명령 처리에 이용되는 레지스터.
+<ul>
+<li>ex) 연산이나 exception handling</li>
+</ul>
+</li>
+</ul>
+<h4 id="d162-the-stack-pointer-registers">D1.6.2 The stack pointer registers<a hidden class="anchor" aria-hidden="true" href="#d162-the-stack-pointer-registers">#</a></h4>
+<p>AArch64 state에선 범용 레지스터 외에도 dedicated 스택 포인터 레지스터가 각자의 exception level에 따라 구현된다.</p>
+<ul>
+<li>SP_EL0, SP_EL1</li>
+<li>EL2가 구현되었다면, SP_EL2</li>
+<li>EL3가 구현되었다면, SP_EL3</li>
+</ul>
+<p>이러한 스택 포인터들의 선택은 다음과 같이 이루어진다.</p>
+<ul>
+<li>EL0에선 PE는 SP_EL0를 이용한다.</li>
+<li>다른 exception level에선 SP_EL0 혹은 그에 맞는 SP_ELx가 선택될 수 있다.</li>
+<li>기본적으로 exception이 받아질때는 그 타겟 exception level에 맞는 SP_ELx가 선택된다.</li>
+<li>SP_EL0에 액세스하려면 PSTATE SP를 업데이트 함으로써 액세스할 수 있다.</li>
+</ul>
+<p>다음과 같은 접미사를 붙여서 스택 포인터를 표현하기도 한다.</p>
+<ul>
+<li>t - SP_EL0 스택 포인터를 이용한다.</li>
+<li>h - SP_ELx 스택 포인터를 이용한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/c3d9a44290a8693a6ad5b843f6dad306.png" alt=""  />
+</li>
+</ul>
+<p>근데 여기서 궁금했던 점이있었다.<br>
+각자의 ELx에 대해서 SP_ELx 라는 물리 레지스터 하나씩 갖고 있으면 됐지 왜 SP_EL0이 또 필요한가라는 점이 궁금했다.<br>
+근데 이 답에 대한 힌트는 아래 문구에 있었다.<br>
+<img loading="lazy" src="/blog/Background_ARM/0fbbf6ae2504557f8b34526ad3253256.png" alt=""  />
+<br>
+왜 이 두 가지를 굳이 나눠서 논리 SP_ELxt, SP_ELxh로 나눠서 7개의 논리 SP를 가지도록 만들었을까?<br>
+실제로는 물리 SP_ELx는 단 4개 밖에 없지만 이렇게 나눈 이유가 있었다.<br>
+일단 Exception은 같은 EL에서도 발생할 수 있다고 했었다.<br>
+exception이 raise되면 PE는 현재 exception level 이상, 타겟 exception level에 진입하고 SP_ELxh를 이용한다.<br>
+이때 handler는 최대한 PSTATE.SPSEL= 0으로 SP_ELxt를 이용해서 SP_EL0를 이용하려 시도한다.</p>
+<p>각자의 SP에 대해서 물리적으로 SP_ELx는 필요하다.<br>
+AArch64에서 격리를 유지하면서 exception 발생시 바로 상위 exception level로 뛸때 동작할 스택이 저장되야하기 때문이다.<br>
+그런데 SP_ELxh를 계속 이용하지 않고 현재 SP를 저장하고 SP_EL0를 초기화해서 다시 이용하는 이유는 만약 SP_ELxh만을 SP로 이용했다면 nested exception이 발생했을 때 그전 SP_ELxh를 저장할 수 없기 때문이다.<br>
+SP_ELxh, handler SP를 핸들링에 이용하게 될 때 같은 exception level에 대해서 nested exception이 발생하면 본래의 SP_ELxh는 무조건 날라가는 문제가 생겨서 exception handler는 exception 발생시 최대한 빠르게 레지스터들 백업하고 SP_ELxt로 진입하려 시도한다.</p>
+<h4 id="d164-saved-program-status-registers-spsrs">D1.6.4 Saved Program Status Registers (SPSRs)<a hidden class="anchor" aria-hidden="true" href="#d164-saved-program-status-registers-spsrs">#</a></h4>
+<p>앞서 설명했던 SPSR의 용도를 생각해보면 당연히 얘도 Exception level 마다 존재한다.</p>
+<ul>
+<li>AArch64의 EL1에서 exception이 발생했을 때 SPSR_EL1을 이용한다.</li>
+<li>EL2가 구현되었다면 EL2에서의 exception은 SPSR_EL2를 이용한다.</li>
+<li>EL3가 구현되었다면 EL3에서의 exception은 SPSR_EL3를 이용한다.</li>
+</ul>
+<p>특정 exception level에서 exception이 발생해서 PE가 처리해야할 때 PE state는 SPSR_ELx의 PSTATE에 저장된다.<br>
+즉 다음과 같은 의미를 가진다.</p>
+<ul>
+<li>exception에서 리턴할 때 PE state를 SPSR_ELx의 참조를 통해 복원할 수 있음을 나타낸다.</li>
+<li>exception 발생 당시의 PSTATE 값을 알 수 있다.</li>
+</ul>
+<p>이때 저장되는 모든 PSTATE 필드들은 AArch32에서만 의미있거나 직접 읽기 쓰기 권한이 없더라도 저장된다.<br>
+AArch32에서만 의미있는 필드들은 exception이 AArch32 state에서 AArch64 state로 발생했을 때 저장된다.</p>
+<h4 id="d165-exception-link-registers-elrs">D1.6.5 Exception Link Registers (ELRs)<a hidden class="anchor" aria-hidden="true" href="#d165-exception-link-registers-elrs">#</a></h4>
+<p>exception link register는 exception return address를 저장한다.<br>
+PE가 exception을 받을 때 마다 ELR_ELx에 return address가 저장된다.<br>
+예를 들어서 EL1에 대한 exception이 발생했을 때에는 return address가 ELR_EL1에 저장되고 return하면 PC는 ELR에 저장된 return address로 복귀한다.</p>
+<p>AArch64 state는 다음과 같은 ELR을 제공한다.</p>
+<ul>
+<li>EL1에 대한 exception은 ELR_EL1을 이용한다.</li>
+<li>EL2가 구현되었다면, EL2에 대한 exception은 ELR_EL2를 이용한다.</li>
+<li>EL3가 구현되었다면, EL3에 대한 exception은 ELR_EL3를 이용한다.</li>
+</ul>
+<h3 id="d17-process-state-pstate">D1.7 Process state, PSTATE<a hidden class="anchor" aria-hidden="true" href="#d17-process-state-pstate">#</a></h3>
+<p>Armv8-A 아키텍처에서 PSTATE는 process state를 나타낸다.<br>
+PSTATE 필드는 다음과 같다.</p>
+<ul>
+<li>The condition flags
+<ul>
+<li>N - 음수 플래그</li>
+<li>Z - 제로 플래그</li>
+<li>C - 캐리 플래그</li>
+<li>V - 오버플로우 플래그</li>
+</ul>
+</li>
+<li>The execution state controls
+<ul>
+<li>SS - Software Step bit
+<ul>
+<li>좀 더 높은 exception level에서 lower exception level에 대해서 single-step 명령을 실행시킬 수 있다.</li>
+<li>디버거의 single step 생각하면 된다.</li>
+</ul>
+</li>
+<li>IL - Illegal Execution state bit
+<ul>
+<li>PSTATE.IL이 1이면 어떤 명령이 시도되더라도 Illegal Execution state exception이 발생한다.</li>
+<li>만약 EL0에서 IL이 1이 되면 EL1에서 이를 처리한다.</li>
+</ul>
+</li>
+<li>nRW - Current Execution state
+<ul>
+<li>AArch64에서 0으로 세팅된다.</li>
+<li>AArch64를 사용하는 ELx로의 Warm reset 혹은 Exception이 받아질때의 CPSR.nRW는 0이다.</li>
+<li>반대로 AArch32 일때는 1이다.</li>
+</ul>
+</li>
+<li>EL - Current Exception level
+<ul>
+<li>AArch64로의 Warm reset시에는 이 필드는 가장 높은 Exception level을 가리키게 된다.</li>
+</ul>
+</li>
+<li>SP - Stack pointer selection bit
+<ul>
+<li>전에 SP_ELxt SP_ELxh 두 가지 옵션이 지원된다고 설명했었는데, 이때 이 두 가지 옵션을 결정하는 비트가 PSTATE.SP 비트이다.</li>
+<li>이때 t 접미사가 붙은 SP_ELxt는 SP_EL0를 가리킨다.</li>
+<li>Warm reset이나 AArch64 state로의 exception은 이 비트를 1로 만든다.
+<ul>
+<li>이는 SP_ELx가 선택된다는 뜻이다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>The exception mask bits
+<ul>
+<li>D - Debug exception mask bit
+<ul>
+<li>이 비트가 설정되면 debug exception을 막는다.</li>
+<li>Warm reset이나 AArch64로의 exception을 받으면 1로 세팅된다.</li>
+</ul>
+</li>
+<li>A, I, F - Asynchhronous exception mask bits
+<ul>
+<li>A - SError, 시스템 에러 interrupt를 막는다.</li>
+<li>I - IRQ interrupt를 막는다.</li>
+<li>F - FIQ interrupt를 막는다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Access control bits
+<ul>
+<li>PAN - Privilege Acess Never state bit
+<ul>
+<li>PAN가 1일때 어떠한 EL1 or EL2의 가상 메모리 주소 privileged data access</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="d19-reset">D1.9 Reset<a hidden class="anchor" aria-hidden="true" href="#d19-reset">#</a></h3>
+<ul>
+<li>Cold reset
+<ul>
+<li>PE가 실행중인 모든 로직을 리셋한다.</li>
+<li>이러한 로직은 cold reset domain에 속한다고도 표현한다.</li>
+<li>power up시에 reset이 cold reset이다.</li>
+</ul>
+</li>
+<li>Warm reset
+<ul>
+<li>PE가 실행중인 일부 로직을 리셋한다.</li>
+<li>이러한 로직은 warm reset domain에 속한다고도 표현한다.<br>
+warm reset에서 리셋되는 로직은 cold reset에서 무조건 리셋된다.</li>
+</ul>
+</li>
+</ul>
+<p>RMR_ELx 레지스터가 구현되어있다면, RMR_ELx.RR 비트를 1로 바꿈으로써 warm reset 요청을 할 수 있다.</p>
+<p>이러한 리셋시에는 PE는 구현된 가장 높은 Exception level로 진입한다.<br>
+가장 높은 exception level이 동작할 때 다음과 같은 특징을 가진다.</p>
+<ul>
+<li>무조건 Reset Management Register(RMR)이 구현되어있어야한다.
+<ul>
+<li>RMR이 하나라면 가장 높은 exception level에 한해서 구현된다.</li>
+</ul>
+</li>
+<li>Cold reset 시에 execution state는 configuration input signal에 의해 결정된다.</li>
+<li>Warm reset 시에는 execution state는 RMR_ELx.AA64에 의해 결정된다.</li>
+</ul>
+<p>가장 높은 exception level이 AArch64 state로 설정되어있고, reset(warm, cold)시에 다음이 수행된다.</p>
+<ul>
+<li>SP_ELx가 선택된다.</li>
+<li>IMPLEMENTATION DEFINED인 PA address에서 실행을 시작한다.
+<ul>
+<li>가장 높은 exception level 레지스터 RVBAR_ELx가 그 주소를 가지고 있다.</li>
+<li>당연하겠지만, RVBAR_EL0은 없다.</li>
+<li>최소가 EL1이기 때문이다.</li>
+</ul>
+</li>
+</ul>
+<h4 id="d191-pe-state-on-reset-to-aarch64-state">D1.9.1 PE state on reset to AArch64 state<a hidden class="anchor" aria-hidden="true" href="#d191-pe-state-on-reset-to-aarch64-state">#</a></h4>
+<p>reset 이후 대부분의 PE state는 UNKNOWN이다.<br>
+그래도 일부의 PE state는 정의되어있다.<br>
+PE가 reset을 하면서 PE state는 정의된대로 돌아가게 된다.</p>
+<p>예를 들어서 PSTATE.{D, A, I, F} interrupt mask는 1로 세팅된다.<br>
+왜냐하면 reset 시에는 저러한 interrupt를 핸들링할 벡터가 설정되지 않았기 때문이다.<br>
+범용 레지스터, 부동 소수점, SIMD 들도 UNKNOWN 상태로 설정된다.</p>
+<p>이런식으로 초기 세팅의 값으로 돌아가게 된다.</p>
+<h3 id="d115-system-calls">D1.15 System calls<a hidden class="anchor" aria-hidden="true" href="#d115-system-calls">#</a></h3>
+<p>System call은 SVC, HVC, SMC 명령에 의해 발생한다.</p>
+<ul>
+<li>The Supervisor Call (SVC) 명령은 user mode 프로그램이 os 서비스를 요청할 때 이용한다.
+<ul>
+<li>EL1을 타겟팅하는 synchronous exception 이다.</li>
+</ul>
+</li>
+<li>The Hypervisor Call (HVC) 명령은 guest OS가 hypervisor 서비스를 요청할 때 이용된다.
+<ul>
+<li>EL2를 타겟팅하는 synchronous exception 이다.</li>
+<li>HVC 명령은 EL0와 Secure state EL1에서 정의되지 않는다.</li>
+</ul>
+</li>
+<li>The Secure monitor Call (SMC) 명령은 Normal world가 Secure world 서비스를 요청할 때 이용된다.
+<ul>
+<li>EL3를 타겟팅하는 synchronous exception 이다.</li>
+<li>당연히 EL0에서 SMC는 정의되지 않는다.</li>
+</ul>
+</li>
+</ul>
+<p>다음과 같은 것들이 가능하다.</p>
+<ul>
+<li>EL2와 EL3는 Hypervisor call exception을 비활성화 할 수 있다.</li>
+<li>EL2는 SMC로 trap을 걸 수 있다.</li>
+<li>EL3는 Secure monitor call exception을 비활성화 할 수 있다.</li>
+</ul>
+<h2 id="d5-the-aarch64-virtual-memory-system-architecture">D5 The AArch64 Virtual Memory System Architecture<a hidden class="anchor" aria-hidden="true" href="#d5-the-aarch64-virtual-memory-system-architecture">#</a></h2>
+<h3 id="d51-about-the-virtual-memory-system-architecture-vmsa">D5.1 About the Virtual Memory System Architecture (VMSA)<a hidden class="anchor" aria-hidden="true" href="#d51-about-the-virtual-memory-system-architecture-vmsa">#</a></h3>
+<p>MMU가 VA를 PA 변환한다.<br>
+이러한 VA가 PA로 변환되는 방식은 Exception level과 Security state에 따라 다르다.<br>
+MMU는 단순히 변환만 하는게 아니라 액세스 권한과 속성에 대한 검사도 진행한다.<br>
+이러한 변환 단계는 단일 단계일 수도 있고 두 가지 연속적인 단계가 필요할 수도 있다.</p>
+<p>여기서 Exception level에 따라 독립적으로 주소 변환이 이루어진다는 말은 다음과 같다.<br>
+<img loading="lazy" src="/blog/Background_ARM/fcc0c64b71b7984ee2746d19dfe4dfd5.png" alt=""  />
+<br>
+위와 같이 변환될때 Exception level과 security state에 따라 translation regime가 다른것을 확인할 수 있다.</p>
+<p><img loading="lazy" src="/blog/Background_ARM/e0dca0d34d4eb234855acbaf775d9d94.png" alt=""  />
+<br>
+각자의 가상 주소 공간을 가진다.<br>
+이런식으로 각자의 가상 공간의 테이블과 설정? 들을 translation regime라고 칭한다.</p>
+<h4 id="d511-armv8-vmsa-naming">D5.1.1 Armv8 VMSA naming<a hidden class="anchor" aria-hidden="true" href="#d511-armv8-vmsa-naming">#</a></h4>
+<p>VMSA 네이밍은 가능한 주소 변환 단계를 나타낸다.</p>
+<ul>
+<li>VMSAv8
+<ul>
+<li>아래 두 가지를 모두 아우르는 scheme이다.</li>
+</ul>
+</li>
+<li>VMSAv8-32
+<ul>
+<li>AArch32의 Exception level에서 핸들링되는 단일 단계 변환 scheme이다.</li>
+<li>가끔 VA를 PA에 매핑하기 위해서 두 단계를 거치기도 한다.</li>
+<li>이런 단계들은 모두 AArch32의 Exception level에서 처리된다.</li>
+</ul>
+</li>
+<li>VMSAv8-64
+<ul>
+<li>VMSAv8-32의 AArch64 버전이다.</li>
+</ul>
+</li>
+</ul>
+<h4 id="d512-the-armv8-vmsa-when-some-exception-levels-are-using-aarch32">D5.1.2 The Armv8 VMSA when some Exception levels are using AArch32<a hidden class="anchor" aria-hidden="true" href="#d512-the-armv8-vmsa-when-some-exception-levels-are-using-aarch32">#</a></h4>
+<p>Higher exception level에선 AArch64를 사용하는 반면 Lower exception level에서는 AArch32를 사용할 수 있다고 앞에서 설명했다.</p>
+<p>EL0에서 AArch32를 쓰더라도 좀 더 높은 exception level EL1에서는 AArch64를 쓰는 경우에선 EL0는 VMSAv8-64 방식을 이용한다.</p>
+<h4 id="d513-vmsa-address-types-and-address-spaces">D5.1.3 VMSA address types and address spaces<a hidden class="anchor" aria-hidden="true" href="#d513-vmsa-address-types-and-address-spaces">#</a></h4>
+<ul>
+<li>
+<p>Virtual address (VA)</p>
+<ul>
+<li>명령어 실행에 이용되는 주소이다.</li>
+<li>AArch64 state 에서 VA는 다음과 같은 최대 address width를 가진다.
+<ul>
+<li>48 bits.</li>
+<li>52 bits. - FEAT_LVA가 구현되어 주소 변환시 64kb granule를 이용할 때.</li>
+<li>52 bits. - 다음이 참일 때.
+<ul>
+<li>FEAT_LPA2가 구현되었을 때.</li>
+<li>TCR_ELx.DS == 1 일때 translation regime가 바뀐다.
+<ul>
+<li>TCR 레지스터는 Translation control register이다.</li>
+</ul>
+</li>
+<li>4kb나 16kb granule를를 사용할 때.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>하나의 주소 변환 단계 (Translation stage) 가 하나의 VA 범위를 변환하는 경우
+<ul>
+<li>48-bit VA
+<ul>
+<li>0x0000000000000000 to 0x0000FFFFFFFFFFFF</li>
+</ul>
+</li>
+<li>52-bit VA
+<ul>
+<li>0x0000000000000000 to 0x000FFFFFFFFFFFFF</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>하나의 주소 변환 단계가 두 개의 VA 범위로 나누어서 변환하는 경우
+<ul>
+<li>bottom VA
+<ul>
+<li>48-bit VA
+<ul>
+<li>0x0000000000000000 to 0x0000FFFFFFFFFFFF</li>
+</ul>
+</li>
+<li>52-bit VA
+<ul>
+<li>0x0000000000000000 to 0x000FFFFFFFFFFFFF</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>top VA - 64bit를 모두 사용한다.
+<ul>
+<li>48-bit VA
+<ul>
+<li>0xFFFF000000000000 to 0xFFFFFFFFFFFFFFFF</li>
+</ul>
+</li>
+<li>52-bit VA
+<ul>
+<li>0xFFF0000000000000 to 0xFFFFFFFFFFFFFFFF</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>이렇게 나눠놓은 이유는 두 개의 subrange에 대해서 다르게 처리해야 할 필요가 있어서 그런 것 같다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Intermediate physical address (IPA)</p>
+<ul>
+<li>주소를 변환하면서 두 가지  주소 변환 단계가 있다.
+<ul>
+<li>stage 1에서의 OA - 1 단계 변환의 출력 주소
+<ul>
+<li>이러한 1단계 변환에선 OS는 IPA를 PA로 착각한다.</li>
+<li>처음에 변환되기 때문에 1단계 변환이라고 부른다.</li>
+</ul>
+</li>
+<li>stage 2에서의 IA - 2 단계 변환의 입력 주소소
+<ul>
+<li>IPA를 PA로 변환하는 단계이다.</li>
+<li>1 단계 변환이 변환한 IPA를 PA로 변환해서 2단계 변환이라고 부른다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>변환 과정에서 IPA와 PA는 비슷하다.</li>
+<li>가상머신으로 운영체제를 실행했을 때 이러한 두 계층의 주소 변환이 필요하게 되는데 첫 번째 계층의 출력 주소로 볼 수 있다.</li>
+</ul>
+</li>
+<li>
+<p>Physical address (PA)</p>
+<ul>
+<li>실제 물리적인 주소이다.</li>
+<li>EL3에서 Secure EL1과 FEAT_SEL2가 활성화되면 Secure EL2 exception level은 Secure, Non-secure operation의 독립적인 PA space로 나눈다.
+<ul>
+<li>Secure state에선 Secure PA space를 이용한다.</li>
+<li>Non-secure state에선 Non-secure PA space를 이용한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="d514-address-tagging-in-aarch64-state">D5.1.4 Address tagging in AArch64 state<a hidden class="anchor" aria-hidden="true" href="#d514-address-tagging-in-aarch64-state">#</a></h4>
+<p>AArch64 state에서 address tagging을 지원한다.<br>
+여기서의 Address tagging과 Memory tagging extension을 혼동하면 안된다.</p>
+<p>Address tagging의 VA의 상위 8비트는 다음을 결정할 때 무시된다.</p>
+<ul>
+<li>변환 시스템이 활성화 되어 있을 때, 그 VA가 범위 밖인지 아닌지 여부.
+<ul>
+<li>translation fault가 일어난다.</li>
+</ul>
+</li>
+<li>변환 시스템이 활성화 되어 있지 않을 때 주소가 범위 밖인지 여부.
+<ul>
+<li>address size fault가 일어난다.</li>
+</ul>
+</li>
+<li>TLB invalidation 명령 실행시 그 주소가 invalidation이 필요할지 여부.</li>
+</ul>
+<p>1 단계 변환에서 두 개의 VA 범위를 지원할 때 다음이 참이다.</p>
+<ul>
+<li>VA의 bit[55]에 따라 다음과 같이 address tag를 사용할지 여부를 결정하는 register bit를 결정한다.
+<ul>
+<li>VA[55] == 0
+<ul>
+<li>TCR_ELx.TBI0 address tag를 사용할지 여부를 결정한다.</li>
+<li>1 단계 변환이 활성화되었을 때 TTBR0_ELx는 변환 테이블(translation table)의 base address를 저장한다.</li>
+<li>TTBR은 Translation table base register로 x86의 CR3처럼 특정 페이지 테이블을 가리킨다.
+<ul>
+<li>context switching이 일어날 때 마다 바뀌게 되는 특징이 있다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>VA[55] == 1
+<ul>
+<li>TCR_ELx.TBI1 address tag를 사용할지 여부를 결정한다.</li>
+<li>1 단계 변환이 활성화되었을 때 TTBR1_ELx는 변환 테이블(translation table)의 base address를 저장한다.<br>
+이런식으로 두 개의 범위를 tagging을 통해 처리한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>1단계 변환에서 오직 하나의 VA 범위를 지원할 때 다음이 참이다.</p>
+<ul>
+<li>1단계 변환이 활성화 되었을 때 TCR_ELx.TBI가 address tag가 사용되는 여부를 결정한다.</li>
+<li>TTBR0_ELx는 변환 테이블의 base address를 저장한다.</li>
+</ul>
+<p>왜 조건에 1 단계 변환의 활성화가 적혀있는지 의문을 가질 수 있는데, 그 이유는 TCR_ELx.TBIn bit는 해당 변환 단계의 사용 여부와 무관하게 address tags 사용 여부를 결정되기 때문이다.</p>
+<p>또한 FEAT_PAuth가 구현되어있다면, TBIDn 비트가 TCR_ELx에 추가된다.<br>
+TCR_ELx.TBIn 비트가 켜져있다면, TBIDn 비트가 address tagging이 data address만 적용할 것인지 instruction address까지 적용할지 결정한다.</p>
+<p>이러한 Address tag 활성화 비트는 다음과 같은 예시처럼 PC의 영향을 줄 수 있다.</p>
+<ul>
+<li>controlled exception level 에서, TCR_EL3.TBI는 다음과 같은 영향을 제어한다.
+<ul>
+<li>EL3에서의 분기나 함수 return.</li>
+<li>EL3로의 exception.</li>
+<li>exception return, EL3로 debug state exit.<br>
+마지막 debug state에서 나갈때는 정확히 잘 이해가 되지 않는다.</li>
+</ul>
+</li>
+</ul>
+<p>TBIn 비트가 어떻게 제어되느냐에 따라 다음과 같은 영향을 가진다.</p>
+<ul>
+<li>1 단계 번역이 두 가지의 VA range를 지원한다.
+<ul>
+<li>PC에 로딩되는 주소 55비트가 1이고 TBIn 비트가 1이라면 bits[63:56] 부분의 PC는 bit 55에 대한 sign extension이 일어나게된다.</li>
+<li>사실 이건 앞에서 범위 얘기하면서 다뤘던 얘기이다. 그냥 같은 얘기.</li>
+</ul>
+</li>
+<li>1 단계 번역이 하나의 VA range를 지원한다.
+<ul>
+<li>55비트가 1이여도 bits[63:56]는 0x00으로 고정된다.</li>
+</ul>
+</li>
+</ul>
+<p>깔끔하게 정리하면 다음과 같다.<br>
+TBI(Top byte ignorance) 비트에 따라 55 bit가 무시될지, 두 개의 VA range를 지원하는지 결정된다.</p>
+<h3 id="d52-the-vmsav8-64-address-translation-system">D5.2 The VMSAv8-64 address translation system<a hidden class="anchor" aria-hidden="true" href="#d52-the-vmsav8-64-address-translation-system">#</a></h3>
+<p>VMSAv8-64 주소 변환 시스템에 대해서 설명한다.</p>
+<h4 id="d521-about-the-vmsav8-64-address-translation-system">D5.2.1 About the VMSAv8-64 address translation system<a hidden class="anchor" aria-hidden="true" href="#d521-about-the-vmsav8-64-address-translation-system">#</a></h4>
+<p>MMU는 PE에 액세스에 대해 주소 변환과 액세스 권한 그리고 메모리 속성 결정과 체크를 담당한다.</p>
+<p>기본적인 MMU의 동작 모델은 원하는 메모리의 액세스에 대한 정보, 예를 들어서 IA(Input Address)를 받아들여 결과를 리턴한다.</p>
+<ul>
+<li>관련된 OA(Output Address)를 리턴한다.</li>
+<li>변환을 완료할 수 없으면, exception이 생성되며 이 exception을 MMU fault라고 부른다.
+<ul>
+<li>시스템 레지스터를 이용해서 이러한 발생한 MMU fault를 알린다.</li>
+</ul>
+</li>
+</ul>
+<p>IA -&gt; OA로 매핑을 하는 과정을 단일 단계 변환 (single stage translation) 이라고 한다.</p>
+<p>VMSAv8 system에서 translation regime는 VA -&gt; PA 로의 매핑에 하나 혹은 두 개의 단계를 거쳐 변환을 수행한다.<br>
+translation granule은 IA -&gt; OA로의 매핑의 세분성을 나타내며 이는 다음 두 가지를 정의한다.</p>
+<ul>
+<li>주소 변환의 단계의 page size
+<ul>
+<li>IA -&gt; OA 매핑의 최소 단위 메모리 블록.</li>
+</ul>
+</li>
+<li>특정 주소 변환 단계의 변환 테이블 (translation table)의 최대 크기<br>
+지금에선 변환 테이블의 최대 크기가 이해되지 않을 수 있다.<br>
+D5.2.4에서 후술한다.<br>
+MMU는 system register에 의해 주소 변환 단계마다 주소 변환이 제어된다.</li>
+</ul>
+<p>변환 단계마다 address translations의 집합과 관련 메모리 속성이 memory mapped table에 존재하며 그 테이블을 translation tables라고 부른다.<br>
+하나의 translation table은 IA를 제한된 특정 비트들을 이용해서 주소를 변환한다.<br>
+그 이유는 하나의 address translation이 여러번의 lookup를 통해 변환을 해야할 수 있기 때문이다.</p>
+<p>그리고 이러한 translation table entry들은 Translation lookaside buffer(TLB)에 캐싱된다.<br>
+메모리 데이터가 L1, L2, L3 캐시에 캐싱되듯이, 주소들은 TLB에 주소 변환에 대한 데이터가 캐싱된다고 볼 수 있다.<br>
+<img loading="lazy" src="/blog/Background_ARM/09e71d09259245edf7b556b82730ede9.png" alt=""  />
+<br>
+mips 사진이긴 하지만 table entry에는 ASID를 명시해서 다른 프로세스별 주소 공간을 명시한다.<br>
+이를 통해 context switching을 할 때 굳이 tlb flush를 통해 entry를 날리지 않고 유지시켜도 격리가 유지되게 된다.<br>
+<img loading="lazy" src="/blog/Background_ARM/6cc5dfa3c33f7b8611485be4534a47a1.png" alt=""  />
+<br>
+그리고 위와 같이 코드를 공유하는 경우에 효율적으로 메모리 공간을 이용할 수 있다.</p>
+<p>IA -&gt; OA 매핑에 대한 정보를 정의하는 translation table entry에서는 다음과 같은 속성들도 정의한다.</p>
+<ul>
+<li>Secure state에서 발생한 메모리 액세스, 즉 액세스가 Secure 혹은 Non-secure address 맵에 접근하는지 여부</li>
+<li>액세스 권한</li>
+<li>memory region property<br>
+<img loading="lazy" src="/blog/Background_ARM/01d98016ed06322303f24d2e93df9c5a.png" alt=""  />
+
+<ul>
+<li>메모리 타입이나 캐시 정책등이 이러한 property에 포함된다.</li>
+</ul>
+</li>
+</ul>
+<p>AArch64 아키텍처에서 translation regime는 다음으로 구성된다.</p>
+<ul>
+<li>단일 단계 주소 변환
+<ul>
+<li>input VA를 바로 output PA로 변환한다.</li>
+</ul>
+</li>
+<li>연속적인 2 단계 주소 변환
+<ul>
+<li>Stage 1 - input VA -&gt; output IPA</li>
+<li>Stage 2 - input IPA -&gt; output PA</li>
+</ul>
+</li>
+</ul>
+<p>앞에서 이미 봤던 사진인데, 이번엔 좀 더 자세히 알아보겠다.<br>
+<img loading="lazy" src="/blog/Background_ARM/7e7839b24d0869389006de10128020ef.png" alt=""  />
+</p>
+<ul>
+<li>EL1&amp;0이고 EL2가 비활성화 되었을 때 - 1 단계 변환
+<ul>
+<li>같은 PA를 공유하는 OS가 없다.</li>
+<li>그러므로 굳이 IPA를 둬서 2 단계 변환을 할 필요가 없다.</li>
+<li>HCR_EL2.{E2H, TGE}가 {0,0} 일 때 EL1이나 EL0일 때 이러한 변환 regime가 이용된다.
+<ul>
+<li>HCR은 Hypervisor control register로 하이퍼 바이저( EL2 )의 동작에 대해 나타낸다.</li>
+<li>E2H는 VHE가 지원되지 않을 때를 뜻하니 단순 VA를 PA로만 변환하면 된다.</li>
+</ul>
+</li>
+<li>SCR_EL3.NS == 1 일 때 Non-secure 메모리 액세스가 일어난다.
+<ul>
+<li>SCR은 Secure configuration register이다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>EL1&amp;0이고 EL2가 활성화 되었을 때 - 2 단계 변환
+<ul>
+<li>같은 PA를 공유하는 OS가 있다.
+<ul>
+<li>OS가 착각하는 PA를 의미한다.</li>
+<li>즉 IPA.</li>
+</ul>
+</li>
+<li>같은 물리 메모리 주소에 대해 다른 값을 리턴해야할 필요가 생긴다.</li>
+<li>그래서 2 단계 변환을 통해 guest os의 PA를 IPA로 속여서 변환해야한다.</li>
+</ul>
+</li>
+<li>EL2나 EL3 - 1단계 변환
+<ul>
+<li>그냥 바로 접근해도 상관없기 때문에 단일 단계 변환을 수행한다.</li>
+</ul>
+</li>
+<li>EL2&amp;0 변환 - 1 단계 변환
+<ul>
+<li>HCR_EL2.{E2H, TGE} 비트가 {1,1} 일 때 적용된다.
+<ul>
+<li>즉 host os가 EL2에서 돌고 있고 host application이 EL0에서 돌고 있을때이다.</li>
+</ul>
+</li>
+<li>이런 경우엔 1 단계 변환만으로도 충분하다.
+<ul>
+<li>왜냐하면 말은 EL2에서 EL0 변환이지만, 실제로는 FEAT_VHE에 의해서 표면적으로 그렇게 보일뿐이지 실제로의 변환은 단순 VA -&gt; PA만 하면 끝이다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>단일 단계 주소 변환에서 TTBR_ELx는 IA를 OA로 매핑하기 위한 첫 번째 translation table을 가리킨다.<br>
+두 개의 VA range를 지원하는 경우 각자의 VA range는 독립된 IA -&gt; OA 매핑을 가진다.<br>
+이는 다음을 말한다.</p>
+<ul>
+<li>두 개의 IA ranges를 지원하면 두 개의 translation tables가 지원된다.</li>
+<li>하나의 IA range를 지원하면 하나의 translation table이 지원된다.<br>
+각자가 다른 table을 이용하게 되면서 각자 독립적인 매핑을 가지게 된다.</li>
+</ul>
+<p>여기서 명심해야할 점은 두 개의 IA ranges를 지원하는건 오직 1 단계 변환만 가능하다.<br>
+바꿔말하면 두 개의 IA ranges를 지원한다면, 그 IA는 무조건 VA 라는 것이다.</p>
+<p>VMSAv8-64에서 주소 변환 단계는 Exception level에 영향을 받는다.<br>
+VMSAv8-64에서 translation table안의 descriptor entry는 64 비트이다.</p>
+<p>VMSAv8-64 translation table format은 다음을 제공한다.</p>
+<ul>
+<li>4 단계 이상의 주소 lookups</li>
+<li>4kb 혹은 16kb, 64kb인 translation granule 크기</li>
+<li>IA/OA
+<ul>
+<li>주로 48 비트이지만 특정 FEAT_LPA2같은 feature에 따라 52 비트까지도 늘어날 수 있다.</li>
+</ul>
+</li>
+</ul>
+<h4 id="d523-controlling-address-translation-stages">D5.2.3 Controlling address translation stages<a hidden class="anchor" aria-hidden="true" href="#d523-controlling-address-translation-stages">#</a></h4>
+<p><img loading="lazy" src="/blog/Background_ARM/432e795d6a09f4ccfd44cab5c6f9f8f1.png" alt=""  />
+<br>
+위 표에 나와있듯이 각자의 변환 단계에 매칭되는 시스템 레지스터들이 존재한다.</p>
+<ul>
+<li>SCTLR (System control register)는 Exception level 별로 존재한다.
+<ul>
+<li>이는 Exception level 마다의 설정이 달라야하니 필요하다.</li>
+</ul>
+</li>
+<li>TCR (Translation control register)는 Exception level 별로 존재하고 EL2에서 특정 하이퍼 바이저의 설정에 따라 추가적으로 VSTCR_EL2가 이용될 수 있으며 기본적으로 EL2가 구현되었다면 VTCR_EL2가 이용된다.</li>
+<li>TTBR (Translation table base register)는 Exception level 별로 존재하며 마찬가지로 EL2의 특정 옵션에 의해 추가적으로 이용될 수 있으며 EL2가 구현되었다면 VTTBR_EL2가 이용된다.
+<ul>
+<li>앞서 address tagging에 대해서 설명하면서 TCR_ELx.TBI0와 TCR_ELx.TBI1가 활성화 되었을 때 VA의 55 비트에 따라 TTBR0_ELx를 이용하는지 TTBR1_ELx를 이용지를 결정한다고 했었다.</li>
+</ul>
+</li>
+</ul>
+<p>ID_AA64MMFR0_EL1.PARange 비트는 물리 주소 크기를 정한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/f293cfe1789480eb2aae659d08860651.png" alt=""  />
+</p>
+<p>활성화된 주소 변환 단계는 각자 TCR_ELx 레지스터를 가지며 IPS 비트에 따라 최대 output address의 크기도 정한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/f506d54bdf18ad035ce21a20f5f73857.png" alt=""  />
+<br>
+활성화된 변환 단계는 마찬가지로 각자의 TCR_ELx 레지스터를 가지며 TCR_ELx의 TxSZ 필드가 input address size를 지정한다.</p>
+<ul>
+<li>두 개의 VA ranges를 지원하는 경우
+<ul>
+<li>TCR_ELx는 두 개의 TxSZ 필드를 가지며 각자 하나의 VA range에 대응한다.
+<ul>
+<li>TCR_ELx.T0SZ는 lower VA인 TTBR0_ELx에 대응한다.</li>
+<li>TCR_ELx.T1SZ는 higher VA인 TTBR1_ELx에 대응한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>단일 VA range를 지원하는 경우
+<ul>
+<li>TCR_ELx의 T0SZ를 이용하며 TTBR0_ELx가 변환에 이용된다.<br>
+<img loading="lazy" src="/blog/Background_ARM/813075dc0feeb3487851ad5e615492f9.png" alt=""  />
+<br>
+위 사진 single VA range를 지원하는 변환 단계의 메모리 맵이다.<br>
+EL1&amp;0 regime에서 EL2가 켜져있으면 여러 OS가 PA를 공유할 가능성이 있으므로 2 단계 변환을 수행한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/8b2604f21957cdf79a2c2d3678b564a7.png" alt=""  />
+<br>
+위 사진은 두 개의 VA ranges를 지원할 때의 메모리 맵이다.</li>
+</ul>
+</li>
+</ul>
+<h4 id="d524-memory-translation-granule-size">D5.2.4 Memory translation granule size<a hidden class="anchor" aria-hidden="true" href="#d524-memory-translation-granule-size">#</a></h4>
+<p>granule size는 다음을 정의한다.</p>
+<ul>
+<li>하나의 translation table의 최대 크기</li>
+<li>memory 페이지 크기</li>
+</ul>
+<p><img loading="lazy" src="/blog/Background_ARM/2c92526cd0b42e34a4e978711f2c6de6.png" alt=""  />
+<br>
+위 표와 같이 1 단계 변환에선 ID_AA64MMFR0_EL1의 TGran4, 16, 64 필드를 통해 어떤 granule size가 지원되는지 확인할 수 있다.<br>
+<img loading="lazy" src="/blog/Background_ARM/db607079c426847efcfd646453416bab.png" alt=""  />
+<br>
+2 단계 변환에서도 앞선 1 단계 변환처럼 똑같이 필드를 통해 granule size를 확인할 수 있다.<br>
+<img loading="lazy" src="/blog/Background_ARM/a313a6985fc2f73bcfddcda84bb2c45d.png" alt=""  />
+<br>
+위와 같은 범위를 가진다.<br>
+전에 granule size가 page size와 최대 translation table의 크기를 정의한다고 했기 때문에 entry 개수는 2^12 / 2^3 = 2^9 개의 entries를 가지게 된다.</p>
+<h4 id="d525-translation-tables-and-the-translation-process">D5.2.5 Translation tables and the translation process<a hidden class="anchor" aria-hidden="true" href="#d525-translation-tables-and-the-translation-process">#</a></h4>
+<p>Translation table walk는 하나 혹은 그 이상의 translation table lookups를 말한다.<br>
+Translation table walk는 VA를 PA로 변환하기 위해 필요한 일련의 lookup들이다.</p>
+<p>translation table walk는 가장 처음으로 TTBR_ELx을 읽어서 table의 base 주소를 얻는다.<br>
+그리고 각자의 translation table lookup은 다음중 하나를 포함하는 descriptor를 리턴한다.</p>
+<ul>
+<li>table entry가 walk의 마지막 entry이면, 그 entry는 OA와 OA에 대한 권한, 속성을 포함한다.</li>
+<li>추가적인 lookup이 필요하면, entry는 다음 lookup을 위한 base address를 포함한다.
+<ul>
+<li>추가적으로 secure translation regime를 이용할 경우 그 base address가 secure인지 non-secure인지를 나타낸다.</li>
+<li>따로 명시적으로 non-secure address space라고 명시할 수도 있다.</li>
+<li>여기서 hierarchical attributes 라는게 적용되는데, 이는 일부 속성이 좀 더 높은 레벨의 테이블 descriptor에서 명시될 수 있다.
+<ul>
+<li>이는 접근 권한, 실행 권한 그리고 물리 주소 공간에서도 적용된다.</li>
+<li>PXNTable(실행 권한)으로 예시를 들어보면 좀 더 높은 level의 table에 비트가 세팅되면 좀 더 낮은 레벨의 비트들은 무시되는 것을 알 수 있다. 또한 PXN을 비트를 클리어 시켜서 전 계층의 비트를 보존시킬 수도 있다.<img loading="lazy" src="/blog/Background_ARM/5bc0db84b836f73412db470d8815b8d6.png" alt=""  />
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>descriptor가 유효하지 않다면 translation fault가 발생한다.</li>
+<li>앞서 PXN같은 용어가 나왔는데 추가적을 설명하자면 page table entry에서 다음과 같은 4 비트가 인코딩된다.
+<ul>
+<li>UXN, Unprivileged Execute never - 이 페이지에선 EL0 코드를 실행할 수 없다.</li>
+<li>PXN, Privileged Execute never - 이 페이지에선 EL1 코드를 실행할 수 없다.</li>
+<li>AP 2bits, 01이면 커널과 유저모드 모두 접근가능하다.</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="/blog/Background_ARM/f0dae7773aa750f297759beeac98535f.png" alt=""  />
+<br>
+단일 단계 변환의 translation table walk에 대한 그림이다.<br>
+D_Block은 granule보다 큰 블록에 대한 descriptor이고 D_Page는 granule 크기에 대한 descriptor이다.<br>
+실제로 구현시에는 동일한 구조를 이용하여 구현한다.<br>
+3 level lookups가 필요한 경우에선 마지막에 D_Block 대신 D_Page로 의미상 이용된다고 한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/8e3db55da4bb684dbfcc3b16b17127d8.png" alt=""  />
+<br>
+위의 포맷을 보면 둘다 아예 같게 생긴 것을 확인할 수 있다.</p>
+<p>TTBR_ELx는 초기 lookup을 위한 translation table의 base address를 가지고 있다.</p>
+<ul>
+<li>EL2가 활성화 되었을 때 EL1&amp;0 translation regime를 제외한 1 단계 변환은 TTBR_ELx의 output address나 어떠한 translation table descriptor에 의해 리턴된 translation table의 base address는 모두 PA이다.</li>
+<li>EL2가 활성화 되었을 때 EL1&amp;0 translation의 1 단계 변환에서 TTBR_ELx의 output address나 어떠한 translation table descriptor에 의해 리턴된 translation table의 base address는 IPA이다. 그리고 2 단계 변환이 활성화 되어있다면 OA는 2 단계 변환의 대상이 된다.</li>
+</ul>
+<h4 id="d526-overview-of-the-vmsav8-64-address-translation-stages">D5.2.6 Overview of the VMSAv8-64 address translation stages<a hidden class="anchor" aria-hidden="true" href="#d526-overview-of-the-vmsav8-64-address-translation-stages">#</a></h4>
+<p><img loading="lazy" src="/blog/Background_ARM/79bbb2464191acd8e6f04b926ece64f9.png" alt=""  />
+<br>
+TCR_ELx의  TnSZ는 IA 범위를 정한다.<br>
+4kb granule 기준으로 위 표처럼 initial lookup level이 결정된다.<br>
+TnSZ에 따라 initial lookup level이 달라진다.<br>
+<img loading="lazy" src="/blog/Background_ARM/9ed34fc4bc856f6af5d0cf971eafb9f6.png" alt=""  />
+<br>
+이렇게 찾아간다.<br>
+<img loading="lazy" src="/blog/Background_ARM/2ec4c442e110283a43dd9708e42b02c5.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/f1eda654a67ecd70fa94a676023a3d23.png" alt=""  />
+<br>
+VTCR_EL2.T0SZ에 따라 IA 크기가 정해지고 initial lookup level이 결정된다.</p>
+<p>16kb granule도 표로 정리되어있긴 하지만 생략하겠다.</p>
+<h3 id="d53-vmsav8-64-translation-table-format-descriptors">D5.3 VMSAv8-64 Translation Table format descriptors<a hidden class="anchor" aria-hidden="true" href="#d53-vmsav8-64-translation-table-format-descriptors">#</a></h3>
+<p>일반적으로 descriptor는 다음중 하나에 해당한다.</p>
+<ul>
+<li>An invalid or fault entry.</li>
+<li>next-level translation table을 가리키는 table entry.</li>
+<li>Accesss를 위한 memory의 properties를 정의하는 block entry.</li>
+<li>예약된 format.</li>
+</ul>
+<h4 id="d531-vmsav8-64-translation-table-level--1-level-0-level-1-and-level-2-descriptor-formats">D5.3.1 VMSAv8-64 translation table level -1, level 0, level 1, and level 2 descriptor formats<a hidden class="anchor" aria-hidden="true" href="#d531-vmsav8-64-translation-table-level--1-level-0-level-1-and-level-2-descriptor-formats">#</a></h4>
+<p>사실 포맷은 granule size나 최대 OA size 같은 여러 요인에 따라 달라진다.<br>
+그런데 그냥 일반적인 경우 포맷은 거의 비슷하다.<br>
+<img loading="lazy" src="/blog/Background_ARM/418d71ffa0a0c54a2b976609809f7780.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/3d0dae39004ad9970ea4f8e0c483ae53.png" alt=""  />
+<br>
+그래서 실질적으로 포맷은 위와 같다.</p>
+<h4 id="d532-armv8-translation-table-level-3-descriptor-formats">D.5.3.2 Armv8 translation table level 3 descriptor formats<a hidden class="anchor" aria-hidden="true" href="#d532-armv8-translation-table-level-3-descriptor-formats">#</a></h4>
+<p><img loading="lazy" src="/blog/Background_ARM/6c825996e3c0b2ee6ab3641b3ad87b65.png" alt=""  />
+<br>
+이런식으로 granule size에 따라 포맷은 달라지게 된다.</p>
+<h4 id="d533-memory-attribute-fields-in-the-vmsav8-64-translation-table-format-descriptors">D5.3.3 Memory attribute fields in the VMSAv8-64 Translation Table format descriptors<a hidden class="anchor" aria-hidden="true" href="#d533-memory-attribute-fields-in-the-vmsav8-64-translation-table-format-descriptors">#</a></h4>
+<p><img loading="lazy" src="/blog/Background_ARM/1abe7e6dc7a41d2f79eb5be938cb9288.png" alt=""  />
+<br>
+stage 1 translation에서 위 비트들은 다음 translation table access를 위한 속성을 정의한다.</p>
+<ul>
+<li>NSTable
+<ul>
+<li>secure state에서 메모리 액세스할때 NSTable bit를 확인한다.</li>
+<li>non-secure state에선 EL2나 EL2&amp;0을 포함해서 RES0이 되고 PE는 이를 무시한다.</li>
+</ul>
+</li>
+<li>APTable
+<ul>
+<li>후속 level lookup시에 적용되는 permission bit들이다.</li>
+<li>아래와 같이 적용된다.<img loading="lazy" src="/blog/Background_ARM/50d412c14a937878b65a7c1cfe5af720.png" alt=""  />
+</li>
+</ul>
+</li>
+<li>UXNTable or XNTable
+<ul>
+<li>후속 level lookup시에 적용되는 XN limit이다.</li>
+<li>naming은 stage 1 translation regime가 두 VA ranges를 지원하는지 유무에 따라 다르다.</li>
+<li>Stage 1이 두 개의 VA ranges를 지원할 때
+<ul>
+<li>이 필드는 UXNTable로 불린다.</li>
+<li>lower level lookup에서 그 region에서 fetch된 instruction이 EL0에서 실행되는 것을 허용하는지를 결정한다.</li>
+</ul>
+</li>
+<li>Stage 1이 하나의 VA range를 지원할 때
+<ul>
+<li>XNTable로 명명된다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>PXNTable
+<ul>
+<li>Privileged execute never.</li>
+<li>후속 levels of lookup에 관여한다.</li>
+<li>이 필드는 항상 2 VA ranges를 지원하는 stage 1 translation에서만 valid 하다.
+<ul>
+<li>당연히 User, Kernel 나눠져야하니까 당연하다.</li>
+<li>그래야 다른 translation table 쓰고 각기 다른 처리가 가능하다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>아까 앞에선 table descriptor였는데 얜 page &amp; block descriptor의 경우이다.<br>
+1 stage block &amp; page descriptor 모습이다.<br>
+메모리 속성이 upper, lower로 나눠진다.<img loading="lazy" src="/blog/Background_ARM/89ac8cbe2ee124fd2a1b1faaf7506c84.png" alt=""  />
+</p>
+<ul>
+<li>마찬가지로 1 stage에서 두 VA ranges면 UXN 아니면 XN.</li>
+<li>PXN도 마찬가지.</li>
+<li>AP는 data access permission 관리한다.
+<ul>
+<li>table descriptor format은 AP의 0 번째 비트를 정의하지 않는다.</li>
+<li>translation regime가 두 VA ranges를 지원하면 얘는 valid하며 singe VA range면 RES1이다.</li>
+</ul>
+</li>
+<li>NS는 Non secure bit다.</li>
+</ul>
+<p>2 stage block &amp; page descriptor의 모습이다.<br>
+<img loading="lazy" src="/blog/Background_ARM/3d94ce66c7124c15a9eba3eab46c802c.png" alt=""  />
+</p>
+<ul>
+<li>전이랑 비슷한데 여러 비트들이 많으니 생략한다.</li>
+<li>S2AP로 이름이 바뀐게 있는데, 그냥 stage 2 data access permission 비트로 AP랑 똑같다.</li>
+</ul>
+<h3 id="d54-memory-access-control">D5.4 Memory access control<a hidden class="anchor" aria-hidden="true" href="#d54-memory-access-control">#</a></h3>
+<p>access control field는 PE가 특정 주소에 접근할 때 그 주소의 접근을 컨트롤한다.<br>
+허용안하면 MMU fault.</p>
+<p>이는 다음에 적용된다.</p>
+<ul>
+<li>single exception level에 대한 변환, EL3 translation regime같은 거.</li>
+<li>EL0 그리고 높은 exception level에 대한 변환, EL1&amp;0 translation regime 같은 거.</li>
+</ul>
+<h4 id="d541-about-access-permissions">D5.4.1 About access permissions<a hidden class="anchor" aria-hidden="true" href="#d541-about-access-permissions">#</a></h4>
+<p>translation table descriptor는 data accesses에 대한 access permissions과 instruction fetches에 대한 access permissions를 정의한다.<br>
+PAN이나 PXN같은거에 대해서 더 자세하게 설명하는 섹션이다.</p>
+<p>access permission 관련 비트들은 앞서 다뤘던 translation table format에 있었다.</p>
+<ul>
+<li>stage 1 translation, AP가 data access permission을 정의한다.</li>
+<li>stage 2에선 S2AP가 data access permission을 정의한다.</li>
+<li>UXN, XN, PXN 필드가 instruction fetches의 access controls를 정의한다.</li>
+</ul>
+<h4 id="d542-about-pstatepan">D5.4.2 About PSTATE.PAN<a hidden class="anchor" aria-hidden="true" href="#d542-about-pstatepan">#</a></h4>
+<p>PSTATE.PAN이 1이면 EL1, HCR_EL2.E2H가 1 일때 EL2에서 EL0이 액세스 가능한 가상 주소 액세스는 Permission fault를 생성한다.<br>
+PSTATE.PAN 0이면 그 기능은 꺼진다.<br>
+그냥 SMAP랑 똑같은 거 같다.</p>
+<p>세부사항이 있지만 패스한다.</p>
+<h4 id="d543-about-pstateuao">D5.4.3 About PSTATE.UAO<a hidden class="anchor" aria-hidden="true" href="#d543-about-pstateuao">#</a></h4>
+<p>PSTATE.UAO가 1이면 unprivileged instruction load/store가 EL1혹은 HCR_EL2.{E2H, TGE}가 {1,1}일 때 EL2가 EL0가 아닌 현재 exception level에 적용되는 memory access permissions에 적용을 받는다.</p>
+<p>세부사항은 패스한다.</p>
+<h4 id="d545-data-access-permission-controls">D5.4.5 Data access permission controls<a hidden class="anchor" aria-hidden="true" href="#d545-data-access-permission-controls">#</a></h4>
+<p>stage 1 translation 에서 AP는 두 개 비트를 포함한다.</p>
+<ul>
+<li>AP 1번 비트
+<ul>
+<li>EL0와 더 높은 exception level 중에서 선택한다.</li>
+</ul>
+</li>
+<li>AP 2번 비트
+<ul>
+<li>read only인지 read/write 가능한지 선택한다.<br>
+다음 액세스 세팅을 나타낼 수 있게 된다.</li>
+</ul>
+</li>
+<li>모든 레벨에서 read-only.</li>
+<li>모든 레벨에서 read/write.</li>
+<li>EL0에선 access 불가능하지만 higher exception level에서 read-only.</li>
+<li>EL0에선 access 불가능하지만 read/write.<br>
+<img loading="lazy" src="/blog/Background_ARM/038b4ab522506db1145b296b254f147b.png" alt=""  />
+<br>
+바로 앞에서 두 개 VA ranges를 지원할 때 higher exception level, EL0에 대한 access permission을 설명했다.<br>
+여기선 1 stage translation에서 single exception level에 대한 data access permission을 설명한다.<br>
+singe exception level이라 굳이 아까 1번 비트는 있을 필요없어서 reserved 값을 가진다.<br>
+<img loading="lazy" src="/blog/Background_ARM/875da4ba21fccd2ebcd339875ff4fae6.png" alt=""  />
+<br>
+위 표처럼 정의된다.</li>
+</ul>
+<p>EL2 활성화시 secure / non-secure EL1&amp;0 translation regime에서 S2AP는 다음 표처럼 정의된다.<br>
+<img loading="lazy" src="/blog/Background_ARM/75010a7681692927086e790cd4bc2f1a.png" alt=""  />
+<br>
+EL2 활성화 되어있을 때 EL1&amp;0 translation regime는 2 stage address translation이 필요하다.<br>
+S2AP는 1 단계 말고 2 단계 translation에 대한 access permission을 정의한다.<br>
+1 stage에서 AP랑 결합되기도 한다.</p>
+<p><img loading="lazy" src="/blog/Background_ARM/ca8a2a8f7164dea6855b2be386282eb0.png" alt=""  />
+<br>
+이렇게 후속 lookups에서 어떤 영향을 주는지 볼 수 있다.</p>
+<h4 id="d546-access-permissions-for-instruction-execution">D5.4.6 Access permissions for instruction execution<a hidden class="anchor" aria-hidden="true" href="#d546-access-permissions-for-instruction-execution">#</a></h4>
+<p>Execute-never controls는 어떤 memory region의 instruction이 실행될 수 있는지를 정의한다.</p>
+<ul>
+<li>UXN, Unprivileged execute-never, stage 1 only
+<ul>
+<li>당연히 1 stage가 두 VA ranges를 지원해야 UXN을 쓸 수 있다.</li>
+<li>이유는 앞서 계속 설명했으니 그냥 생략한다.</li>
+<li>0이면 EL0에서의 execution 허용한다.</li>
+</ul>
+</li>
+<li>XN, Execute-never
+<ul>
+<li>single VA range면 UXN이 아니라 XN으로 정의된다.
+<ul>
+<li>UXN과 같은 자리다.</li>
+</ul>
+</li>
+<li>0이면 실행을 허용한다.</li>
+<li>이 translation 적용되는 모든 exception level에 적용된다.</li>
+</ul>
+</li>
+<li>PXN, Privileged execute, stage 1 only
+<ul>
+<li>두 VA ranges 지원할 때 이용된다.</li>
+<li>single VA range는 res0으로 정의되고 무시된다.</li>
+<li>0이면 실행이 허용된다.</li>
+<li>그냥 SMEP랑 똑같다.</li>
+</ul>
+</li>
+<li>XN, Execute-never, stage 2 only
+<ul>
+<li>EL2같은거 구현되었을 때 EL1&amp;0 regime 쓰면 2 stage로 해야한다.
+<ul>
+<li>두 번째 stage의 XN비트다.</li>
+</ul>
+</li>
+<li>FEAT_XNX가 활성화되었을 때 이런식으로 또 나뉜다.<img loading="lazy" src="/blog/Background_ARM/8192d65a15da41091ea524eeb5af9f7d.png" alt=""  />
+</li>
+<li>FEAT_XNX 아니면 53bit res0이고 하나만 EL0, EL1에 대한 execution 제어를 담당한다.</li>
+</ul>
+</li>
+<li>추가적으로 SCTLR_ELx.WXN이 1이면 어떤 메모리던 간에 writable하면 execute-never하다.</li>
+</ul>
+<p>앞에 내용들 종합해서 stage 1 access permission들 정리하면 다음과 같다.<br>
+<img loading="lazy" src="/blog/Background_ARM/7f0b88e2f50ce7595f801da0b847abd4.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/9a872bc104bb6852783650f6bf2c5580.png" alt=""  />
+<br>
+위 표는 두 VA ranges를 지원할 때 경우이고 아래 표는 single VA range만 지원할 때의 표이다.<br>
+<img loading="lazy" src="/blog/Background_ARM/9e93cfa75cb6e66357a6d74a9de8ed76.png" alt=""  />
+<br>
+아까랑 똑같은데 AP의 1번 째 비트가 reserved 값이 되면서 무시된다.</p>
+<p>Stage 2 instruction execution permissions는 아까 앞서 설명했듯이 stage 2 translation의 XN 필드에 의해 정의된다.<br>
+AP도 S2AP에 의해 정의된다.</p>
+<h3 id="g112-handling-exceptions-that-are-taken-to-an-exception-level-using-aarch32">G1.12 Handling exceptions that are taken to an Exception level using AArch32<a hidden class="anchor" aria-hidden="true" href="#g112-handling-exceptions-that-are-taken-to-an-exception-level-using-aarch32">#</a></h3>
+<p><img loading="lazy" src="/blog/Background_ARM/c89ef93798c1261c0c71448cb19c0970.png" alt=""  />
+<br>
+AArch64와 exception vector tables 형태가 약간 다르다.<br>
+<img loading="lazy" src="/blog/Background_ARM/d8caa30fb5e8aef5f78058a56291d833.png" alt=""  />
+<br>
+다음과 같은 mode로 변환되게 된다.<br>
+일반적으로 cps를 통해 다시 Supervisor로 돌린다거나 하는식으로 mode switch를 한다.</p>
+<h3 id="g54-the-vmsav8-32-short-descriptor-translation-table-format">G5.4 The VMSAv8-32 Short-descriptor translation table format<a hidden class="anchor" aria-hidden="true" href="#g54-the-vmsav8-32-short-descriptor-translation-table-format">#</a></h3>
+<p><img loading="lazy" src="/blog/Background_ARM/c345ed01f3ad15008d62e409d272f177.png" alt=""  />
+<br>
+AArch64와 비슷하지만 그냥 단순히 몇 번째 비트인지만 달라졌다.<br>
+<img loading="lazy" src="/blog/Background_ARM/c8eb5d8d48335045d676f760c98a71bb.png" alt=""  />
+<br>
+위와 같은 형태이다.</p>
+<h3 id="g73vmsav8-32-organization-of-registers-in-the-coproc0b1111-encoding-space">G7.3VMSAv8-32 organization of registers in the (coproc==0b1111) encoding space<a hidden class="anchor" aria-hidden="true" href="#g73vmsav8-32-organization-of-registers-in-the-coproc0b1111-encoding-space">#</a></h3>
+<p>arm trustzone을 분석할 때 arm 모드로 동작하는 경우가 있다.<br>
+얘네들이 mrs, msr 같은 명령어를 이용해서 시스템 레지스터를 컨트롤한다.<br>
+<img loading="lazy" src="/blog/Background_ARM/2922ffafb27f7f139b2f72c4f1e60193.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/59f452a7335ce1a180cbff93474ed0e0.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/00cea4131eb5f41283792049f549c362.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/12f0bc79006abbddbace0e842c70b73a.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/80ce4ca664fe496c046fb951d1853168.png" alt=""  />
+</p>
+<p><img loading="lazy" src="/blog/Background_ARM/0f41a468db5becb44db78f4a54751415.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Background_ARM/da47fb3f99c744b63924e4de725eed94.png" alt=""  />
+<br>
+위와 같이 테이블이 정의되어있는데, 여기에 맞춰서 mrs, msr을 읽으면 된다.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/arm-manual/">ARM Manual</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

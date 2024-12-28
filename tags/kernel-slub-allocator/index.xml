@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>kernel slub allocator on msh1307</title>
+    <link>https://msh1307.kr/tags/kernel-slub-allocator/</link>
+    <description>Recent content in kernel slub allocator on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 12 Mar 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/kernel-slub-allocator/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux kernel SLUB allocator</title>
+      <link>https://msh1307.kr/blog/linux-kernel-slub-allocator/</link>
+      <pubDate>Tue, 12 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/linux-kernel-slub-allocator/</guid>
+      <description>SLUB Allocator Userland에선 ptmalloc2가 있는 반면, Kernelland에선 SLUB이 있다.
+초기엔 SLAB Allocator를 사용했지만, 현재 대부분의 배포판은 SLUB을 이용한다.
+기존 SLAB allocator의 단점을 개선한 버전이다.
+kmem_cache_create로 slab cache를 생성하고 kmem_cache_alloc으로 지정된 slab cache에서 object를 할당한다.
+kmem_cache_free로 free하고 kmem_cache_destroy로 slab cache를 제거한다.
+kmalloc, kzalloc 같은 함수는 kmalloc-N 캐시에서 적합한 size인 object를 할당한다.
+Terms slab SLAB allocator랑 다른말이다.
+slab cache (= kmem_cache)를 확보하고 관리하는 주체다.
+slab cache msh@raspberrypi:~ $ sudo cat /proc/slabinfo slabinfo - version: 2.</description>
+    </item>
+    
+  </channel>
+</rss>

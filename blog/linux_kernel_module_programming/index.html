@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Linux kernel module programming | msh1307</title>
+<meta name="keywords" content="kernel module programming, Linux kernel module, Linux kernel">
+<meta name="description" content="Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.
+커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.
+모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.
+lsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.
+이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다.">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/linux_kernel_module_programming/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Linux kernel module programming" />
+<meta property="og:description" content="Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.
+커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.
+모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.
+lsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.
+이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/linux_kernel_module_programming/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2023-01-20T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-01-20T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Linux kernel module programming"/>
+<meta name="twitter:description" content="Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.
+커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.
+모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.
+lsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.
+이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Linux kernel module programming",
+      "item": "https://msh1307.kr/blog/linux_kernel_module_programming/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Linux kernel module programming",
+  "name": "Linux kernel module programming",
+  "description": "Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.\n커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.\n모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.\nlsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.\n이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다.",
+  "keywords": [
+    "kernel module programming", "Linux kernel module", "Linux kernel"
+  ],
+  "articleBody": "Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.\n커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.\n모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.\nlsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.\n이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다. rmmod를 통해서 커널에 적재된 모듈을 제거할 수 있다. Hello World /* * hello-1.c - The simplest kernel module. */ #include /* Needed by all modules */ #include /* Needed for KERN_INFO */ int init_module(void) { printk(KERN_INFO \"Hello world 1.\\n\"); /* * A non 0 return means init_module failed; module can't be loaded. */ return 0; } void cleanup_module(void) { printk(KERN_INFO \"Goodbye world 1.\\n\"); } 커널 모듈은 최소 두가지 함수를 갖추고 있어야 한다.\n하나는 init_module()이고 또 하나는 cleanup_module()이다.\ninit_module은 insmod를 통해서 커널에 로딩될때 호출되는 초기화 함수이다.\ncleanup_module은 rmmod를 통해서 모듈이 제거될때 호출되는 함수다.\n이름과 상관없이 init, cleanup 함수를 작성할 수 있다. 뒤에서 더 알아볼 예정이다.\nprintk, log level printk()는 유저와 통신하기 위한 함수가 아니다.\n이 함수가 호출되면 커널의 logging mechanism이 수행되고, 이 logging mechanism은 수행한 함수의 정보를 기록하거나 경고를 알린다.\n각각의 printk 선언은 우선순위를 통해서 제공되는데 그 우선순위는 아래와 같다.\nName\nString\nAlias function\nKERN_EMERG\n“0”\npr_emerg()\nKERN_ALERT\n“1”\npr_alert()\nKERN_CRIT\n“2”\npr_crit()\nKERN_ERR\n“3”\npr_err()\nKERN_WARNING\n“4”\npr_warn()\nKERN_NOTICE\n“5”\npr_notice()\nKERN_INFO\n“6”\npr_info()\nKERN_DEBUG\n“7”\npr_debug() and pr_devel() if DEBUG is defined\nKERN_DEFAULT\n“”\nKERN_CONT\n“c”\npr_cont()\n따로 우선순위를 명시하지 않았다면, DEFAULT_MESSAGE_LOGEVEL이 사용된다.\nint_console_loglevel에 따라서 더 높은 심각도, 즉 log level이 낮은 경우에 로그가 터미널에 출력된다.\ncat /proc/sys/kernel/printk 다음을 통해서 현재 터미널의 default log level을 확인할 수 있다.\n4 4 1 7 일반적으로 다음과 같은 결과가 나올텐데, 이때 가장 앞에 4가 console_loglevel이다.\nconsole log level(여기선 4)보다 심각도가 높으면 콘솔에 출력된다.\nKbuild kbuild system은 리눅스 버젼 2.6.x대에 도입된 새로운 kernel build system이다.\nkbuild는 모든 복잡성을 숨길수 있는 간단한 하나의 makefile을 제공한다.\n이 makefile을 사용해서 make로 module을 build 할 수 있다.\nGoal Goal을 정의하는 것은 Kbuild에서 가장 중요한 부분이다.\nGoal은 build 과정을 통해 최종적으로 만들어져야 할 것, 컴파일 옵션, 사용되야하는 하위 디렉토리를 정의한다.\n간단한 kbuild makefile의 일부를 확인해보면 아래와 같다.\nobj-y += foo.o 위 구문이 의미하는 바는 디렉토리 내에 foo.o란 이름의 한개의 오브젝트가 있다는 것이다.\n만약 모듈로 만든다면 obj-m이란 변수가 사용된다.\n즉 아래와 같이 된다.\nobj-$(CONFIG_FOO) += foo.o $(CONFIG_FOO)는 y(built-in)나 m(module)의 값을 갖는다.\n만약 CONFIG_FOO가 y나 m의 값을 갖지 않는다면 이 파일은 컴파일되거나 링크되지 않는다.\nKernel Module Compile 앞에 hello world 예제를 Makefile로 컴파일해보면 아래와 같다.\nobj-m += hello-1.o all: make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules clean: make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean make -j `nproc을을 make modules make modules_install INSTALL_MOD_PATH=../../ 커널 빌드할때 modules_install을 해주고 얻은 경로를 -C로 넘겨주면 원하는 커널 버전에 맞게 커널 모듈을 빌드할 수 있다.\nall과 clean은 단순 사용자의 편의를 위해 추가되었다고 볼 수 있다.\nmake로 컴파일을 하면, .o가 대체된 .ko 확장자를 가진 파일이 생긴다.\ninsmod를 통해 해당 모듈을 적재할 수 있고, rmmod를 통해 제거할 수 있다.\n/var/log/messages를 살펴보면, hello world 로그가 찍힌 것을 확인할 수 있다.\nHello World - 2 init과 cleanup 함수를 재명명할 수 있다.\n이때 module_init과 module_exit 매크로가 필요하다.\n위 매크로들은 linux/init.h에 정의되어 있다.\n예제는 다음과 같다.\n/* * hello-2.c - Demonstrating the module_init() and module_exit() macros. * This is preferred over using init_module() and cleanup_module(). */ #include /* Needed by all modules */ #include /* Needed for KERN_INFO */ #include /* Needed for the macros */ static int __init hello_2_init(void) { printk(KERN_INFO \"Hello, world 2\\n\"); return 0; } static void __exit hello_2_exit(void) { printk(KERN_INFO \"Goodbye, world 2\\n\"); } module_init(hello_2_init); module_exit(hello_2_exit); Modules VS Programs 프로그램들은 보통 Main 함수부터 시작된다.\n하지만 커널 모듈은 항상 _init_module 혹은 module_init 같은 함수의 호출로 시작된다.\n위와 같은 함수들을 entry function이라고 부른다.\nentry function은 모듈의 시작을 의미하는데, 기능적으로 모듈이 어떤 역할을 하는지, 필요로 할때 모듈이 작동될 수 있도록 커널을 설정하는 역할을 한다.\n수행되고 나서 cleanup_module 혹은 module_exit 의 이름으로 사용자가 구체화한 함수의 호출을 통해 종료된다.\n이와 같은 종료 함수는 entry function이 수행한 모든 기능들을 수행하기 전으로 되돌린다.\nFunctions available to modules 일반적으로 프로그램을 작성할때, printf 같은 자신이 정의하지 않은 라이브러리 함수를 사용한다.\n이때 printf 같은 라이브러리 함수들은 나중에 사용되기 위해서 linking을 거치게 된다.\n하지만 커널 모듈은 이런 부분에서 일반적인 프로그램과 다르다.\n위에서 작성한 hello world 모듈을 예로 들어보면, printk 라는 라이브러리 함수를 사용했지만 실제로 I/O library를 include 하지 않았다.\n그 이유는 모듈은 insmod가 수행되면서, printk와 같은 함수들의 symbol이 결정되는 object file이기 때문이다.\n각 symbols의 함수적 정의는 커널이 제공한다.\n이러한 symbol들은 /proc/kallsyms에서 확인할 수 있다.\nUser Space VS Kernel Space 커널은 유저에게 자원에 대한 접근 권한을 부여하지 않는다.\n다음 사진은 인텔 기준으로 총 4개의 ring이 있다.\nOS가 CPU를 사용할때, 사용자가 CPU가 사용할때를 나눠놓았다.\n별다른 의미는 없다.\n라이브러리 함수도 자원에 액세스해야할때는 Kernel에게 요청한다.\n그 요청을 syscall이라고 한다.\nsyscall을 하면, Kernel에 그 syscall에 알맞는 처리를 해주고, 사용자에게 알려준다.\n예를 들어 printf가 호출될때, printf는 format에 맞춘다던가 하는 처리를 해주고 결국 write syscall을 호출한다.\n이때 커널이 superviser mode로 IO를 처리해주고, user mode로 돌아온다.\nprintf 함수를 일종의 거대한 wrapper로 볼 수 있다.\nName Space C 프로그램을 작성할때, 일반적으로 프로그래머는 가독성을 보장하는 변수를 사용한다.\n만약 다른 사람의 전역변수에 해당하는 전역변수명을 재사용한다면, namespace pollution 문제가 생긴다.\n커널에서 아주 작은 모듈이라고 할지라도 작성된 모듈이 커널 전체에 linking 될텐데 위 문제를 고려한다면 이것은 분명히 주목할만한 문제가 된다.\n위 문제점을 피하기 위한 가장 좋은 방법은, 프로그래머만의 잘 정의된 prefix를 사용하고, 모두 static으로 정의하는 것이다.\nCode Space 프로세스가 만들어졌을때, 커널은 가상 메모리를 프로세스에게 할당한다.\n그리고 프로세스를 위해 할당된 메모리 주소는 서로 겹치지 않는다.\n예를 들어 각각의 프로세스들이 0xbffff978 라는 주소에 접근할때 실제로 접근하는 물리적 메모리의 주소는 다르다.\n일종의 offset 개념으로 위와 같은 주소를 사용한다.\n대부분의 경우 프로세스는 다른 프로세스의 메모리 영역에 접근하지 못한다.\n커널은 위 논리에 맞게 자신만의 메모리 영역을 가지고 있다.\n모듈은 커널에 동적으로 탑재되고 제거될수 있으므로 각각의 모듈들은 자신만의 메모리보다 커널의 code space를 공유한다.\n그래서 만약 어떤 모듈이 segfault 같은 에러를 발생시킨다면, kernel panic이 발생하게 된다.\nDevice drivers 드라이버는 모듈의 종류중 하나인데, 하드웨어를 위한 기능을 제공한다.\n리눅스에서 VFS를 지원해서 통일되게 파일들을 다룰 수 있다.\n각각의 하드웨어는 /dev에 위치해있는 파일 이름으로 나타내어질 수 있다.\nVFS 덕분에 간단하게 파일을 다루듯이 read, write 등의 연산을 통해서 하드웨어를 컨트롤 할 수 있다.\napplication이 파일에 대한 IO를 수행하게 되면, 일반적으로 VFS는 inode 메타데이터를 확인해서 특정 파일시스템의 fops를 찾게 되며, 이 fops를 기반으로 read, write 등을 수행한다.\n만약 device file이라면, major number를 통해 device driver를 찾는다.\n이때 device driver의 초기화 과정에서 등록된 fops를 기반으로 호출하게 된다.\nMajor \u0026 Minor Numbers 다음 표는 3개의 IDE hard drive에 대한 정보가 나타나 있다.\n# ls -l /dev/hda[1-3] brw-rw---- 1 root disk 3, 1 Jul 5 2000 /dev/hda1 brw-rw---- 1 root disk 3, 2 Jul 5 2000 /dev/hda2 brw-rw---- 1 root disk 3, 3 Jul 5 2000 /dev/hda3 컴마 이후의 숫자는 장치의 major number를 나타낸다.\n두번째 번호는 minor number를 나타낸다. major number는 어떤 드라이버가 하드웨어에 접근하기 위해 사용되는가를 나타낸다.\n각각의 드라이버는 고유의 major number가 부여되어있다.\n만약 모든 major number가 같다면, 해당 major number가 부여된 장치들은 모두 같은 드라이버에 의해 컨트롤 됨을 나타낸다.\nminor number는 같은 드라이버에 의해 컨트롤되는 장치들을 구분하기 위한 용도로 사용된다.\nDevice files 장치들은 두가지 타입 : character device와 block device로 나뉜다.\nblock device와 character device의 가장 큰 차이점은 Application의 I/O 요구가 있을 시, 데이터를 File System에서 읽어오느냐 Character Device(Raw device)에서 읽어오느냐의 차이다.\nblock device는 System Buffer를 사용하여 블록이나 섹터 등의 정해진 단위로 데이터를 전송한다.\nhdd나 CD/DVD 같은 것들이 block device라고 볼 수 있다.\nI/O 전송 속도가 높은것이 특징이다.\ncharacter device는 block device와는 달리 buffer를 따로 사용하지 않는다.\n그래서 output이 block device에 비해서 유동적이다.\n버퍼 처리를 Application이 제어해서 속도도 Application에 따라서 다를 수 있다.\n# ls -l /dev/hda[1-3] brw-rw---- 1 root disk 3, 1 Jul 5 2000 /dev/hda1 brw-rw---- 1 root disk 3, 2 Jul 5 2000 /dev/hda2 brw-rw---- 1 root disk 3, 3 Jul 5 2000 /dev/hda3 character device와 block device는 가장 앞에 문자를 보고 알 수 있다.\n여기선 모두 b로 block device이다.\ncharacter device는 c로 표시된다.\n시스템에 설치된 모든 device 파일들은 mknod를 통해 생성되었다.\nmajor number가 12, minor number로 2를 가지는 coffee 라는 이름의 character device를 생성하기 위해서는 mknod /dev/coffee c 12 2를 입력하면 된다.\n꼭 device file이 /dev에만 있어야 하는것은 아니지만 일반적으로 잘 관리하기 위해서 /dev에 많이 넣는다.\ndevice file에 어떤 장치가 접근하려 할때, 커널은 device file의 major number를 사용해서 어떤 드라이버가 해당 device file에 대한 접근을 제어하기 위해서 사용되는지 판단한다.\n즉, minor number는 커널에게 별 의미없는 숫자라고 말할 수 있다.\n유일하게 드라이버가 minor number를 사용해 여러가지 하드웨어들을 구분한다.\n여기서 하드웨어는 조금 추상적인 상태의 하드웨어를 의미한다.\n다음 두개의 디바이스 파일을 살펴보자.\n% ls -l /dev/fd0 /dev/fd0u1680 brwxrwxrwx 1 root floppy 2, 0 Jul 5 2000 /dev/fd0 brw-rw---- 1 root floppy 2, 44 Jul 5 2000 /dev/fd0u1680 하나의 플로피 디스크를 넣더라도, 위와 같은 결과가 나올것이다.\n그 이유는 하나의 플로피 디스크가 두 개의 서로 다른 minor number를 가지고 있기 때문이다.\n위 예시 때문에 조금 추상적인 상태의 하드웨어라고 언급한 것이다.\nfile_operations structure file_operations 구조체는 /linux/fs.h에 정의되어있다.\n구조체의 각각의 부분은 드라이버가 정의한 어떤 함수들의 주소에 대응된다.\n다음은 file_operations 구조체이다.\nstruct file_operations { struct module *owner; loff_t (*llseek) (struct file *, loff_t, int); ssize_t (*read) (struct file *, char __user *, size_t, loff_t *); ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *); ssize_t (*read_iter) (struct kiocb *, struct iov_iter *); ssize_t (*write_iter) (struct kiocb *, struct iov_iter *); int (*iterate) (struct file *, struct dir_context *); int (*iterate_shared) (struct file *, struct dir_context *); __poll_t (*poll) (struct file *, struct poll_table_struct *); long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long); long (*compat_ioctl) (struct file *, unsigned int, unsigned long); int (*mmap) (struct file *, struct vm_area_struct *); unsigned long mmap_supported_flags; int (*open) (struct inode *, struct file *); int (*flush) (struct file *, fl_owner_t id); int (*release) (struct inode *, struct file *); int (*fsync) (struct file *, loff_t, loff_t, int datasync); int (*fasync) (int, struct file *, int); int (*lock) (struct file *, int, struct file_lock *); ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int); unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long); int (*check_flags)(int); int (*setfl)(struct file *, unsigned long); int (*flock) (struct file *, int, struct file_lock *); ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int); ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int); int (*setlease)(struct file *, long, struct file_lock **, void **); long (*fallocate)(struct file *file, int mode, loff_t offset,loff_t len); void (*show_fdinfo)(struct seq_file *m, struct file *f); #ifndef CONFIG_MMU unsigned (*mmap_capabilities)(struct file *); #endif ssize_t (*copy_file_range)(struct file *, loff_t, struct file *, loff_t, size_t, unsigned int); int (*clone_file_range)(struct file *, loff_t, struct file *, loff_t, u64); ssize_t (*dedupe_file_range)(struct file *, u64, u64, struct file *, u64); } __randomize_layout; 드라이버가 구현하지 않는 몇몇 기능들도 존재한다.\n그런 경우에는 진입점이 NULL로 세팅되어야 한다.\nstruct file_operations fops = { .read = device_read, .write = device_write, .open = device_open, .release = device_release }; 위와 같은 방식으로 사용할 수 있다.\nfile structure 각각의 디바이스들은 linux/fs.h에 정의된 커널의 file 구조체로 표현될 수 있다.\n하지만 위의 구조체는 커널 수준에서 사용되므로 유저레벨의 사용 환경에선 확인할 수 없다.\nfile 구조체의 객체는 보통 flip라고 불린다.\nRegistering a Device 시스템에 드라이버를 설치한다는 것은 커널에 등록을 해야한다는 것을 의미한다.\n이 말은 모듈의 초기화 동안 major number를 드라이버에 할당한다는 것과 같은 의미이다.\nregister_chrdev() register_chrdev 함수를 보면 다음과 같다.\nint register_chrdev(unsigned int major, const char *name, struct file_operations *fops); 커널에 디바이스 드라이버의 major number를 등록한다.\n이때 minor number를 넘기지 않는 이유는 커널이 나중에 디바이스 파일을 이 major number를 보고 저기로 넘기기 때문이다.\nminor number는 그냥 device files를 만들때 필요하다.\n드라이버가 처리하기 위해 fops 등록하는 역할이다.\n중복을 막기 위해서 register_chrdev 함수에 0을 전달하면, 커널은 동적으로 할당한 major number를 리턴한다.\nregister_chrdev()대신 요즘엔 register_chrdev_region, alloc_chrdev_region 들을 써서 minor number도 미리 예약한다.\ndevice 파일을 만들려면 major, minor를 다 지정해서 cdev_init/cdev_add 혹은 device_create같은 애들을 사용해서 직접 디바이스 파일을 생성해도된다.\ndev_t Device descriptor type.\nmajor, minor 번호가 조합되어있다.\nMAJOR(dev_t dev) MINOR(dev_t dev) MKDEV(int ma, int mi) linux/kdev_t.h에서 정의된 매크로를 확인할 수 있다.\n#define MINORBITS 20 #define MINORMASK ((1U \u003c\u003c MINORBITS) - 1) #define MAJOR(dev) ((unsigned int) ((dev) \u003e\u003e MINORBITS)) #define MINOR(dev) ((unsigned int) ((dev) \u0026 MINORMASK)) #define MKDEV(ma,mi) (((ma) \u003c\u003c MINORBITS) | (mi)) cdev 커널 내부적으로 char dev 표현할때 쓰는 구조체이다.\n/* include/linux/cdev.h */ struct cdev { struct kobject kobj; struct module *owner; const struct file_operations *ops; /* 디바이스에서 정의된 file_operations */ struct list_head list; /* cdev 리스트 */ dev_t dev; /* 디바이스 번호 (주번호와 부번호가 각각 저장되어있음) */ unsigned int count; } __randomize_layout; alloc_chrdev_region() alloc_chrdev_region() 은 동적으로 디바이스 번호 할당해주는 함수이다.\nint alloc_chrdev_region(dev_t *dev, unsigned int firstminor, unsigned int count, char* name) 원형은 위와 같다.\n동적으로 할당해주기 때문에 미리 디바이스 파일을 못 만든다.\n/proc/devices 읽고 major number 얻어서 자동으로 등록하는 스크립트를 통해서 해결할 수 있긴 하다.\nregister_chrdev_region() int register_chrdev_region(dev_t first, unsigned int count, char *name); register_chrdev_region() 함수는 디바이스 번호 알고있으면 쓰는 함수다.\ncdev_init() void cdev_init(struct cdev * cdev, const struct file_operations * fops); cdev_init은 cdev 구조체 초기화 해주는 함수다.\ncdev_add() int cdev_add(struct cdev * p, dev_t dev, unsigned count); cdev_add 함수는 디바이스를 등록해주는 함수다.\nclass_create() struct class* class_create(struct module* owner, const char* name) class는 디바이스의 그룹이다.\n/sys/class 에서 클래스를 확인할 수 있다.\n그룹을 나누기 위해 존재하는 것 같다.\ndevice_create() struct device* device_create(struct class* class, struct device parent, dev_t devt, const char* fmt, …) 장치를 생성한다.\n/dev에 아직 디바이스 파일이 안생겼으니, device_create 함수로 디바이스 파일을 생성할 수 있다.\nTHIS_MODULE #define THIS_MODULE (\u0026__this_module) 이렇게 정의되어있다.\n아래 모듈 구조체의 포인터라고 생각하면 된다.\nstruct module { enum module_state state; /* Member of list of modules */ struct list_head list; /* Unique handle for this module */ char name[MODULE_NAME_LEN]; /* Sysfs stuff. */ struct module_kobject mkobj; struct module_attribute *modinfo_attrs; const char *version; const char *srcversion; struct kobject *holders_dir; /* Exported symbols */ const struct kernel_symbol *syms; const s32 *crcs; unsigned int num_syms; /* Kernel parameters. */ #ifdef CONFIG_SYSFS struct mutex param_lock; #endif struct kernel_param *kp; unsigned int num_kp; /* GPL-only exported symbols. */ unsigned int num_gpl_syms; const struct kernel_symbol *gpl_syms; const s32 *gpl_crcs; #ifdef CONFIG_UNUSED_SYMBOLS /* unused exported symbols. */ const struct kernel_symbol *unused_syms; const s32 *unused_crcs; unsigned int num_unused_syms; /* GPL-only, unused exported symbols. */ unsigned int num_unused_gpl_syms; const struct kernel_symbol *unused_gpl_syms; const s32 *unused_gpl_crcs; #endif #ifdef CONFIG_MODULE_SIG /* Signature was verified. */ bool sig_ok; #endif bool async_probe_requested; /* symbols that will be GPL-only in the near future. */ const struct kernel_symbol *gpl_future_syms; const s32 *gpl_future_crcs; unsigned int num_gpl_future_syms; /* Exception table */ unsigned int num_exentries; struct exception_table_entry *extable; /* Startup function. */ int (*init)(void); /* Core layout: rbtree is accessed frequently, so keep together. */ struct module_layout core_layout __module_layout_align; struct module_layout init_layout; /* Arch-specific module values */ struct mod_arch_specific arch; unsigned long taints;\t/* same bits as kernel:taint_flags */ #ifdef CONFIG_GENERIC_BUG /* Support for BUG */ unsigned num_bugs; struct list_head bug_list; struct bug_entry *bug_table; #endif #ifdef CONFIG_KALLSYMS /* Protected by RCU and/or module_mutex: use rcu_dereference() */ struct mod_kallsyms *kallsyms; struct mod_kallsyms core_kallsyms; /* Section attributes */ struct module_sect_attrs *sect_attrs; /* Notes attributes */ struct module_notes_attrs *notes_attrs; #endif /* The command line arguments (may be mangled). People like keeping pointers to this stuff */ char *args; #ifdef CONFIG_SMP /* Per-cpu data. */ void __percpu *percpu; unsigned int percpu_size; #endif #ifdef CONFIG_TRACEPOINTS unsigned int num_tracepoints; struct tracepoint * const *tracepoints_ptrs; #endif #ifdef HAVE_JUMP_LABEL struct jump_entry *jump_entries; unsigned int num_jump_entries; #endif #ifdef CONFIG_TRACING unsigned int num_trace_bprintk_fmt; const char **trace_bprintk_fmt_start; #endif #ifdef CONFIG_EVENT_TRACING struct trace_event_call **trace_events; unsigned int num_trace_events; struct trace_eval_map **trace_evals; unsigned int num_trace_evals; #endif #ifdef CONFIG_FTRACE_MCOUNT_RECORD unsigned int num_ftrace_callsites; unsigned long *ftrace_callsites; #endif #ifdef CONFIG_LIVEPATCH bool klp; /* Is this a livepatch module? */ bool klp_alive; /* Elf information */ struct klp_modinfo *klp_info; #endif #ifdef CONFIG_MODULE_UNLOAD /* What modules depend on me? */ struct list_head source_list; /* What modules do I depend on? */ struct list_head target_list; /* Destruction function. */ void (*exit)(void); atomic_t refcnt; #endif #ifdef CONFIG_CONSTRUCTORS /* Constructor functions. */ ctor_fn_t *ctors; unsigned int num_ctors; #endif #ifdef CONFIG_FUNCTION_ERROR_INJECTION struct error_injection_entry *ei_funcs; unsigned int num_ei_funcs; #endif } ____cacheline_aligned __randomize_layout; 다음과 같은 모듈 구조체를 가리킨다.\n말 그대로 THIS_MODULE이다.\n#include #include static int myinit(void) { /* Set by default based on the module file name. */ pr_info(\"name = %s\\n\", THIS_MODULE-\u003ename); pr_info(\"version = %s\\n\", THIS_MODULE-\u003eversion); return 0; } static void myexit(void) {} module_init(myinit) module_exit(myexit) MODULE_VERSION(\"1.0\"); MODULE_LICENSE(\"GPL\"); 이런식으로 THIS_MODULE을 쓸 수 있다.\nExample fops - open #include #include #include #include #include #include #include #include #include #include #include #define DEVICE_NAME \"chardev\" #define DEVICE_FILE_NAME \"chardev\" #define MAJOR_NUM 100 static int chardev_open(struct inode *inode, struct file *file) { printk(\"chardev_open\"); return 0; } struct file_operations chardev_fops = { .open = chardev_open, }; static int chardev_init(void) { int ret_val; ret_val = register_chrdev(MAJOR_NUM, DEVICE_NAME, \u0026chardev_fops); if (ret_val \u003c 0) { printk(KERN_ALERT \"%s failed with %d\\n\", \"Sorry, registering the character device \", ret_val); return ret_val; } printk(KERN_INFO \"%s The major device number is %d.\\n\", \"Registeration is a success\", MAJOR_NUM); printk(KERN_INFO \"If you want to talk to the device driver,\\n\"); printk(KERN_INFO \"you'll have to create a device file. \\n\"); printk(KERN_INFO \"We suggest you use:\\n\"); printk(KERN_INFO \"mknod %s c %d 0\\n\", DEVICE_FILE_NAME, MAJOR_NUM); printk(KERN_INFO \"The device file name is important, because\\n\"); printk(KERN_INFO \"the ioctl program assumes that's the\\n\"); printk(KERN_INFO \"file you'll use.\\n\"); return 0; } static void chardev_exit(void) { unregister_chrdev(MAJOR_NUM, DEVICE_NAME); } module_init(chardev_init); module_exit(chardev_exit); fops 구조체에 .open에 함수 주소를 따로 할당해놓고, device open시 커널 로그를 찍는 예제이다.\nExample fops - open, release, read, write #include #include #include #include #include #include #include #include #include #include #include MODULE_LICENSE(\"Dual BSD/GPL\"); #define DRIVER_NAME \"chardev\" #define BUFFER_SIZE 256 static const unsigned int MINOR_BASE = 0; static const unsigned int MINOR_NUM = 2; static unsigned int chardev_major; static struct cdev chardev_cdev; static struct class *chardev_class = NULL; static int chardev_open(struct inode *, struct file *); static int chardev_release(struct inode *, struct file *); static ssize_t chardev_read(struct file *, char *, size_t, loff_t *); static ssize_t chardev_write(struct file *, const char *, size_t, loff_t *); struct file_operations chardev_fops = { .open = chardev_open, .release = chardev_release, .read = chardev_read, .write = chardev_write, }; struct data { unsigned char buffer[BUFFER_SIZE]; }; static int chardev_init(void) { int alloc_ret = 0; int cdev_err = 0; int minor; dev_t dev; printk(\"The chardev_init() function has been called.\"); alloc_ret = alloc_chrdev_region(\u0026dev, MINOR_BASE, MINOR_NUM, DRIVER_NAME); if (alloc_ret != 0) { printk(KERN_ERR \"alloc_chrdev_region = %d\\n\", alloc_ret); return -1; } //Get the major number value in dev. chardev_major = MAJOR(dev); dev = MKDEV(chardev_major, MINOR_BASE); //initialize a cdev structure cdev_init(\u0026chardev_cdev, \u0026chardev_fops); chardev_cdev.owner = THIS_MODULE; //add a char device to the system cdev_err = cdev_add(\u0026chardev_cdev, dev, MINOR_NUM); if (cdev_err != 0) { printk(KERN_ERR \"cdev_add = %d\\n\", alloc_ret); unregister_chrdev_region(dev, MINOR_NUM); return -1; } chardev_class = class_create(THIS_MODULE, \"chardev\"); if (IS_ERR(chardev_class)) { printk(KERN_ERR \"class_create\\n\"); cdev_del(\u0026chardev_cdev); unregister_chrdev_region(dev, MINOR_NUM); return -1; } for (minor = MINOR_BASE; minor \u003c MINOR_BASE + MINOR_NUM; minor++) { device_create(chardev_class, NULL, MKDEV(chardev_major, minor), NULL, \"chardev%d\", minor); } return 0; } static void chardev_exit(void) { int minor; dev_t dev = MKDEV(chardev_major, MINOR_BASE); printk(\"The chardev_exit() function has been called.\"); for (minor = MINOR_BASE; minor \u003c MINOR_BASE + MINOR_NUM; minor++) { device_destroy(chardev_class, MKDEV(chardev_major, minor)); } class_destroy(chardev_class); cdev_del(\u0026chardev_cdev); unregister_chrdev_region(dev, MINOR_NUM); } static int chardev_open(struct inode *inode, struct file *file) { char *str = \"helloworld\"; int ret; struct data *p = kmalloc(sizeof(struct data), GFP_KERNEL); printk(\"The chardev_open() function has been called.\"); if (p == NULL) { printk(KERN_ERR \"kmalloc - Null\"); return -ENOMEM; } ret = strlcpy(p-\u003ebuffer, str, sizeof(p-\u003ebuffer)); if(ret \u003e strlen(str)){ printk(KERN_ERR \"strlcpy - too long (%d)\",ret); } file-\u003eprivate_data = p; return 0; } static int chardev_release(struct inode *inode, struct file *file) { printk(\"The chardev_release() function has been called.\"); if (file-\u003eprivate_data) { kfree(file-\u003eprivate_data); file-\u003eprivate_data = NULL; } return 0; } static ssize_t chardev_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) { struct data *p = filp-\u003eprivate_data; printk(\"The chardev_write() function has been called.\"); printk(\"Before calling the copy_from_user() function : %p, %s\",p-\u003ebuffer,p-\u003ebuffer); if (copy_from_user(p-\u003ebuffer, buf, count) != 0) { return -EFAULT; } printk(\"After calling the copy_from_user() function : %p, %s\",p-\u003ebuffer,p-\u003ebuffer); return count; } static ssize_t chardev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) { struct data *p = filp-\u003eprivate_data; printk(\"The chardev_read() function has been called.\"); if(count \u003e BUFFER_SIZE){ count = BUFFER_SIZE; } if (copy_to_user(buf, p-\u003ebuffer, count) != 0) { return -EFAULT; } return count; } module_init(chardev_init); module_exit(chardev_exit); IOCTL(input/output control) read, write 오퍼레이션을 통한 읽기 쓰기는 가능할지 몰라도, 하드웨어 제어 및 상태 정보 확인은 불가능하다.\nioctl() 함수쓰면 하드웨어 제어가 가능하고, 상태 정보도 얻을 수 있다.\n#include int ioctl(int d, int request, ...); 첫번째 인자는 fd, 두번째 인자는 디바이스에게 전달할 명령이다.\n개발자의 필요에 따라 추가적인 인자를 생성할 수 있다.\n/usr/include/asm/ioctl.h 헤더파일에 ioctl의 커맨드 번호를 작성하는데 사용해야하는 매크로가 있다.\nrw에 대한 정보를 담아서 고유한 ioctl 식별자를 만드는걸 도와주기 위한 매크로라고 생각하면 된다.\nMacroDescriptionMacroDescription_IO(int type, int number)type, number 값만 전달하는 단순한 ioctl에 사용됩니다. _IOR(int type, int number, data_type) 디바이스 드라이버에서 데이터를 읽는 ioctl에 사용됩니다._IOW(int type, int number, data_type)디바이스 드라이버에서 데이터를 쓰는 ioctl에 사용됩니다._IORW(int type, int number, data_type)디바이스 드라이버에서 데이터를 쓰고 읽는 ioctl에 사용됩니다. type\n디바이스 드라이버에 할당된 8비트 정수이다. number\n8비트 정수이다.\n디바이스 드라이버내에서 서비스하는 서로 다른 종류의 ioctl 명령마다 각기 다른 고유번호를 가지고 있어야한다. data_type\n클라이언트와 드라이버간에 교환되는 바이트 수를 계산하는 데 사용되는 유형 이름이다. Example ioctl #include #include #include #include #include #include #include #include #include #include #include #include \"chardev.h\" MODULE_LICENSE(\"Dual BSD/GPL\"); #define DRIVER_NAME \"chardev\" static const unsigned int MINOR_BASE = 0; static const unsigned int MINOR_NUM = 1; static unsigned int chardev_major; static struct cdev chardev_cdev; static struct class *chardev_class = NULL; static int chardev_open(struct inode *, struct file *); static int chardev_release(struct inode *, struct file *); static ssize_t chardev_read(struct file *, char *, size_t, loff_t *); static ssize_t chardev_write(struct file *, const char *, size_t, loff_t *); static long chardev_ioctl(struct file *, unsigned int, unsigned long); struct file_operations s_chardev_fops = { .open = chardev_open, .release = chardev_release, .read = chardev_read, .write = chardev_write, .unlocked_ioctl = chardev_ioctl, }; static int chardev_init(void) { int alloc_ret = 0; int cdev_err = 0; int minor = 0; dev_t dev; printk(\"The chardev_init() function has been called.\"); alloc_ret = alloc_chrdev_region(\u0026dev, MINOR_BASE, MINOR_NUM, DRIVER_NAME); if (alloc_ret != 0) { printk(KERN_ERR \"alloc_chrdev_region = %d\\n\", alloc_ret); return -1; } //Get the major number value in dev. chardev_major = MAJOR(dev); dev = MKDEV(chardev_major, MINOR_BASE); //initialize a cdev structure cdev_init(\u0026chardev_cdev, \u0026s_chardev_fops); chardev_cdev.owner = THIS_MODULE; //add a char device to the system cdev_err = cdev_add(\u0026chardev_cdev, dev, MINOR_NUM); if (cdev_err != 0) { printk(KERN_ERR \"cdev_add = %d\\n\", alloc_ret); unregister_chrdev_region(dev, MINOR_NUM); return -1; } chardev_class = class_create(THIS_MODULE, \"chardev\"); if (IS_ERR(chardev_class)) { printk(KERN_ERR \"class_create\\n\"); cdev_del(\u0026chardev_cdev); unregister_chrdev_region(dev, MINOR_NUM); return -1; } device_create(chardev_class, NULL, MKDEV(chardev_major, minor), NULL, \"chardev%d\", minor); return 0; } static void chardev_exit(void) { int minor = 0; dev_t dev = MKDEV(chardev_major, MINOR_BASE); printk(\"The chardev_exit() function has been called.\"); device_destroy(chardev_class, MKDEV(chardev_major, minor)); class_destroy(chardev_class); cdev_del(\u0026chardev_cdev); unregister_chrdev_region(dev, MINOR_NUM); } static int chardev_open(struct inode *inode, struct file *file) { printk(\"The chardev_open() function has been called.\"); return 0; } static int chardev_release(struct inode *inode, struct file *file) { printk(\"The chardev_close() function has been called.\"); return 0; } static ssize_t chardev_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos) { printk(\"The chardev_write() function has been called.\"); return count; } static ssize_t chardev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos) { printk(\"The chardev_read() function has been called.\"); return count; } static struct ioctl_info info; static long chardev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) { printk(\"The chardev_ioctl() function has been called.\"); switch (cmd) { case SET_DATA: printk(\"SET_DATA\\n\"); if (copy_from_user(\u0026info, (void __user *)arg, sizeof(info))) { return -EFAULT; } printk(\"info.size : %ld, info.buf : %s\",info.size, info.buf); break; case GET_DATA: printk(\"GET_DATA\\n\"); if (copy_to_user((void __user *)arg, \u0026info, sizeof(info))) { return -EFAULT; } break; default: printk(KERN_WARNING \"unsupported command %d\\n\", cmd); return -EFAULT; } return 0; } module_init(chardev_init); module_exit(chardev_exit); #ifndef CHAR_DEV_H_ #define CHAR_DEV_H_ #include struct ioctl_info{ unsigned long size; char buf[128]; }; #define IOCTL_MAGIC 'G' #define SET_DATA _IOW(IOCTL_MAGIC, 2 ,struct ioctl_info) #define GET_DATA _IOR(IOCTL_MAGIC, 3 ,struct ioctl_info) #endif obj-m += chardev.o all: make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules clean: make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean 유저모드에서 ioctl을 호출하면 sys_ioctl이 호출되고, fops에 등록된 chardev_ioctl이 최종적으로 호출된다.\n테스트 코드는 다음과 같다.\n#include #include #include #include #include #include #include #include \"chardev.h\" int main() { int fd; struct ioctl_info set_info; struct ioctl_info get_info; set_info.size = 100; strncpy(set_info.buf,\"lazenca.0x0\",11); if ((fd = open(\"/dev/chardev0\", O_RDWR)) \u003c 0){ printf(\"Cannot open /dev/chardev0. Try again later.\\n\"); } if (ioctl(fd, SET_DATA, \u0026set_info) \u003c 0){ printf(\"Error : SET_DATA.\\n\"); } if (ioctl(fd, GET_DATA, \u0026get_info) \u003c 0){ printf(\"Error : SET_DATA.\\n\"); } printf(\"get_info.size : %ld, get_info.buf : %s\\n\", get_info.size, get_info.buf); if (close(fd) != 0){ printf(\"Cannot close.\\n\"); } return 0; } ",
+  "wordCount" : "4024",
+  "inLanguage": "en",
+  "datePublished": "2023-01-20T00:00:00Z",
+  "dateModified": "2023-01-20T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/linux_kernel_module_programming/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      Linux kernel module programming
+    </h1>
+    <div class="post-meta">
+
+
+January 2023
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#kernel-module" aria-label="Kernel module?">Kernel module?</a></li>
+                <li>
+                    <a href="#lsmod-insmod-rmmod" aria-label="lsmod insmod rmmod">lsmod insmod rmmod</a></li>
+                <li>
+                    <a href="#hello-world" aria-label="Hello World">Hello World</a></li>
+                <li>
+                    <a href="#printk-log-level" aria-label="printk, log level">printk, log level</a></li>
+                <li>
+                    <a href="#kbuild" aria-label="Kbuild">Kbuild</a><ul>
+                        
+                <li>
+                    <a href="#goal" aria-label="Goal">Goal</a></li></ul>
+                </li>
+                <li>
+                    <a href="#kernel-module-compile" aria-label="Kernel Module Compile">Kernel Module Compile</a></li>
+                <li>
+                    <a href="#hello-world---2" aria-label="Hello World - 2">Hello World - 2</a></li>
+                <li>
+                    <a href="#modules-vs-programs" aria-label="Modules VS Programs">Modules VS Programs</a></li>
+                <li>
+                    <a href="#functions-available-to-modules" aria-label="Functions available to modules">Functions available to modules</a></li>
+                <li>
+                    <a href="#user-space-vs-kernel-space" aria-label="User Space VS Kernel Space">User Space VS Kernel Space</a></li>
+                <li>
+                    <a href="#name-space" aria-label="Name Space">Name Space</a></li>
+                <li>
+                    <a href="#code-space" aria-label="Code Space">Code Space</a></li>
+                <li>
+                    <a href="#device-drivers" aria-label="Device drivers">Device drivers</a><ul>
+                        
+                <li>
+                    <a href="#major--minor-numbers" aria-label="Major &amp;amp; Minor Numbers">Major &amp; Minor Numbers</a></li>
+                <li>
+                    <a href="#device-files" aria-label="Device files">Device files</a></li></ul>
+                </li>
+                <li>
+                    <a href="#file_operations-structure" aria-label="file_operations structure">file_operations structure</a></li>
+                <li>
+                    <a href="#file-structure" aria-label="file structure">file structure</a></li>
+                <li>
+                    <a href="#registering-a-device" aria-label="Registering a Device">Registering a Device</a><ul>
+                        
+                <li>
+                    <a href="#register_chrdev" aria-label="register_chrdev()">register_chrdev()</a></li>
+                <li>
+                    <a href="#dev_t" aria-label="dev_t">dev_t</a></li>
+                <li>
+                    <a href="#cdev" aria-label="cdev">cdev</a></li>
+                <li>
+                    <a href="#alloc_chrdev_region" aria-label="alloc_chrdev_region()">alloc_chrdev_region()</a></li>
+                <li>
+                    <a href="#register_chrdev_region" aria-label="register_chrdev_region()">register_chrdev_region()</a></li>
+                <li>
+                    <a href="#cdev_init" aria-label="cdev_init()">cdev_init()</a></li>
+                <li>
+                    <a href="#cdev_add" aria-label="cdev_add()">cdev_add()</a></li>
+                <li>
+                    <a href="#class_create" aria-label="class_create()">class_create()</a></li>
+                <li>
+                    <a href="#device_create" aria-label="device_create()">device_create()</a></li>
+                <li>
+                    <a href="#this_module" aria-label="THIS_MODULE">THIS_MODULE</a></li></ul>
+                </li>
+                <li>
+                    <a href="#example-fops---open" aria-label="Example fops - open">Example fops - open</a></li>
+                <li>
+                    <a href="#example-fops---open-release-read-write" aria-label="Example fops - open, release, read, write">Example fops - open, release, read, write</a></li>
+                <li>
+                    <a href="#ioctlinputoutput-control" aria-label="IOCTL(input/output control)">IOCTL(input/output control)</a></li>
+                <li>
+                    <a href="#example-ioctl" aria-label="Example ioctl">Example ioctl</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="kernel-module">Kernel module?<a hidden class="anchor" aria-hidden="true" href="#kernel-module">#</a></h1>
+<hr>
+<p>모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.<br>
+커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.<br>
+모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.</p>
+<h1 id="lsmod-insmod-rmmod">lsmod insmod rmmod<a hidden class="anchor" aria-hidden="true" href="#lsmod-insmod-rmmod">#</a></h1>
+<hr>
+<ul>
+<li><code>lsmod</code>를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.<br>
+이때 lsmod는 <code>/proc/modules</code>를 읽고나서 좀 더 예쁘게 바꿔준다.</li>
+<li><code>insmod</code>를 통해서 커널에 모듈을 적재할 수 있다.</li>
+<li><code>rmmod</code>를 통해서 커널에 적재된 모듈을 제거할 수 있다.</li>
+</ul>
+<h1 id="hello-world">Hello World<a hidden class="anchor" aria-hidden="true" href="#hello-world">#</a></h1>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">* hello-1.c - The simplest kernel module.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">*/</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/module.h&gt; /* Needed by all modules */</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/kernel.h&gt; /* Needed for KERN_INFO */</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">init_module</span>(<span style="color:#66d9ef">void</span>) { 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;Hello world 1.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	* A non 0 return means init_module failed; module can&#39;t be loaded. 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">cleanup_module</span>(<span style="color:#66d9ef">void</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;Goodbye world 1.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>커널 모듈은 최소 두가지 함수를 갖추고 있어야 한다.<br>
+하나는 <code>init_module()</code>이고 또 하나는 <code>cleanup_module()</code>이다.<br>
+<code>init_module</code>은 <code>insmod</code>를 통해서 커널에 로딩될때 호출되는 초기화 함수이다.<br>
+<code>cleanup_module</code>은 <code>rmmod</code>를 통해서 모듈이 제거될때 호출되는 함수다.<br>
+이름과 상관없이 init, cleanup 함수를 작성할 수 있다. 뒤에서 더 알아볼 예정이다.</p>
+<h1 id="printk-log-level">printk, log level<a hidden class="anchor" aria-hidden="true" href="#printk-log-level">#</a></h1>
+<hr>
+<p>printk()는 유저와 통신하기 위한 함수가 아니다.<br>
+이 함수가 호출되면 커널의 logging mechanism이 수행되고, 이 logging mechanism은 수행한 함수의 정보를 기록하거나 경고를 알린다.<br>
+각각의 printk 선언은 우선순위를 통해서 제공되는데 그 우선순위는 아래와 같다.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%">
+<col style="width: 11%">
+<col style="width: 66%">
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>String</p></th>
+<th class="head"><p>Alias function</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>KERN_EMERG</p></td>
+<td><p>“0”</p></td>
+<td><p><a class="reference internal" href="#c.pr_emerg" title="pr_emerg"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_emerg()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>KERN_ALERT</p></td>
+<td><p>“1”</p></td>
+<td><p><a class="reference internal" href="#c.pr_alert" title="pr_alert"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_alert()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>KERN_CRIT</p></td>
+<td><p>“2”</p></td>
+<td><p><a class="reference internal" href="#c.pr_crit" title="pr_crit"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_crit()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>KERN_ERR</p></td>
+<td><p>“3”</p></td>
+<td><p><a class="reference internal" href="#c.pr_err" title="pr_err"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_err()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>KERN_WARNING</p></td>
+<td><p>“4”</p></td>
+<td><p><a class="reference internal" href="#c.pr_warn" title="pr_warn"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_warn()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>KERN_NOTICE</p></td>
+<td><p>“5”</p></td>
+<td><p><a class="reference internal" href="#c.pr_notice" title="pr_notice"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_notice()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p>KERN_INFO</p></td>
+<td><p>“6”</p></td>
+<td><p><a class="reference internal" href="#c.pr_info" title="pr_info"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_info()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>KERN_DEBUG</p></td>
+<td><p>“7”</p></td>
+<td><p><a class="reference internal" href="#c.pr_debug" title="pr_debug"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_debug()</span></code></a> and <a class="reference internal" href="#c.pr_devel" title="pr_devel"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_devel()</span></code></a> if DEBUG is defined</p></td>
+</tr>
+<tr class="row-even"><td><p>KERN_DEFAULT</p></td>
+<td><p>“”</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>KERN_CONT</p></td>
+<td><p>“c”</p></td>
+<td><p><a class="reference internal" href="#c.pr_cont" title="pr_cont"><code class="xref c c-func docutils literal notranslate"><span class="pre">pr_cont()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<p>따로 우선순위를 명시하지 않았다면, <code>DEFAULT_MESSAGE_LOGEVEL</code>이 사용된다.<br>
+<code>int_console_loglevel</code>에 따라서 더 높은 심각도, 즉 log level이 낮은 경우에 로그가 터미널에 출력된다.</p>
+<pre tabindex="0"><code>cat /proc/sys/kernel/printk
+</code></pre><p>다음을 통해서 현재 터미널의 <code>default log level</code>을 확인할 수 있다.</p>
+<pre tabindex="0"><code>4       4       1       7
+</code></pre><p>일반적으로 다음과 같은 결과가 나올텐데, 이때 가장 앞에 4가 <code>console_loglevel</code>이다.<br>
+<code>console log level</code>(여기선 4)보다 심각도가 높으면 콘솔에 출력된다.</p>
+<h1 id="kbuild">Kbuild<a hidden class="anchor" aria-hidden="true" href="#kbuild">#</a></h1>
+<hr>
+<p>kbuild system은 리눅스 버젼 2.6.x대에 도입된 새로운 kernel build system이다.<br>
+kbuild는 모든 복잡성을 숨길수 있는 간단한 하나의 makefile을 제공한다.<br>
+이 makefile을 사용해서 make로 module을 build 할 수 있다.</p>
+<h2 id="goal">Goal<a hidden class="anchor" aria-hidden="true" href="#goal">#</a></h2>
+<hr>
+<p>Goal을 정의하는 것은 Kbuild에서 가장 중요한 부분이다.<br>
+Goal은 build 과정을 통해 최종적으로 만들어져야 할 것, 컴파일 옵션, 사용되야하는 하위 디렉토리를 정의한다.<br>
+간단한 kbuild makefile의 일부를 확인해보면 아래와 같다.</p>
+<pre tabindex="0"><code>obj-y += foo.o
+</code></pre><p>위 구문이 의미하는 바는 디렉토리 내에 foo.o란 이름의 한개의 오브젝트가 있다는 것이다.<br>
+만약 모듈로 만든다면 obj-m이란 변수가 사용된다.<br>
+즉 아래와 같이 된다.</p>
+<pre tabindex="0"><code>obj-$(CONFIG_FOO) += foo.o
+</code></pre><p><code>$(CONFIG_FOO)</code>는 <code>y(built-in)</code>나 <code>m(module)</code>의 값을 갖는다.<br>
+만약 <code>CONFIG_FOO</code>가 y나 m의 값을 갖지 않는다면 이 파일은 컴파일되거나 링크되지 않는다.</p>
+<h1 id="kernel-module-compile">Kernel Module Compile<a hidden class="anchor" aria-hidden="true" href="#kernel-module-compile">#</a></h1>
+<hr>
+<p>앞에 hello world 예제를 Makefile로 컴파일해보면 아래와 같다.</p>
+<pre tabindex="0"><code>obj-m += hello-1.o
+all:
+make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+clean:
+make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+</code></pre><pre tabindex="0"><code>make -j `nproc을을
+make modules
+make modules_install INSTALL_MOD_PATH=../../
+</code></pre><p>커널 빌드할때 modules_install을 해주고 얻은 경로를 -C로 넘겨주면 원하는 커널 버전에 맞게 커널 모듈을 빌드할 수 있다.</p>
+<p>all과 clean은 단순 사용자의 편의를 위해 추가되었다고 볼 수 있다.<br>
+make로 컴파일을 하면, <code>.o</code>가 대체된 <code>.ko</code> 확장자를 가진 파일이 생긴다.</p>
+<p><code>insmod</code>를 통해 해당 모듈을 적재할 수 있고, <code>rmmod</code>를 통해 제거할 수 있다.<br>
+<code>/var/log/messages</code>를 살펴보면, hello world 로그가 찍힌 것을 확인할 수 있다.</p>
+<h1 id="hello-world---2">Hello World - 2<a hidden class="anchor" aria-hidden="true" href="#hello-world---2">#</a></h1>
+<hr>
+<p>init과 cleanup 함수를 재명명할 수 있다.<br>
+이때 <code>module_init</code>과 <code>module_exit</code> 매크로가 필요하다.<br>
+위 매크로들은 <code>linux/init.h</code>에 정의되어 있다.<br>
+예제는 다음과 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">* hello-2.c - Demonstrating the module_init() and module_exit() macros.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">* This is preferred over using init_module() and cleanup_module().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">*/</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/module.h&gt; /* Needed by all modules */</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/kernel.h&gt; /* Needed for KERN_INFO */</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/init.h&gt; /* Needed for the macros */</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> __init <span style="color:#a6e22e">hello_2_init</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{ 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;Hello, world 2</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> __exit <span style="color:#a6e22e">hello_2_exit</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{ 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;Goodbye, world 2</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_init</span>(hello_2_init);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_exit</span>(hello_2_exit);
+</span></span></code></pre></div><h1 id="modules-vs-programs">Modules VS Programs<a hidden class="anchor" aria-hidden="true" href="#modules-vs-programs">#</a></h1>
+<hr>
+<p>프로그램들은 보통 Main 함수부터 시작된다.<br>
+하지만 커널 모듈은 항상 <code>_init_module</code> 혹은 <code>module_init</code> 같은 함수의 호출로 시작된다.<br>
+위와 같은 함수들을 <code>entry function</code>이라고 부른다.<br>
+entry function은 모듈의 시작을 의미하는데, 기능적으로 모듈이 어떤 역할을 하는지, 필요로 할때 모듈이 작동될 수 있도록 커널을 설정하는 역할을 한다.</p>
+<p>수행되고 나서 <code>cleanup_module</code> 혹은 <code>module_exit</code> 의 이름으로 사용자가 구체화한 함수의 호출을 통해 종료된다.<br>
+이와 같은 종료 함수는 <code>entry function</code>이 수행한 모든 기능들을 수행하기 전으로 되돌린다.</p>
+<h1 id="functions-available-to-modules">Functions available to modules<a hidden class="anchor" aria-hidden="true" href="#functions-available-to-modules">#</a></h1>
+<hr>
+<p>일반적으로 프로그램을 작성할때, <code>printf</code> 같은 자신이 정의하지 않은 라이브러리 함수를 사용한다.<br>
+이때 <code>printf</code> 같은 라이브러리 함수들은 나중에 사용되기 위해서 <code>linking</code>을 거치게 된다.</p>
+<p>하지만 커널 모듈은 이런 부분에서 일반적인 프로그램과 다르다.<br>
+위에서 작성한 hello world 모듈을 예로 들어보면, <code>printk</code> 라는 라이브러리 함수를 사용했지만 실제로 <code>I/O library</code>를 include 하지 않았다.<br>
+그 이유는 모듈은 <code>insmod</code>가 수행되면서, <code>printk</code>와 같은 함수들의 symbol이 결정되는 object file이기 때문이다.<br>
+각 symbols의 함수적 정의는 커널이 제공한다.<br>
+이러한 symbol들은 <code>/proc/kallsyms</code>에서 확인할 수 있다.</p>
+<h1 id="user-space-vs-kernel-space">User Space VS Kernel Space<a hidden class="anchor" aria-hidden="true" href="#user-space-vs-kernel-space">#</a></h1>
+<hr>
+<p>커널은 유저에게 자원에 대한 접근 권한을 부여하지 않는다.<br>
+다음 사진은 인텔 기준으로 총 4개의 ring이 있다.<br>
+OS가 CPU를 사용할때, 사용자가 CPU가 사용할때를 나눠놓았다.<br>
+별다른 의미는 없다.<br>
+<img loading="lazy" src="/blog/Linux_kernel_module_programming/image1.png" alt=""  />
+<br>
+라이브러리 함수도 자원에 액세스해야할때는 Kernel에게 요청한다.<br>
+그 요청을 syscall이라고 한다.<br>
+syscall을 하면, Kernel에 그 syscall에 알맞는 처리를 해주고, 사용자에게 알려준다.<br>
+예를 들어 printf가 호출될때, printf는 format에 맞춘다던가 하는 처리를 해주고 결국 write syscall을 호출한다.<br>
+이때 커널이 superviser mode로 IO를 처리해주고, user mode로 돌아온다.<br>
+printf 함수를 일종의 거대한 wrapper로 볼 수 있다.</p>
+<h1 id="name-space">Name Space<a hidden class="anchor" aria-hidden="true" href="#name-space">#</a></h1>
+<hr>
+<p>C 프로그램을 작성할때, 일반적으로 프로그래머는 가독성을 보장하는 변수를 사용한다.<br>
+만약 다른 사람의 전역변수에 해당하는 전역변수명을 재사용한다면, namespace pollution 문제가 생긴다.</p>
+<p>커널에서 아주 작은 모듈이라고 할지라도 작성된 모듈이 커널 전체에 linking 될텐데 위 문제를 고려한다면 이것은 분명히 주목할만한 문제가 된다.<br>
+위 문제점을 피하기 위한 가장 좋은 방법은, 프로그래머만의 잘 정의된 prefix를 사용하고, 모두 static으로 정의하는 것이다.</p>
+<h1 id="code-space">Code Space<a hidden class="anchor" aria-hidden="true" href="#code-space">#</a></h1>
+<hr>
+<p>프로세스가 만들어졌을때, 커널은 가상 메모리를 프로세스에게 할당한다.<br>
+그리고 프로세스를 위해 할당된 메모리 주소는 서로 겹치지 않는다.<br>
+예를 들어 각각의 프로세스들이 0xbffff978 라는 주소에 접근할때 실제로 접근하는 물리적 메모리의 주소는 다르다.<br>
+일종의 offset 개념으로 위와 같은 주소를 사용한다.<br>
+대부분의 경우 프로세스는 다른 프로세스의 메모리 영역에 접근하지 못한다.</p>
+<p>커널은 위 논리에 맞게 자신만의 메모리 영역을 가지고 있다.<br>
+모듈은 커널에 동적으로 탑재되고 제거될수 있으므로 각각의 모듈들은 자신만의 메모리보다 커널의 code space를 공유한다.<br>
+그래서 만약 어떤 모듈이 segfault 같은 에러를 발생시킨다면, kernel panic이 발생하게 된다.</p>
+<h1 id="device-drivers">Device drivers<a hidden class="anchor" aria-hidden="true" href="#device-drivers">#</a></h1>
+<hr>
+<p>드라이버는 모듈의 종류중 하나인데, 하드웨어를 위한 기능을 제공한다.<br>
+리눅스에서 VFS를 지원해서 통일되게 파일들을 다룰 수 있다.<br>
+각각의 하드웨어는 /dev에 위치해있는 파일 이름으로 나타내어질 수 있다.<br>
+VFS 덕분에 간단하게 파일을 다루듯이 read, write 등의 연산을 통해서 하드웨어를 컨트롤 할 수 있다.<br>
+<img loading="lazy" src="/blog/Linux_kernel_module_programming/image2.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/Linux_kernel_module_programming/image3.png" alt=""  />
+<br>
+application이 파일에 대한 IO를 수행하게 되면, 일반적으로 VFS는 inode 메타데이터를 확인해서 특정 파일시스템의 fops를 찾게 되며, 이 fops를 기반으로 read, write 등을 수행한다.<br>
+만약 device file이라면, major number를 통해 device driver를 찾는다.<br>
+이때 device driver의 초기화 과정에서 등록된 fops를 기반으로 호출하게 된다.</p>
+<h2 id="major--minor-numbers">Major &amp; Minor Numbers<a hidden class="anchor" aria-hidden="true" href="#major--minor-numbers">#</a></h2>
+<hr>
+<p>다음 표는 3개의 IDE hard drive에 대한 정보가 나타나 있다.</p>
+<pre tabindex="0"><code># ls -l /dev/hda[1-3]
+brw-rw---- 1 root disk 3, 1 Jul 5 2000 /dev/hda1
+brw-rw---- 1 root disk 3, 2 Jul 5 2000 /dev/hda2
+brw-rw---- 1 root disk 3, 3 Jul 5 2000 /dev/hda3
+</code></pre><p>컴마 이후의 숫자는 장치의 <code>major number</code>를 나타낸다.<br>
+두번째 번호는 <code>minor number</code>를 나타낸다. <code>major number</code>는 어떤 드라이버가 하드웨어에 접근하기 위해 사용되는가를 나타낸다.</p>
+<p>각각의 드라이버는 고유의 <code>major number</code>가 부여되어있다.<br>
+만약 모든 <code>major number</code>가 같다면, 해당 <code>major number</code>가 부여된 장치들은 모두 같은 드라이버에 의해 컨트롤 됨을 나타낸다.</p>
+<p><code>minor number</code>는 같은 드라이버에 의해 컨트롤되는 장치들을 구분하기 위한 용도로 사용된다.</p>
+<h2 id="device-files">Device files<a hidden class="anchor" aria-hidden="true" href="#device-files">#</a></h2>
+<hr>
+<p>장치들은 두가지 타입 : <code>character device</code>와 <code>block device</code>로 나뉜다.</p>
+<p>block device와 character device의 가장 큰 차이점은 Application의 I/O 요구가 있을 시, 데이터를 File System에서 읽어오느냐 Character Device(Raw device)에서 읽어오느냐의 차이다.</p>
+<p><code>block device</code>는 <code>System Buffer</code>를 사용하여 블록이나 섹터 등의 정해진 단위로 데이터를 전송한다.<br>
+hdd나 CD/DVD 같은 것들이 block device라고 볼 수 있다.<br>
+I/O 전송 속도가 높은것이 특징이다.</p>
+<p><code>character device</code>는 block device와는 달리 buffer를 따로 사용하지 않는다.<br>
+그래서 output이 block device에 비해서 유동적이다.<br>
+버퍼 처리를 Application이 제어해서 속도도 Application에 따라서 다를 수 있다.</p>
+<pre tabindex="0"><code># ls -l /dev/hda[1-3]
+brw-rw---- 1 root disk 3, 1 Jul 5 2000 /dev/hda1
+brw-rw---- 1 root disk 3, 2 Jul 5 2000 /dev/hda2
+brw-rw---- 1 root disk 3, 3 Jul 5 2000 /dev/hda3
+</code></pre><p>character device와 block device는 가장 앞에 문자를 보고 알 수 있다.<br>
+여기선 모두 b로 block device이다.<br>
+character device는 c로 표시된다.</p>
+<p>시스템에 설치된 모든 device 파일들은 <code>mknod</code>를 통해 생성되었다.<br>
+major number가 12, minor number로 2를 가지는 coffee 라는 이름의 character device를 생성하기 위해서는 <code>mknod /dev/coffee c 12 2</code>를 입력하면 된다.<br>
+꼭 device file이 /dev에만 있어야 하는것은 아니지만 일반적으로 잘 관리하기 위해서 /dev에 많이 넣는다.</p>
+<p>device file에 어떤 장치가 접근하려 할때, 커널은 device file의 <code>major number</code>를 사용해서 어떤 드라이버가 해당 <code>device file</code>에 대한 접근을 제어하기 위해서 사용되는지 판단한다.</p>
+<p>즉, <code>minor number</code>는 커널에게 별 의미없는 숫자라고 말할 수 있다.<br>
+유일하게 드라이버가 minor number를 사용해 여러가지 하드웨어들을 구분한다.<br>
+여기서 하드웨어는 조금 추상적인 상태의 하드웨어를 의미한다.<br>
+다음 두개의 디바이스 파일을 살펴보자.</p>
+<pre tabindex="0"><code>% ls -l /dev/fd0 /dev/fd0u1680
+brwxrwxrwx 1 root floppy 2, 0 Jul 5 2000 /dev/fd0
+brw-rw---- 1 root floppy 2, 44 Jul 5 2000 /dev/fd0u1680
+</code></pre><p>하나의 플로피 디스크를 넣더라도, 위와 같은 결과가 나올것이다.<br>
+그 이유는 하나의 플로피 디스크가 두 개의 서로 다른 minor number를 가지고 있기 때문이다.<br>
+위 예시 때문에 조금 추상적인 상태의 하드웨어라고 언급한 것이다.</p>
+<h1 id="file_operations-structure">file_operations structure<a hidden class="anchor" aria-hidden="true" href="#file_operations-structure">#</a></h1>
+<hr>
+<p><code>file_operations</code> 구조체는 <code>/linux/fs.h</code>에 정의되어있다.<br>
+구조체의 각각의 부분은 드라이버가 정의한 어떤 함수들의 주소에 대응된다.</p>
+<p>다음은 <code>file_operations</code> 구조체이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> file_operations {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> module <span style="color:#f92672">*</span>owner;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">loff_t</span> (<span style="color:#f92672">*</span>llseek) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span>, <span style="color:#66d9ef">int</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>read) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">char</span> __user <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>write) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> __user <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>read_iter) (<span style="color:#66d9ef">struct</span> kiocb <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> iov_iter <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>write_iter) (<span style="color:#66d9ef">struct</span> kiocb <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> iov_iter <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>iterate) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> dir_context <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>iterate_shared) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> dir_context <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">__poll_t</span> (<span style="color:#f92672">*</span>poll) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> poll_table_struct <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">long</span> (<span style="color:#f92672">*</span>unlocked_ioctl) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">long</span> (<span style="color:#f92672">*</span>compat_ioctl) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>mmap) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> vm_area_struct <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> mmap_supported_flags;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>open) (<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>flush) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">fl_owner_t</span> id);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>release) (<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>fsync) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span>, <span style="color:#66d9ef">loff_t</span>, <span style="color:#66d9ef">int</span> datasync);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>fasync) (<span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">int</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>lock) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">struct</span> file_lock <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>sendpage) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> page <span style="color:#f92672">*</span>, <span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">int</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#a6e22e">long</span> (<span style="color:#f92672">*</span>get_unmapped_area)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>check_flags)(<span style="color:#66d9ef">int</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>setfl)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>flock) (<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">struct</span> file_lock <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>splice_write)(<span style="color:#66d9ef">struct</span> pipe_inode_info <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>splice_read)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> pipe_inode_info <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>setlease)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">long</span>, <span style="color:#66d9ef">struct</span> file_lock <span style="color:#f92672">**</span>, <span style="color:#66d9ef">void</span> <span style="color:#f92672">**</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">long</span> (<span style="color:#f92672">*</span>fallocate)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>file, <span style="color:#66d9ef">int</span> mode, <span style="color:#66d9ef">loff_t</span> offset,<span style="color:#66d9ef">loff_t</span> len);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>show_fdinfo)(<span style="color:#66d9ef">struct</span> seq_file <span style="color:#f92672">*</span>m, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>f);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifndef CONFIG_MMU
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">unsigned</span> (<span style="color:#f92672">*</span>mmap_capabilities)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>copy_file_range)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>clone_file_range)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">loff_t</span>, u64);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">ssize_t</span> (<span style="color:#f92672">*</span>dedupe_file_range)(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, u64, u64, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, u64);
+</span></span><span style="display:flex;"><span>} __randomize_layout;
+</span></span></code></pre></div><p>드라이버가 구현하지 않는 몇몇 기능들도 존재한다.<br>
+그런 경우에는 진입점이 NULL로 세팅되어야 한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> file_operations fops <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>	.read <span style="color:#f92672">=</span> device_read,
+</span></span><span style="display:flex;"><span>	.write <span style="color:#f92672">=</span> device_write,
+</span></span><span style="display:flex;"><span>	.open <span style="color:#f92672">=</span> device_open,
+</span></span><span style="display:flex;"><span>	.release <span style="color:#f92672">=</span> device_release
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>위와 같은 방식으로 사용할 수 있다.</p>
+<h1 id="file-structure">file structure<a hidden class="anchor" aria-hidden="true" href="#file-structure">#</a></h1>
+<hr>
+<p>각각의 디바이스들은 linux/fs.h에 정의된 커널의 file 구조체로 표현될 수 있다.<br>
+하지만 위의 구조체는 커널 수준에서 사용되므로 유저레벨의 사용 환경에선 확인할 수 없다.<br>
+file 구조체의 객체는 보통 flip라고 불린다.</p>
+<h1 id="registering-a-device">Registering a Device<a hidden class="anchor" aria-hidden="true" href="#registering-a-device">#</a></h1>
+<hr>
+<p>시스템에 드라이버를 설치한다는 것은 커널에 등록을 해야한다는 것을 의미한다.<br>
+이 말은 모듈의 초기화 동안 major number를 드라이버에 할당한다는 것과 같은 의미이다.</p>
+<h2 id="register_chrdev">register_chrdev()<a hidden class="anchor" aria-hidden="true" href="#register_chrdev">#</a></h2>
+<hr>
+<p>register_chrdev 함수를 보면 다음과 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">register_chrdev</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> major, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name, <span style="color:#66d9ef">struct</span> file_operations <span style="color:#f92672">*</span>fops);
+</span></span></code></pre></div><p>커널에 디바이스 드라이버의 major number를 등록한다.</p>
+<p>이때 <code>minor number</code>를 넘기지 않는 이유는 커널이 나중에 디바이스 파일을 이 major number를 보고 저기로 넘기기 때문이다.<br>
+minor number는 그냥 device files를 만들때 필요하다.<br>
+드라이버가 처리하기 위해 fops 등록하는 역할이다.</p>
+<p>중복을 막기 위해서 <code>register_chrdev</code> 함수에 0을 전달하면, 커널은 동적으로 할당한 major number를 리턴한다.</p>
+<p><code>register_chrdev()</code>대신 요즘엔 <code>register_chrdev_region</code>, <code>alloc_chrdev_region</code> 들을 써서 minor number도 미리 예약한다.<br>
+device 파일을 만들려면 major, minor를 다 지정해서 <code>cdev_init</code>/<code>cdev_add</code> 혹은 <code>device_create</code>같은 애들을 사용해서 직접 디바이스 파일을 생성해도된다.</p>
+<h2 id="dev_t">dev_t<a hidden class="anchor" aria-hidden="true" href="#dev_t">#</a></h2>
+<hr>
+<p>Device descriptor type.<br>
+major, minor 번호가 조합되어있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#a6e22e">MAJOR</span>(<span style="color:#66d9ef">dev_t</span> dev)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">MINOR</span>(<span style="color:#66d9ef">dev_t</span> dev)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">MKDEV</span>(<span style="color:#66d9ef">int</span> ma, <span style="color:#66d9ef">int</span> mi)
+</span></span></code></pre></div><p>linux/kdev_t.h에서 정의된 매크로를 확인할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#define MINORBITS       20
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define MINORMASK       ((1U &lt;&lt; MINORBITS) - 1)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define MAJOR(dev)      ((unsigned int) ((dev) &gt;&gt; MINORBITS))
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define MINOR(dev)      ((unsigned int) ((dev) &amp; MINORMASK))
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define MKDEV(ma,mi)    (((ma) &lt;&lt; MINORBITS) | (mi))
+</span></span></span></code></pre></div><h2 id="cdev">cdev<a hidden class="anchor" aria-hidden="true" href="#cdev">#</a></h2>
+<hr>
+<p>커널 내부적으로 char dev 표현할때 쓰는 구조체이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">/* include/linux/cdev.h */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> cdev {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> kobject kobj;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> module <span style="color:#f92672">*</span>owner;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> file_operations <span style="color:#f92672">*</span>ops; <span style="color:#75715e">/* 디바이스에서 정의된 file_operations */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> list_head list; <span style="color:#75715e">/* cdev 리스트 */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">dev_t</span> dev; <span style="color:#75715e">/* 디바이스 번호 (주번호와 부번호가 각각 저장되어있음) */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> count;
+</span></span><span style="display:flex;"><span>} __randomize_layout;
+</span></span></code></pre></div><h2 id="alloc_chrdev_region">alloc_chrdev_region()<a hidden class="anchor" aria-hidden="true" href="#alloc_chrdev_region">#</a></h2>
+<hr>
+<p><code>alloc_chrdev_region()</code> 은 동적으로 디바이스 번호 할당해주는 함수이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">alloc_chrdev_region</span>(<span style="color:#66d9ef">dev_t</span> <span style="color:#f92672">*</span>dev, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> firstminor, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> count, <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name)
+</span></span></code></pre></div><p>원형은 위와 같다.<br>
+동적으로 할당해주기 때문에 미리 디바이스 파일을 못 만든다.<br>
+<code>/proc/devices</code> 읽고 major number 얻어서 자동으로 등록하는 스크립트를 통해서 해결할 수 있긴 하다.</p>
+<h2 id="register_chrdev_region">register_chrdev_region()<a hidden class="anchor" aria-hidden="true" href="#register_chrdev_region">#</a></h2>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">register_chrdev_region</span>(<span style="color:#66d9ef">dev_t</span> first, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> count, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name);
+</span></span></code></pre></div><p><code>register_chrdev_region()</code> 함수는 디바이스 번호 알고있으면 쓰는 함수다.</p>
+<h2 id="cdev_init">cdev_init()<a hidden class="anchor" aria-hidden="true" href="#cdev_init">#</a></h2>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">cdev_init</span>(<span style="color:#66d9ef">struct</span> cdev <span style="color:#f92672">*</span> cdev, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> file_operations <span style="color:#f92672">*</span> fops);
+</span></span></code></pre></div><p>cdev_init은 cdev 구조체 초기화 해주는 함수다.</p>
+<h2 id="cdev_add">cdev_add()<a hidden class="anchor" aria-hidden="true" href="#cdev_add">#</a></h2>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">cdev_add</span>(<span style="color:#66d9ef">struct</span> cdev <span style="color:#f92672">*</span> p, <span style="color:#66d9ef">dev_t</span> dev, <span style="color:#66d9ef">unsigned</span> count);
+</span></span></code></pre></div><p>cdev_add 함수는 디바이스를 등록해주는 함수다.</p>
+<h2 id="class_create">class_create()<a hidden class="anchor" aria-hidden="true" href="#class_create">#</a></h2>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> class<span style="color:#f92672">*</span> <span style="color:#a6e22e">class_create</span>(<span style="color:#66d9ef">struct</span> module<span style="color:#f92672">*</span> owner, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name)
+</span></span></code></pre></div><p><code>class</code>는 디바이스의 그룹이다.<br>
+<code>/sys/class</code> 에서 클래스를 확인할 수 있다.<br>
+그룹을 나누기 위해 존재하는 것 같다.</p>
+<h2 id="device_create">device_create()<a hidden class="anchor" aria-hidden="true" href="#device_create">#</a></h2>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> device<span style="color:#f92672">*</span> <span style="color:#a6e22e">device_create</span>(<span style="color:#66d9ef">struct</span> class<span style="color:#f92672">*</span> class, <span style="color:#66d9ef">struct</span> device parent, <span style="color:#66d9ef">dev_t</span> devt, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> fmt, <span style="color:#960050;background-color:#1e0010">…</span>)
+</span></span></code></pre></div><p>장치를 생성한다.<br>
+/dev에 아직 디바이스 파일이 안생겼으니, <code>device_create</code> 함수로 디바이스 파일을 생성할 수 있다.</p>
+<h2 id="this_module">THIS_MODULE<a hidden class="anchor" aria-hidden="true" href="#this_module">#</a></h2>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#define THIS_MODULE (&amp;__this_module)
+</span></span></span></code></pre></div><p>이렇게 정의되어있다.<br>
+아래 모듈 구조체의 포인터라고 생각하면 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> module {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">enum</span> module_state state;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Member of list of modules */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> list_head list;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Unique handle for this module */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> name[MODULE_NAME_LEN];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Sysfs stuff. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> module_kobject mkobj;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> module_attribute <span style="color:#f92672">*</span>modinfo_attrs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>version;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>srcversion;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> kobject <span style="color:#f92672">*</span>holders_dir;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Exported symbols */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> kernel_symbol <span style="color:#f92672">*</span>syms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> s32 <span style="color:#f92672">*</span>crcs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_syms;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Kernel parameters. */</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_SYSFS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">struct</span> mutex param_lock;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">struct</span> kernel_param <span style="color:#f92672">*</span>kp;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_kp;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* GPL-only exported symbols. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_gpl_syms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> kernel_symbol <span style="color:#f92672">*</span>gpl_syms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> s32 <span style="color:#f92672">*</span>gpl_crcs;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_UNUSED_SYMBOLS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/* unused exported symbols. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> kernel_symbol <span style="color:#f92672">*</span>unused_syms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> s32 <span style="color:#f92672">*</span>unused_crcs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_unused_syms;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* GPL-only, unused exported symbols. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_unused_gpl_syms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> kernel_symbol <span style="color:#f92672">*</span>unused_gpl_syms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> s32 <span style="color:#f92672">*</span>unused_gpl_crcs;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_MODULE_SIG
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/* Signature was verified. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> sig_ok;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> async_probe_requested;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* symbols that will be GPL-only in the near future. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">struct</span> kernel_symbol <span style="color:#f92672">*</span>gpl_future_syms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> s32 <span style="color:#f92672">*</span>gpl_future_crcs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_gpl_future_syms;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Exception table */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_exentries;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> exception_table_entry <span style="color:#f92672">*</span>extable;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Startup function. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> (<span style="color:#f92672">*</span>init)(<span style="color:#66d9ef">void</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Core layout: rbtree is accessed frequently, so keep together. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> module_layout core_layout __module_layout_align;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> module_layout init_layout;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Arch-specific module values */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> mod_arch_specific arch;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> taints;	<span style="color:#75715e">/* same bits as kernel:taint_flags */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_GENERIC_BUG
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/* Support for BUG */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> num_bugs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> list_head bug_list;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> bug_entry <span style="color:#f92672">*</span>bug_table;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_KALLSYMS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/* Protected by RCU and/or module_mutex: use rcu_dereference() */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> mod_kallsyms <span style="color:#f92672">*</span>kallsyms;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> mod_kallsyms core_kallsyms;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Section attributes */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> module_sect_attrs <span style="color:#f92672">*</span>sect_attrs;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Notes attributes */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> module_notes_attrs <span style="color:#f92672">*</span>notes_attrs;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* The command line arguments (may be mangled).  People like
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">	   keeping pointers to this stuff */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>args;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_SMP
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/* Per-cpu data. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">void</span> __percpu <span style="color:#f92672">*</span>percpu;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> percpu_size;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_TRACEPOINTS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_tracepoints;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> tracepoint <span style="color:#f92672">*</span> <span style="color:#66d9ef">const</span> <span style="color:#f92672">*</span>tracepoints_ptrs;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef HAVE_JUMP_LABEL
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">struct</span> jump_entry <span style="color:#f92672">*</span>jump_entries;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_jump_entries;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_TRACING
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_trace_bprintk_fmt;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>trace_bprintk_fmt_start;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_EVENT_TRACING
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">struct</span> trace_event_call <span style="color:#f92672">**</span>trace_events;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_trace_events;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> trace_eval_map <span style="color:#f92672">**</span>trace_evals;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_trace_evals;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_FTRACE_MCOUNT_RECORD
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_ftrace_callsites;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> <span style="color:#f92672">*</span>ftrace_callsites;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_LIVEPATCH
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">bool</span> klp; <span style="color:#75715e">/* Is this a livepatch module? */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">bool</span> klp_alive;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Elf information */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> klp_modinfo <span style="color:#f92672">*</span>klp_info;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_MODULE_UNLOAD
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/* What modules depend on me? */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> list_head source_list;
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* What modules do I depend on? */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">struct</span> list_head target_list;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">/* Destruction function. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>exit)(<span style="color:#66d9ef">void</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">atomic_t</span> refcnt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_CONSTRUCTORS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#75715e">/* Constructor functions. */</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">ctor_fn_t</span> <span style="color:#f92672">*</span>ctors;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_ctors;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef CONFIG_FUNCTION_ERROR_INJECTION
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">struct</span> error_injection_entry <span style="color:#f92672">*</span>ei_funcs;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> num_ei_funcs;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>} ____cacheline_aligned __randomize_layout;
+</span></span></code></pre></div><p>다음과 같은 모듈 구조체를 가리킨다.<br>
+말 그대로 <code>THIS_MODULE</code>이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/module.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/kernel.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">myinit</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/* Set by default based on the module file name. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">pr_info</span>(<span style="color:#e6db74">&#34;name    = %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, THIS_MODULE<span style="color:#f92672">-&gt;</span>name);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">pr_info</span>(<span style="color:#e6db74">&#34;version = %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, THIS_MODULE<span style="color:#f92672">-&gt;</span>version);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">myexit</span>(<span style="color:#66d9ef">void</span>) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_init</span>(myinit)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_exit</span>(myexit)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">MODULE_VERSION</span>(<span style="color:#e6db74">&#34;1.0&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">MODULE_LICENSE</span>(<span style="color:#e6db74">&#34;GPL&#34;</span>);
+</span></span></code></pre></div><p>이런식으로 <code>THIS_MODULE</code>을 쓸 수 있다.</p>
+<h1 id="example-fops---open">Example fops - open<a hidden class="anchor" aria-hidden="true" href="#example-fops---open">#</a></h1>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/init.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/module.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/types.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/kernel.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/fs.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/cdev.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/sched.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/device.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/slab.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;asm/current.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/uaccess.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> 
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define DEVICE_NAME &#34;chardev&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define DEVICE_FILE_NAME &#34;chardev&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define MAJOR_NUM 100
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_open</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>inode, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>file)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;chardev_open&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> file_operations chardev_fops <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    .open    <span style="color:#f92672">=</span> chardev_open,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_init</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> ret_val;
+</span></span><span style="display:flex;"><span>    ret_val <span style="color:#f92672">=</span> <span style="color:#a6e22e">register_chrdev</span>(MAJOR_NUM, DEVICE_NAME, <span style="color:#f92672">&amp;</span>chardev_fops);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (ret_val <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_ALERT <span style="color:#e6db74">&#34;%s failed with %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>           <span style="color:#e6db74">&#34;Sorry, registering the character device &#34;</span>, ret_val);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> ret_val;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;%s The major device number is %d.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>       <span style="color:#e6db74">&#34;Registeration is a success&#34;</span>, MAJOR_NUM);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;If you want to talk to the device driver,</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;you&#39;ll have to create a device file. </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;We suggest you use:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;mknod %s c %d 0</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, DEVICE_FILE_NAME, MAJOR_NUM);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;The device file name is important, because</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;the ioctl program assumes that&#39;s the</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(KERN_INFO <span style="color:#e6db74">&#34;file you&#39;ll use.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">chardev_exit</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">unregister_chrdev</span>(MAJOR_NUM, DEVICE_NAME);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_init</span>(chardev_init);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_exit</span>(chardev_exit);
+</span></span></code></pre></div><p>fops 구조체에 .open에 함수 주소를 따로 할당해놓고, device open시 커널 로그를 찍는 예제이다.</p>
+<h1 id="example-fops---open-release-read-write">Example fops - open, release, read, write<a hidden class="anchor" aria-hidden="true" href="#example-fops---open-release-read-write">#</a></h1>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/init.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/module.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/types.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/kernel.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/fs.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/cdev.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/sched.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/device.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/slab.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;asm/current.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/uaccess.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">MODULE_LICENSE</span>(<span style="color:#e6db74">&#34;Dual BSD/GPL&#34;</span>);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define DRIVER_NAME &#34;chardev&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define BUFFER_SIZE 256
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>     
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> MINOR_BASE <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> MINOR_NUM  <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> chardev_major;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">struct</span> cdev chardev_cdev;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">struct</span> class <span style="color:#f92672">*</span>chardev_class <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span>     <span style="color:#a6e22e">chardev_open</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span>     <span style="color:#a6e22e">chardev_release</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_read</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_write</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> file_operations chardev_fops <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    .open    <span style="color:#f92672">=</span> chardev_open,
+</span></span><span style="display:flex;"><span>    .release <span style="color:#f92672">=</span> chardev_release,
+</span></span><span style="display:flex;"><span>    .read    <span style="color:#f92672">=</span> chardev_read,
+</span></span><span style="display:flex;"><span>    .write   <span style="color:#f92672">=</span> chardev_write,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> data {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> buffer[BUFFER_SIZE];
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_init</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> alloc_ret <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> cdev_err <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> minor;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">dev_t</span> dev;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_init() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>    alloc_ret <span style="color:#f92672">=</span> <span style="color:#a6e22e">alloc_chrdev_region</span>(<span style="color:#f92672">&amp;</span>dev, MINOR_BASE, MINOR_NUM, DRIVER_NAME);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (alloc_ret <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR  <span style="color:#e6db74">&#34;alloc_chrdev_region = %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, alloc_ret);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//Get the major number value in dev.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    chardev_major <span style="color:#f92672">=</span> <span style="color:#a6e22e">MAJOR</span>(dev);
+</span></span><span style="display:flex;"><span>    dev <span style="color:#f92672">=</span> <span style="color:#a6e22e">MKDEV</span>(chardev_major, MINOR_BASE);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//initialize a cdev structure
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">cdev_init</span>(<span style="color:#f92672">&amp;</span>chardev_cdev, <span style="color:#f92672">&amp;</span>chardev_fops);
+</span></span><span style="display:flex;"><span>    chardev_cdev.owner <span style="color:#f92672">=</span> THIS_MODULE;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//add a char device to the system
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    cdev_err <span style="color:#f92672">=</span> <span style="color:#a6e22e">cdev_add</span>(<span style="color:#f92672">&amp;</span>chardev_cdev, dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (cdev_err <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR  <span style="color:#e6db74">&#34;cdev_add = %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, alloc_ret);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">unregister_chrdev_region</span>(dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    chardev_class <span style="color:#f92672">=</span> <span style="color:#a6e22e">class_create</span>(THIS_MODULE, <span style="color:#e6db74">&#34;chardev&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">IS_ERR</span>(chardev_class)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR  <span style="color:#e6db74">&#34;class_create</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">cdev_del</span>(<span style="color:#f92672">&amp;</span>chardev_cdev);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">unregister_chrdev_region</span>(dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (minor <span style="color:#f92672">=</span> MINOR_BASE; minor <span style="color:#f92672">&lt;</span> MINOR_BASE <span style="color:#f92672">+</span> MINOR_NUM; minor<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">device_create</span>(chardev_class, NULL, <span style="color:#a6e22e">MKDEV</span>(chardev_major, minor), NULL, <span style="color:#e6db74">&#34;chardev%d&#34;</span>, minor);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">chardev_exit</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> minor; 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">dev_t</span> dev <span style="color:#f92672">=</span> <span style="color:#a6e22e">MKDEV</span>(chardev_major, MINOR_BASE);
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_exit() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (minor <span style="color:#f92672">=</span> MINOR_BASE; minor <span style="color:#f92672">&lt;</span> MINOR_BASE <span style="color:#f92672">+</span> MINOR_NUM; minor<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">device_destroy</span>(chardev_class, <span style="color:#a6e22e">MKDEV</span>(chardev_major, minor));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">class_destroy</span>(chardev_class);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cdev_del</span>(<span style="color:#f92672">&amp;</span>chardev_cdev);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">unregister_chrdev_region</span>(dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_open</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>inode, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>file)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;helloworld&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> ret;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> data <span style="color:#f92672">*</span>p <span style="color:#f92672">=</span> <span style="color:#a6e22e">kmalloc</span>(<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">struct</span> data), GFP_KERNEL);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_open() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (p <span style="color:#f92672">==</span> NULL) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR  <span style="color:#e6db74">&#34;kmalloc - Null&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>ENOMEM;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    ret <span style="color:#f92672">=</span> <span style="color:#a6e22e">strlcpy</span>(p<span style="color:#f92672">-&gt;</span>buffer, str, <span style="color:#66d9ef">sizeof</span>(p<span style="color:#f92672">-&gt;</span>buffer));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(ret <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">strlen</span>(str)){
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR <span style="color:#e6db74">&#34;strlcpy - too long (%d)&#34;</span>,ret);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    file<span style="color:#f92672">-&gt;</span>private_data <span style="color:#f92672">=</span> p;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_release</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>inode, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>file)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_release() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (file<span style="color:#f92672">-&gt;</span>private_data) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">kfree</span>(file<span style="color:#f92672">-&gt;</span>private_data);
+</span></span><span style="display:flex;"><span>        file<span style="color:#f92672">-&gt;</span>private_data <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_write</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>filp, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> __user <span style="color:#f92672">*</span>buf, <span style="color:#66d9ef">size_t</span> count, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>f_pos)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> data <span style="color:#f92672">*</span>p <span style="color:#f92672">=</span> filp<span style="color:#f92672">-&gt;</span>private_data;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_write() function has been called.&#34;</span>);   
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;Before calling the copy_from_user() function : %p, %s&#34;</span>,p<span style="color:#f92672">-&gt;</span>buffer,p<span style="color:#f92672">-&gt;</span>buffer);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">copy_from_user</span>(p<span style="color:#f92672">-&gt;</span>buffer, buf, count) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>EFAULT;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;After calling the copy_from_user() function : %p, %s&#34;</span>,p<span style="color:#f92672">-&gt;</span>buffer,p<span style="color:#f92672">-&gt;</span>buffer);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> count;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_read</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>filp, <span style="color:#66d9ef">char</span> __user <span style="color:#f92672">*</span>buf, <span style="color:#66d9ef">size_t</span> count, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>f_pos)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> data <span style="color:#f92672">*</span>p <span style="color:#f92672">=</span> filp<span style="color:#f92672">-&gt;</span>private_data;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_read() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(count <span style="color:#f92672">&gt;</span> BUFFER_SIZE){
+</span></span><span style="display:flex;"><span>        count <span style="color:#f92672">=</span> BUFFER_SIZE;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">copy_to_user</span>(buf, p<span style="color:#f92672">-&gt;</span>buffer, count) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>EFAULT;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> count;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_init</span>(chardev_init);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_exit</span>(chardev_exit);
+</span></span></code></pre></div><h1 id="ioctlinputoutput-control">IOCTL(input/output control)<a hidden class="anchor" aria-hidden="true" href="#ioctlinputoutput-control">#</a></h1>
+<hr>
+<p>read, write 오퍼레이션을 통한 읽기 쓰기는 가능할지 몰라도, 하드웨어 제어 및 상태 정보 확인은 불가능하다.<br>
+ioctl() 함수쓰면 하드웨어 제어가 가능하고, 상태 정보도 얻을 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;sys/ioctl.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">ioctl</span>(<span style="color:#66d9ef">int</span> d, <span style="color:#66d9ef">int</span> request, ...);
+</span></span></code></pre></div><p>첫번째 인자는 fd, 두번째 인자는 디바이스에게 전달할 명령이다.<br>
+개발자의 필요에 따라 추가적인 인자를 생성할 수 있다.</p>
+<p><code>/usr/include/asm/ioctl.h</code> 헤더파일에 ioctl의 커맨드 번호를 작성하는데 사용해야하는 매크로가 있다.<br>
+rw에 대한 정보를 담아서 고유한 ioctl 식별자를 만드는걸 도와주기 위한 매크로라고 생각하면 된다.</p>
+<div class="table-wrap"><table class="wrapped confluenceTable tablesorter tablesorter-default stickyTableHeaders" role="grid" resolved="" style="padding: 0px;"><colgroup><col><col></colgroup><thead class="tableFloatingHeaderOriginal"><tr role="row" class="tablesorter-headerRow"><th style="text-align: center; user-select: none;" class="confluenceTh tablesorter-header sortableHeader tablesorter-headerUnSorted" data-column="0" tabindex="0" scope="col" role="columnheader" aria-disabled="false" unselectable="on" aria-sort="none" aria-label="Macro: No sort applied, activate to apply an ascending sort"><div class="tablesorter-header-inner">Macro</div></th><th style="text-align: center; user-select: none;" class="confluenceTh tablesorter-header sortableHeader tablesorter-headerUnSorted" data-column="1" tabindex="0" scope="col" role="columnheader" aria-disabled="false" unselectable="on" aria-sort="none" aria-label="Description: No sort applied, activate to apply an ascending sort"><div class="tablesorter-header-inner">Description</div></th></tr></thead><thead class="tableFloatingHeader" style="display: none;"><tr role="row" class="tablesorter-headerRow"><th style="text-align: center; user-select: none;" class="confluenceTh tablesorter-header sortableHeader tablesorter-headerUnSorted" data-column="0" tabindex="0" scope="col" role="columnheader" aria-disabled="false" unselectable="on" aria-sort="none" aria-label="Macro: No sort applied, activate to apply an ascending sort"><div class="tablesorter-header-inner">Macro</div></th><th style="text-align: center; user-select: none;" class="confluenceTh tablesorter-header sortableHeader tablesorter-headerUnSorted" data-column="1" tabindex="0" scope="col" role="columnheader" aria-disabled="false" unselectable="on" aria-sort="none" aria-label="Description: No sort applied, activate to apply an ascending sort"><div class="tablesorter-header-inner">Description</div></th></tr></thead><tbody aria-live="polite" aria-relevant="all"><tr role="row"><td class="confluenceTd">_IO(int type, int number)</td><td class="confluenceTd">type, number 값만 전달하는 단순한 ioctl에 사용됩니다. </td></tr><tr role="row"><td class="confluenceTd">_IOR(int type, int number, data_type)&nbsp;</td><td class="confluenceTd">디바이스 드라이버에서&nbsp;데이터를 읽는 ioctl에 사용됩니다.</td></tr><tr role="row"><td class="confluenceTd">_IOW(int type, int number, data_type)</td><td class="confluenceTd"><span>디바이스 드라이버에서</span><span>&nbsp;데이터를 쓰는 ioctl에 사용됩니다.</span></td></tr><tr role="row"><td colspan="1" class="confluenceTd">_IORW(int type, int number, data_type)</td><td colspan="1" class="confluenceTd">디바이스 드라이버에서 데이터를 쓰고 읽는 ioctl에 사용됩니다.</td></tr></tbody></table></div>
+<ul>
+<li>type<br>
+디바이스 드라이버에 할당된 8비트 정수이다.</li>
+<li>number<br>
+8비트 정수이다.<br>
+디바이스 드라이버내에서 서비스하는 서로 다른 종류의 ioctl 명령마다 각기 다른 고유번호를 가지고 있어야한다.</li>
+<li>data_type<br>
+클라이언트와 드라이버간에 교환되는 바이트 수를 계산하는 데 사용되는 유형 이름이다.</li>
+</ul>
+<h1 id="example-ioctl">Example ioctl<a hidden class="anchor" aria-hidden="true" href="#example-ioctl">#</a></h1>
+<hr>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/init.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/module.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/types.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/kernel.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/fs.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/cdev.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/sched.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/device.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/slab.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;asm/current.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/uaccess.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;chardev.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">MODULE_LICENSE</span>(<span style="color:#e6db74">&#34;Dual BSD/GPL&#34;</span>);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define DRIVER_NAME &#34;chardev&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> MINOR_BASE <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> MINOR_NUM  <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> chardev_major;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">struct</span> cdev chardev_cdev;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">struct</span> class <span style="color:#f92672">*</span>chardev_class <span style="color:#f92672">=</span> NULL;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span>     <span style="color:#a6e22e">chardev_open</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span>     <span style="color:#a6e22e">chardev_release</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_read</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_write</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">size_t</span>, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">chardev_ioctl</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> file_operations s_chardev_fops <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    .open    <span style="color:#f92672">=</span> chardev_open,
+</span></span><span style="display:flex;"><span>    .release <span style="color:#f92672">=</span> chardev_release,
+</span></span><span style="display:flex;"><span>    .read    <span style="color:#f92672">=</span> chardev_read,
+</span></span><span style="display:flex;"><span>    .write   <span style="color:#f92672">=</span> chardev_write,
+</span></span><span style="display:flex;"><span>    .unlocked_ioctl <span style="color:#f92672">=</span> chardev_ioctl,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_init</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> alloc_ret <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> cdev_err <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> minor <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">dev_t</span> dev;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_init() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>    alloc_ret <span style="color:#f92672">=</span> <span style="color:#a6e22e">alloc_chrdev_region</span>(<span style="color:#f92672">&amp;</span>dev, MINOR_BASE, MINOR_NUM, DRIVER_NAME);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (alloc_ret <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR  <span style="color:#e6db74">&#34;alloc_chrdev_region = %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, alloc_ret);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//Get the major number value in dev.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    chardev_major <span style="color:#f92672">=</span> <span style="color:#a6e22e">MAJOR</span>(dev);
+</span></span><span style="display:flex;"><span>    dev <span style="color:#f92672">=</span> <span style="color:#a6e22e">MKDEV</span>(chardev_major, MINOR_BASE);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//initialize a cdev structure
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">cdev_init</span>(<span style="color:#f92672">&amp;</span>chardev_cdev, <span style="color:#f92672">&amp;</span>s_chardev_fops);
+</span></span><span style="display:flex;"><span>    chardev_cdev.owner <span style="color:#f92672">=</span> THIS_MODULE;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//add a char device to the system
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    cdev_err <span style="color:#f92672">=</span> <span style="color:#a6e22e">cdev_add</span>(<span style="color:#f92672">&amp;</span>chardev_cdev, dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (cdev_err <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR  <span style="color:#e6db74">&#34;cdev_add = %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, alloc_ret);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">unregister_chrdev_region</span>(dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    chardev_class <span style="color:#f92672">=</span> <span style="color:#a6e22e">class_create</span>(THIS_MODULE, <span style="color:#e6db74">&#34;chardev&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">IS_ERR</span>(chardev_class)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(KERN_ERR  <span style="color:#e6db74">&#34;class_create</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">cdev_del</span>(<span style="color:#f92672">&amp;</span>chardev_cdev);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">unregister_chrdev_region</span>(dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">device_create</span>(chardev_class, NULL, <span style="color:#a6e22e">MKDEV</span>(chardev_major, minor), NULL, <span style="color:#e6db74">&#34;chardev%d&#34;</span>, minor);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">chardev_exit</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> minor <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">dev_t</span> dev <span style="color:#f92672">=</span> <span style="color:#a6e22e">MKDEV</span>(chardev_major, MINOR_BASE);
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_exit() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">device_destroy</span>(chardev_class, <span style="color:#a6e22e">MKDEV</span>(chardev_major, minor));
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">class_destroy</span>(chardev_class);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cdev_del</span>(<span style="color:#f92672">&amp;</span>chardev_cdev);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">unregister_chrdev_region</span>(dev, MINOR_NUM);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_open</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>inode, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>file)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_open() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">chardev_release</span>(<span style="color:#66d9ef">struct</span> inode <span style="color:#f92672">*</span>inode, <span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>file)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_close() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_write</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>filp, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> __user <span style="color:#f92672">*</span>buf, <span style="color:#66d9ef">size_t</span> count, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>f_pos)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_write() function has been called.&#34;</span>);  
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> count;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">ssize_t</span> <span style="color:#a6e22e">chardev_read</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>filp, <span style="color:#66d9ef">char</span> __user <span style="color:#f92672">*</span>buf, <span style="color:#66d9ef">size_t</span> count, <span style="color:#66d9ef">loff_t</span> <span style="color:#f92672">*</span>f_pos)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_read() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> count;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">struct</span> ioctl_info info;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">long</span> <span style="color:#a6e22e">chardev_ioctl</span>(<span style="color:#66d9ef">struct</span> file <span style="color:#f92672">*</span>filp, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> cmd, <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> arg)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;The chardev_ioctl() function has been called.&#34;</span>);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span> (cmd) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> SET_DATA:
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;SET_DATA</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">copy_from_user</span>(<span style="color:#f92672">&amp;</span>info, (<span style="color:#66d9ef">void</span> __user <span style="color:#f92672">*</span>)arg, <span style="color:#66d9ef">sizeof</span>(info))) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>EFAULT;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;info.size : %ld, info.buf : %s&#34;</span>,info.size, info.buf);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> GET_DATA:
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">printk</span>(<span style="color:#e6db74">&#34;GET_DATA</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">copy_to_user</span>((<span style="color:#66d9ef">void</span> __user <span style="color:#f92672">*</span>)arg, <span style="color:#f92672">&amp;</span>info, <span style="color:#66d9ef">sizeof</span>(info))) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>EFAULT;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">default</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">printk</span>(KERN_WARNING <span style="color:#e6db74">&#34;unsupported command %d</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, cmd);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>EFAULT;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_init</span>(chardev_init);
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">module_exit</span>(chardev_exit);
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#ifndef CHAR_DEV_H_
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define CHAR_DEV_H_
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;linux/ioctl.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> ioctl_info{
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span> size;
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">char</span> buf[<span style="color:#ae81ff">128</span>];
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>   
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define             IOCTL_MAGIC         &#39;G&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define             SET_DATA            _IOW(IOCTL_MAGIC, 2 ,struct ioctl_info)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define             GET_DATA            _IOR(IOCTL_MAGIC, 3 ,struct ioctl_info)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span></code></pre></div><pre tabindex="0"><code>obj-m += chardev.o
+
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+</code></pre><p>유저모드에서 ioctl을 호출하면 <code>sys_ioctl</code>이 호출되고, fops에 등록된 <code>chardev_ioctl</code>이 최종적으로 호출된다.<br>
+테스트 코드는 다음과 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;fcntl.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unistd.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;errno.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;sys/ioctl.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;chardev.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> fd;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> ioctl_info set_info;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">struct</span> ioctl_info get_info;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    set_info.size <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">strncpy</span>(set_info.buf,<span style="color:#e6db74">&#34;lazenca.0x0&#34;</span>,<span style="color:#ae81ff">11</span>);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ((fd <span style="color:#f92672">=</span> <span style="color:#a6e22e">open</span>(<span style="color:#e6db74">&#34;/dev/chardev0&#34;</span>, O_RDWR)) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>){
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Cannot open /dev/chardev0. Try again later.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">ioctl</span>(fd, SET_DATA, <span style="color:#f92672">&amp;</span>set_info) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>){
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Error : SET_DATA.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">ioctl</span>(fd, GET_DATA, <span style="color:#f92672">&amp;</span>get_info) <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>){
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Error : SET_DATA.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;get_info.size : %ld, get_info.buf : %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, get_info.size, get_info.buf);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">close</span>(fd) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>){
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Cannot close.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/kernel-module-programming/">kernel module programming</a></li>
+      <li><a href="https://msh1307.kr/tags/linux-kernel-module/">Linux kernel module</a></li>
+      <li><a href="https://msh1307.kr/tags/linux-kernel/">Linux kernel</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

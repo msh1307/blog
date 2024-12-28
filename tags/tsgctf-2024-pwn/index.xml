@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>TSGCTF 2024 Pwn on msh1307</title>
+    <link>https://msh1307.kr/tags/tsgctf-2024-pwn/</link>
+    <description>Recent content in TSGCTF 2024 Pwn on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 18 Dec 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/tsgctf-2024-pwn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>TSGCTF 2024 - Sqlite of Hand</title>
+      <link>https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/</link>
+      <pubDate>Wed, 18 Dec 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/</guid>
+      <description>TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.
+근데 도커를 안줘서 로되리안 났다.
+티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.
+SQLite of Hand Analysis int main() { setvbuf(stdout, NULL, _IONBF, 0); setvbuf(stdin, NULL, _IONBF, 0); setvbuf(stderr, NULL, _IONBF, 0); sqlite3 *db; sqlite3_stmt *stmt; char *buf = mmap((void *)MAP_ADDR, 0x2000, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0); if (buf == MAP_FAILED) { perror(&amp;#34;mmap&amp;#34;); return 1; } if (sqlite3_open(&amp;#34;hello.</description>
+    </item>
+    
+  </channel>
+</rss>

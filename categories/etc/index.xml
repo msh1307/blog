@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>ETC on msh1307</title>
+    <link>https://msh1307.kr/categories/etc/</link>
+    <description>Recent content in ETC on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 19 Dec 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/categories/etc/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>goyang2</title>
+      <link>https://msh1307.kr/blog/geunhwang/</link>
+      <pubDate>Thu, 19 Dec 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/geunhwang/</guid>
+      <description>친구의 피드백을 받아서 블로그에 자기 이야기를 좀 적으라고 해서 고민하다가 고양이 버프에 대해서 적기로 결정했다.
+고1 후반쯤에 한반도의 끝자락에서 고양이를 줏어왔다.
+이후 고양이 버프를 받아서 열심히 했다.
+2학년 때는 bob 갔었는데, 고양이와 떨어져서 버프를 못 받았다.
+그래서 공통교육때 과제 드랍을 시작으로 과제 드랍의 길을 걷게 되었다.
+bob때 아무래도 흥미 위주로 수업듣고 이상한거 하다 보니까 과제를 많이 놓쳤다.
+아쉽지만 그래도 재밌게 했다.
+하드웨어 수업 듣고 삘받아서 알리익스프레스에서 보이는 대로 다 사서 센터에서 납땜을 했었던 적이 있었다.</description>
+    </item>
+    
+    <item>
+      <title>Router firmware extraction &amp; ld based emulator development</title>
+      <link>https://msh1307.kr/blog/router_firmware_extraction_emulator_dev/</link>
+      <pubDate>Fri, 19 Jul 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/router_firmware_extraction_emulator_dev/</guid>
+      <description>계기 BoB 교육기간중에 갑자기 흥미가 생겨서 친구 라우터를 빼았고 UART에 땜질한다고 나대다가 부숴먹고 새로 구매했다.
+시도 당연하지만 알리산 3천원 땜질기로는 제대로된 땜질을 할 수 없었고 이걸로 열심히 기판을 지지다 망가뜨렸다.
+유튜브보고 대충 땜질을 배우고 알리에서 열풍기를 포함한 땜질 키트와 방진 마스크를 샀다.
+열풍기 써보려고 테스트하다 또 하나 더 부숴먹었다.
+납 발라놓고 열풍기로 조지니까 잘 달라붙는다.
+Firmware 추출 쿠팡에서 제일 위에 떠있는 라우터를 사왔다.
+제일 기본적으로 디버깅 인터페이스부터 찾으려고 했다.
+JTAG나 UART가 어디 없나 찾던중 UART를 찾은것 같았다.</description>
+    </item>
+    
+    <item>
+      <title>Raspberry pi server setup</title>
+      <link>https://msh1307.kr/blog/raspberry_pi_setup/</link>
+      <pubDate>Sun, 28 Jan 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/raspberry_pi_setup/</guid>
+      <description>setup raspi-img &amp;amp; switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.
+라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.
+기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.
+cat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.
+라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.
+중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.
+network interface #!/bin/bash if [ -z &amp;#34;$1&amp;#34; ]; then DELAY=&amp;#34;30&amp;#34; else DELAY=&amp;#34;$1&amp;#34; fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep &amp;#34;inet\b&amp;#34; | awk &amp;#39;{print $2}&amp;#39; | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep &amp;#34;inet\b&amp;#34; | awk &amp;#39;{print $2}&amp;#39; | cut -d/ -f1) if [ -z $EthAddr ]; then echo &amp;#34;Using WiFi&amp;#34; echo &amp;#34;wlan0 IP=$WiFiAddr&amp;#34; else echo &amp;#34;Using Ethernet!</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Blogs on msh1307</title>
+    <link>https://msh1307.kr/blog/</link>
+    <description>Recent content in Blogs on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 19 Dec 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>goyang2</title>
+      <link>https://msh1307.kr/blog/geunhwang/</link>
+      <pubDate>Thu, 19 Dec 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/geunhwang/</guid>
+      <description>친구의 피드백을 받아서 블로그에 자기 이야기를 좀 적으라고 해서 고민하다가 고양이 버프에 대해서 적기로 결정했다.
+고1 후반쯤에 한반도의 끝자락에서 고양이를 줏어왔다.
+이후 고양이 버프를 받아서 열심히 했다.
+2학년 때는 bob 갔었는데, 고양이와 떨어져서 버프를 못 받았다.
+그래서 공통교육때 과제 드랍을 시작으로 과제 드랍의 길을 걷게 되었다.
+bob때 아무래도 흥미 위주로 수업듣고 이상한거 하다 보니까 과제를 많이 놓쳤다.
+아쉽지만 그래도 재밌게 했다.
+하드웨어 수업 듣고 삘받아서 알리익스프레스에서 보이는 대로 다 사서 센터에서 납땜을 했었던 적이 있었다.</description>
+    </item>
+    
+    <item>
+      <title>TSGCTF 2024 - Sqlite of Hand</title>
+      <link>https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/</link>
+      <pubDate>Wed, 18 Dec 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/tsgctf2024_sqlite_of_hand/</guid>
+      <description>TSG CTF 소리가 들려서 들어가봤는데 Hard 0솔짜리 있길래 잡았다.
+근데 도커를 안줘서 로되리안 났다.
+티켓 열고 도커 달라고 찡찡댔는데 갑자기 솔버 나와서 ubuntu24.04 인거만 알려주고 힌트 못준다고해서 그냥 마저 랭겜했다.
+SQLite of Hand Analysis int main() { setvbuf(stdout, NULL, _IONBF, 0); setvbuf(stdin, NULL, _IONBF, 0); setvbuf(stderr, NULL, _IONBF, 0); sqlite3 *db; sqlite3_stmt *stmt; char *buf = mmap((void *)MAP_ADDR, 0x2000, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0); if (buf == MAP_FAILED) { perror(&amp;#34;mmap&amp;#34;); return 1; } if (sqlite3_open(&amp;#34;hello.</description>
+    </item>
+    
+    <item>
+      <title>CODEGATE 2024 Finals</title>
+      <link>https://msh1307.kr/blog/codegate_junior_2024/</link>
+      <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/codegate_junior_2024/</guid>
+      <description>작년 코게는 1, 2등이 영국인이였고 이번 예선때도 이스라엘, 싱가포르, 일본이 1, 2, 3등 먹었어서 3등이라도 하고 싶어서 전날에 기도하고 코엑스가서 본선을 치뤘는데 1등을 해버렸다.
+해킹 시작하고 항상 코게 1등하는 망상하면서 살았는데 이게 현실이 될줄 몰랐다.
+뭔가 오히려 CTF스러운 준비 없이 티오리 인턴하면서 리얼월드 바이너리보고 취약점도 찾았던게 도움이 많이된 것 같다.
+후유증 반년은 갈듯.
+트로피 예쁘다.
+이번에 육군 대회 나갔을때도 군쪽 분들도 코드게이트 때문에 많이로 알아봐주셔서 되게 감사했다.
+Lucky Draw 파이썬 모듈이 주어진다.</description>
+    </item>
+    
+    <item>
+      <title>DEFCON 32</title>
+      <link>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</link>
+      <pubDate>Thu, 15 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</guid>
+      <description>컨퍼런스 티켓도 구매했었는데 대회랑 겹쳐서 전날에 구경밖에 못했다.
+숙소 1층에서 DEFCON 셔틀이 있어서 그거 타고 라스베가스 컨벤션 센터로 갈 수 있었다.
+1, 2일차에는 여러 문제들 보면서 잡다한 버그들 찾다가 상대팀 패치도 분석해보고 공격 패킷도 분석하면서 시간을 보냈다.
+2일차에 마지막으로 release된 Attack &amp;amp; Defense 문제중에 cloud cache를 잡았다.
+그날 저녁 열심히 익스플로잇 코드 두 개를 준비해서 갔지만 막상 3일차에 본선장에 가서 다른 팀들한테 쏴봤더니 둘다 동작하지 않아서 당황했다.
+원래 계획과는 다르게 팀원분이 다른 취약점으로 준비하신 두 개의 익스플로잇 코드를 먼저 쏘셨다.</description>
+    </item>
+    
+    <item>
+      <title>Router firmware extraction &amp; ld based emulator development</title>
+      <link>https://msh1307.kr/blog/router_firmware_extraction_emulator_dev/</link>
+      <pubDate>Fri, 19 Jul 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/router_firmware_extraction_emulator_dev/</guid>
+      <description>계기 BoB 교육기간중에 갑자기 흥미가 생겨서 친구 라우터를 빼았고 UART에 땜질한다고 나대다가 부숴먹고 새로 구매했다.
+시도 당연하지만 알리산 3천원 땜질기로는 제대로된 땜질을 할 수 없었고 이걸로 열심히 기판을 지지다 망가뜨렸다.
+유튜브보고 대충 땜질을 배우고 알리에서 열풍기를 포함한 땜질 키트와 방진 마스크를 샀다.
+열풍기 써보려고 테스트하다 또 하나 더 부숴먹었다.
+납 발라놓고 열풍기로 조지니까 잘 달라붙는다.
+Firmware 추출 쿠팡에서 제일 위에 떠있는 라우터를 사왔다.
+제일 기본적으로 디버깅 인터페이스부터 찾으려고 했다.
+JTAG나 UART가 어디 없나 찾던중 UART를 찾은것 같았다.</description>
+    </item>
+    
+    <item>
+      <title>Background ARM</title>
+      <link>https://msh1307.kr/blog/background_arm/</link>
+      <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/background_arm/</guid>
+      <description>Background - arm A1 Introduction to the Armv8 Architecture A1.1 About Arm Architecture Arm 아키텍처는 RISC로 reduced instruction set computer이다.
+다음과 같은 특징이 있다.
+많은 레지스터터 개수 load/store 아키텍처, 바로 memory에 작성을 허용치 않고 무조건 register를 거쳐서 load/store이 진행된다. 간단한 addressing mode, 모든 store/load address는 register와 명령 필드로만 addressing된다. 매우 중요한 특징으로 Arm 아키텍처 퍼포먼스나 사이즈나 전력 소모량에 따라 여러 구현이 존재한다.
+Armv8의 중요한 특징은 호환성이다.
+64-bit Execution state, AArch64 32-bit Execution state, AArch32 - 또한 이전 버전의 Arm 아키텍처와 모두 호환된다.</description>
+    </item>
+    
+    <item>
+      <title>Google CTF 2024 - UNICORNEL</title>
+      <link>https://msh1307.kr/blog/google_ctf_2024_unicornel/</link>
+      <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/google_ctf_2024_unicornel/</guid>
+      <description>UNICORNEL Cold Fusion 연합팀으로 Google ctf에 참여했다.
+늦잠자서 늦게 합류했는데, 이미 팀원분이 취약점을 찾아놓으셔서 어떻게 악용할지를 중점적으로 생각하고 익스플로잇을 작성해서 챌린지를 해결했다.
+Analysis ==== About ==== Unicornel is a multi-process, multi-architecture emulator server with concurrency and system call support. All processes of any architecture share the underlying kernel, and can interact with each other via system calls and in particular a lightweight shared memory interface. ==== Starting processes ==== In order to start a new process, you must first send a unicornelf header, which naturally bears no resemblance whatsoever to the actual ELF standard: struct unicornelf { uc_arch arch; //Desired unicorn-supported ISA uc_mode mode; //Desired unicorn-supported mode struct { unsigned long va; //Virtual address to map unsigned long length; //Length of memory to map } maps[4]; //Up to 4 mappings supported unsigned short code_length; //The length of the code to follow the unicornelf header unsigned char num_maps; //The number of mappings initialized in the maps array }; Following the unicornelf header should be &amp;lt;code length&amp;gt; bytes of assembled machine code in the specified instruction set architecture.</description>
+    </item>
+    
+    <item>
+      <title>HITCON CTF 2018 - SuperHexagon</title>
+      <link>https://msh1307.kr/blog/hitcon_2018_superhexagon/</link>
+      <pubDate>Tue, 25 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/hitcon_2018_superhexagon/</guid>
+      <description>오랜만에 한꺼번에 블로그 글을 쓰게 되었다.
+이번년도 초에 Theori에서 과제로 superhexagon을 풀면서 관련 CS를 한달간 공부해오는 것을 과제로 받았다.
+글에서 언급하는 background 내용은 다른 글에서 따로 정리되어있다.
+익스플로잇 코드나 gdbscript들은 Appendix 섹션으로 밀었다.
+Overview HITCON 2018 SuperHexagon Overview qemu는 메모리 블록을 region과 그에 대한 subregion으로 구성한다.
+이러한 region들은 각자의 priority를 가지며 priority 값이 낮을수록 참조가 우선된다.
+... + ARMCPRegInfo hitcon_flag_reginfo[] = { + { .name = &amp;#34;FLAG_WORD_0&amp;#34;, .state = ARM_CP_STATE_BOTH, + .</description>
+    </item>
+    
+    <item>
+      <title>Bi0s CTF 2024 - KowaiiVM</title>
+      <link>https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/</link>
+      <pubDate>Wed, 20 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/bi0s_ctf_2024_kowaiivm/</guid>
+      <description>Kowaii VM Analysis 문제에서 소스코드를 제공해준다.
+---- 0x0000 Header data ---- 0x1000 .CODE ---- bss &amp;gt;= 0xc000 .BSS ---- 0xffff 위와 같은 바이너리 구조를 입력으로 받는다.
+void prepareCtx() { this-&amp;gt;prepareFuncTable(); this-&amp;gt;regs-&amp;gt;bp = (u64 *)mmap(this-&amp;gt;genAddr(), STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;regs-&amp;gt;bp == (void *)(-1)) error(&amp;#34;Unable to map stack!&amp;#34;); this-&amp;gt;regs-&amp;gt;bp += (STACK_SIZE)/sizeof(u64); this-&amp;gt;regs-&amp;gt;sp = this-&amp;gt;regs-&amp;gt;bp; this-&amp;gt;jitBase = (u8 *)mmap(this-&amp;gt;genAddr(), JIT_SIZE, PROT_READ | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0); if(this-&amp;gt;jitBase == (void *)(-1)) error(&amp;#34;Unable to allocate executable memory!</description>
+    </item>
+    
+    <item>
+      <title>Linux kernel SLUB allocator</title>
+      <link>https://msh1307.kr/blog/linux-kernel-slub-allocator/</link>
+      <pubDate>Tue, 12 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/linux-kernel-slub-allocator/</guid>
+      <description>SLUB Allocator Userland에선 ptmalloc2가 있는 반면, Kernelland에선 SLUB이 있다.
+초기엔 SLAB Allocator를 사용했지만, 현재 대부분의 배포판은 SLUB을 이용한다.
+기존 SLAB allocator의 단점을 개선한 버전이다.
+kmem_cache_create로 slab cache를 생성하고 kmem_cache_alloc으로 지정된 slab cache에서 object를 할당한다.
+kmem_cache_free로 free하고 kmem_cache_destroy로 slab cache를 제거한다.
+kmalloc, kzalloc 같은 함수는 kmalloc-N 캐시에서 적합한 size인 object를 할당한다.
+Terms slab SLAB allocator랑 다른말이다.
+slab cache (= kmem_cache)를 확보하고 관리하는 주체다.
+slab cache msh@raspberrypi:~ $ sudo cat /proc/slabinfo slabinfo - version: 2.</description>
+    </item>
+    
+    <item>
+      <title>CVE-2022-1015 Linux kernel netfilter</title>
+      <link>https://msh1307.kr/blog/cve-2022-1015-linux-kernel-netfilter/</link>
+      <pubDate>Sun, 10 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/cve-2022-1015-linux-kernel-netfilter/</guid>
+      <description>Backgrounds Capabilites 요즘 리눅스들은 단순 root VS normal user가 아니다.
+capabilities로 나뉘어져 권한이 부여된다.
+즉 root를 통째로 주지 않고 미세한 capability를 부여해서 리스크를 최소화 시킨다.
+Namespace namespace는 일종의 보안적인 요소들같은 것들을 모두 격리시키는 공간? 이다.
+여기엔 UID GID cred keys capabilites 등이 모두 포함된다.
+nested namespace
+유저의 namespace는 중첩될 수 있다.
+그 뜻은 initial root를 제외한 네임스페이스가 부모 namespace를 갖는다는 뜻이다.
+0개 혹은 더 많은 child namespace를 가질 수 있다.</description>
+    </item>
+    
+    <item>
+      <title>CVE-2022-42432 Linux kernel netfilter</title>
+      <link>https://msh1307.kr/blog/cve-2022-42432-linux-kernel-netfilter/</link>
+      <pubDate>Sun, 10 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/cve-2022-42432-linux-kernel-netfilter/</guid>
+      <description>CVE-2022-42432 struct expr_ops expr_ops_osf = { .name	= &amp;#34;osf&amp;#34;, .alloc_len	= sizeof(struct nftnl_expr_osf), .max_attr	= NFTA_OSF_MAX, .set	= nftnl_expr_osf_set, .get	= nftnl_expr_osf_get, .parse	= nftnl_expr_osf_parse, .build	= nftnl_expr_osf_build, .output	= nftnl_expr_osf_snprintf, }; libnftnl 소스코드에서 osf expr도 지원한다는 것을 알 수 있었다.
+struct nftnl_expr_osf { enum nft_registers	dreg; uint8_t	ttl; uint32_t	flags; }; static int nftnl_expr_osf_set(struct nftnl_expr *e, uint16_t type, const void *data, uint32_t data_len) { struct nftnl_expr_osf *osf = nftnl_expr_data(e); switch(type) { case NFTNL_EXPR_OSF_DREG: memcpy(&amp;amp;osf-&amp;gt;dreg, data, sizeof(osf-&amp;gt;dreg)); break; case NFTNL_EXPR_OSF_TTL: memcpy(&amp;amp;osf-&amp;gt;ttl, data, sizeof(osf-&amp;gt;ttl)); break; case NFTNL_EXPR_OSF_FLAGS: memcpy(&amp;amp;osf-&amp;gt;flags, data, sizeof(osf-&amp;gt;flags)); break; } return 0; } nf tables에서 expr 추가하듯이 추가하면 된다.</description>
+    </item>
+    
+    <item>
+      <title>Iris CTF 2024</title>
+      <link>https://msh1307.kr/blog/iris_ctf_2024/</link>
+      <pubDate>Sun, 10 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/iris_ctf_2024/</guid>
+      <description>DeadSec으로 참여했다. 당시엔 팀원분이 풀어주셔서 넘겼지만, sqlite3라 꼭 혼자 풀어보고싶었다.
+sequilitis SQL query를 만들고 실행시키는 프로그램이다.
+Analysis chal 여러 옵션이 존재한다.
+먼저 sqlite3는 오픈소스이고 소스코드도 주어지기 때문에 일단 컴파일을 하고 구조체나 enum을 IDA로 import 했다.
+inscribe 옵션에서 sqlite3의 vm 코드를 수정할 수 있는 취약점이있다.
+그리고 execute로 실행하고 나면 column type에 따라 값들이 리턴된다.
+sqlite3 sqlite3의 vmcode들을 분석해야한다.
+/* forward declaration */ static int sqlite3Prepare( sqlite3 *db, /* Database handle. */ const char *zSql, /* UTF-8 encoded SQL statement.</description>
+    </item>
+    
+    <item>
+      <title>LACTF 2024 - ppplot</title>
+      <link>https://msh1307.kr/blog/lactf_2024_ppplot/</link>
+      <pubDate>Sat, 09 Mar 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/lactf_2024_ppplot/</guid>
+      <description>ppplot Analysis int __fastcall arith(int flag) { uint64_t *v1; // rax unsigned int res; // eax char v3; // cl int i; // [rsp+1Ch] [rbp-14h] int idx; // [rsp+20h] [rbp-10h] unsigned int v7; // [rsp+24h] [rbp-Ch] eq_obj *obj; // [rsp+28h] [rbp-8h] printf(&amp;#34;idx: &amp;#34;); idx = read_int(); if ( (unsigned int)idx &amp;lt; 128 ) { v1 = (uint64_t *)obj_list_[idx]; obj = (eq_obj *)v1; for ( i = 0; i &amp;lt;= 63; ++i ) { res = calc(obj, i - 0x20); v7 = res + 0x20; LODWORD(v1) = printf(&amp;#34;(%d, %d)\n&amp;#34;, (unsigned int)(i - 0x20), res); if ( v7 &amp;lt;= 0x3F ) { if ( flag ) v3 = &amp;#39;.</description>
+    </item>
+    
+    <item>
+      <title>Kimsuky malware analysis</title>
+      <link>https://msh1307.kr/blog/jse_dropper_kimsuky/</link>
+      <pubDate>Sat, 24 Feb 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/jse_dropper_kimsuky/</guid>
+      <description>Overview 북한 Kimsuky 위협 그룹에서 외교부를 타겟으로 악성코드를 유포했다.
+Analysis Procmon 외교부가판2021-05-07로 유포되었고, .pdf.jse의 형태를 취하고 있었다.
+vm안에서 실행하고 process create로 필터링해서 확인해보면,
+WScript.exe가 돌면서 프로세스를 생성한다.
+dll를 regsvr32.exe로 등록한다.
+그냥 pdf viewer처럼 동작하면서 외교부가판 문서를 열어준다.
+하지만 procmon으로 확인해보면 process create를 걸고 확인해보면 실제로는 WScript가 실행되면서 실제 악성코드를 드랍한다.
+regsvr32.exe로 악성 dll을 로드하고 실행 흐름이 넘어간다.
+이러한 형태는 백신을 우회하기 위해 사용된다.
+Dll Extraction pdf를 열어주고 뒤에선 base64 더블 디코딩을 수행하고 실행흐름을 dll로 프록시한다.</description>
+    </item>
+    
+    <item>
+      <title>Raspberry pi server setup</title>
+      <link>https://msh1307.kr/blog/raspberry_pi_setup/</link>
+      <pubDate>Sun, 28 Jan 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/raspberry_pi_setup/</guid>
+      <description>setup raspi-img &amp;amp; switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.
+라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.
+기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.
+cat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.
+라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.
+중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.
+network interface #!/bin/bash if [ -z &amp;#34;$1&amp;#34; ]; then DELAY=&amp;#34;30&amp;#34; else DELAY=&amp;#34;$1&amp;#34; fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep &amp;#34;inet\b&amp;#34; | awk &amp;#39;{print $2}&amp;#39; | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep &amp;#34;inet\b&amp;#34; | awk &amp;#39;{print $2}&amp;#39; | cut -d/ -f1) if [ -z $EthAddr ]; then echo &amp;#34;Using WiFi&amp;#34; echo &amp;#34;wlan0 IP=$WiFiAddr&amp;#34; else echo &amp;#34;Using Ethernet!</description>
+    </item>
+    
+    <item>
+      <title>CODEGATE 2023 Quals</title>
+      <link>https://msh1307.kr/blog/codegate_junior_2023_quals/</link>
+      <pubDate>Sat, 24 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/codegate_junior_2023_quals/</guid>
+      <description>PCPU 대회 끝나기 2시간정도 전에 잡았었는데, 분석하기 빡세고 구조체도 많아서 시간내로 못풀었다.
+나중에 끝나고 천천히 풀어봤다.
+파이프라이닝이 적용된 VCPU 컨셉의 문제다.
+Analysis __int64 __fastcall main(int a1, char **a2, char **a3) { init_(); input_validchk(); // opcode(1byte) | operands(3bytes) while ( PC &amp;lt;= instr_sz ) { run_cycle(); ++PC; } run_cycle(); run_cycle(); run_cycle(); print_cycle(); return 0LL; } int init_() { unsigned int v0; // eax v0 = time(0LL); srand(v0); setvbuf(stdin, 0LL, 2, 0LL); setvbuf(stdout, 0LL, 2, 0LL); IF_NODE = malloc(0x10uLL); ID_NODE = malloc(0x10uLL); OF_NODE = malloc(0x10uLL); EX_NODE = malloc(0x10uLL); REG = malloc(0x20uLL); memset(REG, 0, sizeof(REG_SETS)); init_m(IF_NODE); init_m(ID_NODE); init_m(OF_NODE); init_m(EX_NODE); ANON.</description>
+    </item>
+    
+    <item>
+      <title>CCE 2023 Quals</title>
+      <link>https://msh1307.kr/blog/cce_2023_junior_quals/</link>
+      <pubDate>Sat, 10 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/cce_2023_junior_quals/</guid>
+      <description>K-Exploit 처음으로 잡아본 커널 문제다.
+대회끝나고 50분뒤에 플래그가 나왔다.
+아침에 BoB 필기랑 인적성보고 풀려했는데, 대회가 너무 빨리 끝났다. ;;
+Analysis rootfs.img.gz 파일 시스템이 주어지고 bzImage가 주어진다.
+local_run.sh #!/bin/sh qemu-system-x86_64 \ -m 128M \ -cpu kvm64,+smep,+smap \ -kernel bzImage \ -initrd rootfs.img.gz \ -snapshot \ -nographic \ -monitor /dev/null \ -no-reboot \ -append &amp;#34;console=ttyS0 kaslr kpti=1 quiet panic=1&amp;#34; \ -s kaslr, kpti, smep, smap 다 빡세게 걸려있다.
+server_run.sh #!/bin/sh qemu-system-x86_64 \ -m 128M \ -cpu kvm64,+smep,+smap \ -kernel bzImage \ -initrd $1 \ -snapshot \ -nographic \ -monitor /dev/null \ -no-reboot \ -append &amp;#34;console=ttyS0 kaslr kpti=1 quiet panic=1&amp;#34; 똑같은데 디버깅 옵션만 빠진거같다.</description>
+    </item>
+    
+    <item>
+      <title>TJCTF 2023 - Painter</title>
+      <link>https://msh1307.kr/blog/tjctf_2023_painter/</link>
+      <pubDate>Mon, 29 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/tjctf_2023_painter/</guid>
+      <description>painter 유사 그림판 컨셉인듯 하다.
+Web Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.
+Wasm 취약점 분석은 처음 해봐서 생소했다.
+admin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.
+Analysis admin-bot.js import flag from &amp;#39;./flag.txt&amp;#39;; function sleep(time) { return new Promise(resolve =&amp;gt; { setTimeout(resolve, time); }); } export default { id: &amp;#39;painter&amp;#39;, name: &amp;#39;painter&amp;#39;, urlRegex: /^https:\/\/painter\.tjc\.tf\//, timeout: 10000, handler: async (url, ctx) =&amp;gt; { const page = await ctx.newPage(); await page.goto(&amp;#39;https://painter.tjc.tf&amp;#39;, { waitUntil: &amp;#39;domcontentloaded&amp;#39; }); await page.</description>
+    </item>
+    
+    <item>
+      <title>Kalmar CTF 2023 - MJS</title>
+      <link>https://msh1307.kr/blog/kalmar_ctf_2023_mjs/</link>
+      <pubDate>Mon, 13 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/kalmar_ctf_2023_mjs/</guid>
+      <description>MJS CTF 당시에는 warm-up인데 자바스크립트 엔진이라 도망갔다.
+구글링 잘했으면 바로 풀 수 있었을 것 같다.
+Analysis FROM ubuntu:22.04 ENV DEBIAN_FRONTEND noninteractive RUN apt-get update RUN apt-get install -y xinetd python3 xxd COPY mjs / COPY ynetd / COPY remote.py / RUN echo &amp;#34;kalmar{redacted}&amp;#34; &amp;gt; /flag-$(head -c 16 /dev/urandom | xxd -p).txt USER 1000:1000 EXPOSE 10002 CMD ./ynetd -p 10002 &amp;#34;timeout 60 ./remote.py&amp;#34; 22.04이다.
+diff --git a/Makefile b/Makefile index d265d7e..d495e84 100644 --- a/Makefile +++ b/Makefile @@ -5,6 +5,7 @@ BUILD_DIR = build RD ?</description>
+    </item>
+    
+    <item>
+      <title>Linux kernel module programming</title>
+      <link>https://msh1307.kr/blog/linux_kernel_module_programming/</link>
+      <pubDate>Fri, 20 Jan 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/linux_kernel_module_programming/</guid>
+      <description>Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.
+커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.
+모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.
+lsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.
+이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다.</description>
+    </item>
+    
+    <item>
+      <title>RealWorld CTF 2023 - NoneHeavyFTP</title>
+      <link>https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/</link>
+      <pubDate>Sat, 07 Jan 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/</guid>
+      <description>NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.
+Analysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.
+/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.
+https://github.com/hfiref0x/LightFTP
+그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.
+탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.
+소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.
+// positive sp value has been detected, the output may be wrong!</description>
+    </item>
+    
+  </channel>
+</rss>

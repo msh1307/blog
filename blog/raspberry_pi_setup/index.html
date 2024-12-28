@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Raspberry pi server setup | msh1307</title>
+<meta name="keywords" content="Raspberry pi">
+<meta name="description" content="setup raspi-img &amp; switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.
+라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.
+기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.
+cat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.
+라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.
+중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.
+network interface #!/bin/bash if [ -z &#34;$1&#34; ]; then DELAY=&#34;30&#34; else DELAY=&#34;$1&#34; fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep &#34;inet\b&#34; | awk &#39;{print $2}&#39; | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep &#34;inet\b&#34; | awk &#39;{print $2}&#39; | cut -d/ -f1) if [ -z $EthAddr ]; then echo &#34;Using WiFi&#34; echo &#34;wlan0 IP=$WiFiAddr&#34; else echo &#34;Using Ethernet!">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/raspberry_pi_setup/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Raspberry pi server setup" />
+<meta property="og:description" content="setup raspi-img &amp; switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.
+라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.
+기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.
+cat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.
+라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.
+중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.
+network interface #!/bin/bash if [ -z &#34;$1&#34; ]; then DELAY=&#34;30&#34; else DELAY=&#34;$1&#34; fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep &#34;inet\b&#34; | awk &#39;{print $2}&#39; | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep &#34;inet\b&#34; | awk &#39;{print $2}&#39; | cut -d/ -f1) if [ -z $EthAddr ]; then echo &#34;Using WiFi&#34; echo &#34;wlan0 IP=$WiFiAddr&#34; else echo &#34;Using Ethernet!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/raspberry_pi_setup/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-01-28T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2024-01-28T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Raspberry pi server setup"/>
+<meta name="twitter:description" content="setup raspi-img &amp; switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.
+라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.
+기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.
+cat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.
+라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.
+중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.
+network interface #!/bin/bash if [ -z &#34;$1&#34; ]; then DELAY=&#34;30&#34; else DELAY=&#34;$1&#34; fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep &#34;inet\b&#34; | awk &#39;{print $2}&#39; | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep &#34;inet\b&#34; | awk &#39;{print $2}&#39; | cut -d/ -f1) if [ -z $EthAddr ]; then echo &#34;Using WiFi&#34; echo &#34;wlan0 IP=$WiFiAddr&#34; else echo &#34;Using Ethernet!"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Raspberry pi server setup",
+      "item": "https://msh1307.kr/blog/raspberry_pi_setup/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Raspberry pi server setup",
+  "name": "Raspberry pi server setup",
+  "description": "setup raspi-img \u0026amp; switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.\n라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.\n기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.\ncat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.\n라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.\n중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.\nnetwork interface #!/bin/bash if [ -z \u0026#34;$1\u0026#34; ]; then DELAY=\u0026#34;30\u0026#34; else DELAY=\u0026#34;$1\u0026#34; fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep \u0026#34;inet\\b\u0026#34; | awk \u0026#39;{print $2}\u0026#39; | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep \u0026#34;inet\\b\u0026#34; | awk \u0026#39;{print $2}\u0026#39; | cut -d/ -f1) if [ -z $EthAddr ]; then echo \u0026#34;Using WiFi\u0026#34; echo \u0026#34;wlan0 IP=$WiFiAddr\u0026#34; else echo \u0026#34;Using Ethernet!",
+  "keywords": [
+    "Raspberry pi"
+  ],
+  "articleBody": "setup raspi-img \u0026 switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.\n라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.\n기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.\ncat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.\n라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.\n중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.\nnetwork interface #!/bin/bash if [ -z \"$1\" ]; then DELAY=\"30\" else DELAY=\"$1\" fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep \"inet\\b\" | awk '{print $2}' | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep \"inet\\b\" | awk '{print $2}' | cut -d/ -f1) if [ -z $EthAddr ]; then echo \"Using WiFi\" echo \"wlan0 IP=$WiFiAddr\" else echo \"Using Ethernet! Switching off WiFi\" echo \"eth0 IP=$EthAddr\" echo \"wlan0 IP=$WiFiAddr\" ifconfig wlan0 down fi 이렇게 작성해준다.\n#!/bin/sh -e # # rc.local # # This script is executed at the end of each multiuser runlevel. # Make sure that the script will \"exit 0\" on success or any other # value on error. # # In order to enable or disable this script just change the execution # bits. # # By default this script does nothing. /home/msh/check_eth.sh \u0026 # Print the IP address _IP=$(hostname -I) || true if [ \"$_IP\" ]; then printf \"My IP address is %s\\n\" \"$_IP\" fi exit 0 그리고 /etc/rc.local에 등록해주면, 랜선이 꼽혀있는한 eth0 인터페이스만 활성화된다.\nauto reboot \u0026 fail2ban 00 00 * * * reboot crontab -e로 넣어준다.\n그리고 sudo apt install fail2ban 해주고\n[DEFAULT] findtime = 1d maxretry = 8 bantime = 3w`` backend = systemd ignoreip = 127.0.0.1/8 192.168.0.0/24 [sshd] enabled = true port = 22 filter = sshd logpath = /var/log/fail2ban-ssh.log /etc/fail2ban/jail.local을 세팅해준다.\nPort fowarding 인터페이스 두개 MAC으로 dhcp ip를 고정시켜준다.\n그리고 포트 열어주면 된다.\nCloudflare 그리고 이제 네임서버 바꿔주고 A 레코드 DNS only로 서브도메인도 설정해줬다.\n하나는 블로그라 깃허브로 연결되어있고, 서브도메인을 따로 두고 직접 라즈베리파이 서버로 들어가도록 했다.\nSSL \u0026 Proxy 개인 nas처럼 쓰려는데 ssl을 자체적으로 지원은 안하는것 같아서 nginx로 프록시해서 ssl을 적용시켰다.\n그리고 라즈베리파이4에서 리버스프록시로 라즈베리파이5로도 포워딩하도록 설정했다.\nsudo certbot 이후 서브도메인으로 주면 알아서 설정해준다.\n/etc/nginx/sites-enabled/* 를 수정해준다.\nserver_name raspi.msh1307.kr; # managed by Certbot location / { proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_set_header X-Forwarded-Proto $scheme; proxy_pass http://127.0.0.1:8080/; # First attempt to serve request as file, then # as directory, then fall back to displaying a 404. #try_files $uri $uri/ =404; } certbot이 자동으로 생성한 부분 조금 지워주고 수정해서 루프백으로 포워딩해주는 부분을 추가한다.\n그리고 라즈베리파이5로도 포워딩이 진행되어야하니 설정을 그대로 복사해서 listen만 다른 포트로 지정해주면 된다.\nsudo nginx -t sudo service nginx restart 그리고 crontab에 넣어서 자동으로 인증서를 갱신하게 해줄 수 있다.\n00 02 * * 0 sudo certbot renew --quiet ",
+  "wordCount" : "445",
+  "inLanguage": "en",
+  "datePublished": "2024-01-28T00:00:00Z",
+  "dateModified": "2024-01-28T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/raspberry_pi_setup/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      Raspberry pi server setup
+    </h1>
+    <div class="post-meta">
+
+
+January 2024
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#setup" aria-label="setup">setup</a><ul>
+                        
+                <li>
+                    <a href="#raspi-img--switch" aria-label="raspi-img &amp;amp; switch">raspi-img &amp; switch</a></li>
+                <li>
+                    <a href="#network-interface" aria-label="network interface">network interface</a></li>
+                <li>
+                    <a href="#auto-reboot--fail2ban" aria-label="auto reboot &amp;amp; fail2ban">auto reboot &amp; fail2ban</a></li>
+                <li>
+                    <a href="#port-fowarding" aria-label="Port fowarding">Port fowarding</a></li>
+                <li>
+                    <a href="#cloudflare" aria-label="Cloudflare">Cloudflare</a></li>
+                <li>
+                    <a href="#ssl--proxy" aria-label="SSL &amp;amp; Proxy">SSL &amp; Proxy</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="setup">setup<a hidden class="anchor" aria-hidden="true" href="#setup">#</a></h1>
+<h2 id="raspi-img--switch">raspi-img &amp; switch<a hidden class="anchor" aria-hidden="true" href="#raspi-img--switch">#</a></h2>
+<p>평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.<br>
+라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.<br>
+기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.<br>
+<img loading="lazy" src="/blog/Raspberry_pi_setup/switch.jpg" alt=""  />
+<br>
+cat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.</p>
+<p>라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.<br>
+중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.<br>
+<img loading="lazy" src="/blog/Raspberry_pi_setup/serv.jpg" alt=""  />
+</p>
+<h2 id="network-interface">network interface<a hidden class="anchor" aria-hidden="true" href="#network-interface">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z <span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  DELAY<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;30&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>  DELAY<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>sleep $DELAY
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>EthAddr<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>ip addr show eth0 | grep <span style="color:#e6db74">&#34;inet\b&#34;</span> | awk <span style="color:#e6db74">&#39;{print $2}&#39;</span> | cut -d/ -f1<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>WiFiAddr<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>ip addr show wlan0 | grep <span style="color:#e6db74">&#34;inet\b&#34;</span> | awk <span style="color:#e6db74">&#39;{print $2}&#39;</span> | cut -d/ -f1<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -z $EthAddr <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;Using WiFi&#34;</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;wlan0 IP=</span>$WiFiAddr<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;Using Ethernet! Switching off WiFi&#34;</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;eth0  IP=</span>$EthAddr<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;wlan0 IP=</span>$WiFiAddr<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  ifconfig wlan0 down
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span></code></pre></div><p>이렇게 작성해준다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/sh -e
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># rc.local</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># This script is executed at the end of each multiuser runlevel.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Make sure that the script will &#34;exit 0&#34; on success or any other</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># value on error.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># In order to enable or disable this script just change the execution</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># bits.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># By default this script does nothing.</span>
+</span></span><span style="display:flex;"><span>/home/msh/check_eth.sh &amp;
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Print the IP address</span>
+</span></span><span style="display:flex;"><span>_IP<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>hostname -I<span style="color:#66d9ef">)</span> <span style="color:#f92672">||</span> true
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">&#34;</span>$_IP<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  printf <span style="color:#e6db74">&#34;My IP address is %s\n&#34;</span> <span style="color:#e6db74">&#34;</span>$_IP<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>exit <span style="color:#ae81ff">0</span>
+</span></span></code></pre></div><p>그리고 /etc/rc.local에 등록해주면, 랜선이 꼽혀있는한 eth0 인터페이스만 활성화된다.</p>
+<h2 id="auto-reboot--fail2ban">auto reboot &amp; fail2ban<a hidden class="anchor" aria-hidden="true" href="#auto-reboot--fail2ban">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#ae81ff">00</span> <span style="color:#ae81ff">00</span> * * * reboot
+</span></span></code></pre></div><p>crontab -e로 넣어준다.</p>
+<p>그리고 sudo apt install fail2ban 해주고</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">[</span>DEFAULT<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>findtime <span style="color:#f92672">=</span> 1d
+</span></span><span style="display:flex;"><span>maxretry <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>bantime <span style="color:#f92672">=</span> 3w<span style="color:#e6db74">``</span>
+</span></span><span style="display:flex;"><span>backend <span style="color:#f92672">=</span> systemd
+</span></span><span style="display:flex;"><span>ignoreip <span style="color:#f92672">=</span> 127.0.0.1/8 192.168.0.0/24
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>sshd<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>enabled <span style="color:#f92672">=</span> true
+</span></span><span style="display:flex;"><span>port <span style="color:#f92672">=</span> <span style="color:#ae81ff">22</span>
+</span></span><span style="display:flex;"><span>filter <span style="color:#f92672">=</span> sshd
+</span></span><span style="display:flex;"><span>logpath <span style="color:#f92672">=</span> /var/log/fail2ban-ssh.log
+</span></span></code></pre></div><p>/etc/fail2ban/jail.local을 세팅해준다.</p>
+<h2 id="port-fowarding">Port fowarding<a hidden class="anchor" aria-hidden="true" href="#port-fowarding">#</a></h2>
+<p><img loading="lazy" src="/blog/Raspberry_pi_setup/image-2.png" alt=""  />
+<br>
+인터페이스 두개 MAC으로 dhcp ip를 고정시켜준다.<br>
+<img loading="lazy" src="/blog/Raspberry_pi_setup/image-3.png" alt=""  />
+<br>
+그리고 포트 열어주면 된다.</p>
+<h2 id="cloudflare">Cloudflare<a hidden class="anchor" aria-hidden="true" href="#cloudflare">#</a></h2>
+<p><img loading="lazy" src="/blog/Raspberry_pi_setup/image-4.png" alt=""  />
+<br>
+그리고 이제 네임서버 바꿔주고 A 레코드 DNS only로 서브도메인도 설정해줬다.<br>
+하나는 블로그라 깃허브로 연결되어있고, 서브도메인을 따로 두고 직접 라즈베리파이 서버로 들어가도록 했다.</p>
+<h2 id="ssl--proxy">SSL &amp; Proxy<a hidden class="anchor" aria-hidden="true" href="#ssl--proxy">#</a></h2>
+<p>개인 nas처럼 쓰려는데 ssl을 자체적으로 지원은 안하는것 같아서 nginx로 프록시해서 ssl을 적용시켰다.<br>
+그리고 라즈베리파이4에서 리버스프록시로 라즈베리파이5로도 포워딩하도록 설정했다.</p>
+<pre tabindex="0"><code>sudo certbot
+</code></pre><p>이후 서브도메인으로 주면 알아서 설정해준다.<br>
+/etc/nginx/sites-enabled/* 를 수정해준다.</p>
+<pre tabindex="0"><code>    server_name raspi.msh1307.kr; # managed by Certbot
+
+    location / {
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_pass http://127.0.0.1:8080/;
+
+      # First attempt to serve request as file, then
+      # as directory, then fall back to displaying a 404.
+      #try_files $uri $uri/ =404;
+    }
+</code></pre><p>certbot이 자동으로 생성한 부분 조금 지워주고 수정해서 루프백으로 포워딩해주는 부분을 추가한다.<br>
+그리고 라즈베리파이5로도 포워딩이 진행되어야하니 설정을 그대로 복사해서 listen만 다른 포트로 지정해주면 된다.</p>
+<pre tabindex="0"><code>sudo nginx -t
+sudo service nginx restart
+</code></pre><p>그리고 crontab에 넣어서 자동으로 인증서를 갱신하게 해줄 수 있다.</p>
+<pre tabindex="0"><code>00 02 * * 0 sudo certbot renew --quiet
+</code></pre>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/raspberry-pi/">Raspberry pi</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

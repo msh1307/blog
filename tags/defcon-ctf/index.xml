@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>DEFCON CTF on msh1307</title>
+    <link>https://msh1307.kr/tags/defcon-ctf/</link>
+    <description>Recent content in DEFCON CTF on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 15 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/defcon-ctf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>DEFCON 32</title>
+      <link>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</link>
+      <pubDate>Thu, 15 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/defcon_32_cloud_cache-quickjs_exploitation/</guid>
+      <description>컨퍼런스 티켓도 구매했었는데 대회랑 겹쳐서 전날에 구경밖에 못했다.
+숙소 1층에서 DEFCON 셔틀이 있어서 그거 타고 라스베가스 컨벤션 센터로 갈 수 있었다.
+1, 2일차에는 여러 문제들 보면서 잡다한 버그들 찾다가 상대팀 패치도 분석해보고 공격 패킷도 분석하면서 시간을 보냈다.
+2일차에 마지막으로 release된 Attack &amp;amp; Defense 문제중에 cloud cache를 잡았다.
+그날 저녁 열심히 익스플로잇 코드 두 개를 준비해서 갔지만 막상 3일차에 본선장에 가서 다른 팀들한테 쏴봤더니 둘다 동작하지 않아서 당황했다.
+원래 계획과는 다르게 팀원분이 다른 취약점으로 준비하신 두 개의 익스플로잇 코드를 먼저 쏘셨다.</description>
+    </item>
+    
+  </channel>
+</rss>

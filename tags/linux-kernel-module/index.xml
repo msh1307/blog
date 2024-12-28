@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Linux kernel module on msh1307</title>
+    <link>https://msh1307.kr/tags/linux-kernel-module/</link>
+    <description>Recent content in Linux kernel module on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 20 Jan 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/linux-kernel-module/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux kernel module programming</title>
+      <link>https://msh1307.kr/blog/linux_kernel_module_programming/</link>
+      <pubDate>Fri, 20 Jan 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/linux_kernel_module_programming/</guid>
+      <description>Kernel module? 모듈은 사용자의 혹은 커널의 요구로 읽혀지거나 아니면 없어지는 코드들로 이루어진 프로그램의 어떤 한 조각을 의미한다.
+커널은 하나의 큰 모듈들의 집합이라고 볼 수 있다.
+모듈들을 통해서 필요할때 더 추가, 혹은 제거를 통해서 커널을 재컴파일 혹은 재가동하지 않고도 커널의 기능을 확장하거나 축소시킬 수 있다.
+lsmod insmod rmmod lsmod를 통해서 현재 커널에 있는 모듈들의 정보를 확인할 수 있다.
+이때 lsmod는 /proc/modules를 읽고나서 좀 더 예쁘게 바꿔준다. insmod를 통해서 커널에 모듈을 적재할 수 있다.</description>
+    </item>
+    
+  </channel>
+</rss>

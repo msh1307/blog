@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>TJCTF_2023 Painter on msh1307</title>
+    <link>https://msh1307.kr/tags/tjctf_2023-painter/</link>
+    <description>Recent content in TJCTF_2023 Painter on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 29 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/tjctf_2023-painter/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>TJCTF 2023 - Painter</title>
+      <link>https://msh1307.kr/blog/tjctf_2023_painter/</link>
+      <pubDate>Mon, 29 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/tjctf_2023_painter/</guid>
+      <description>painter 유사 그림판 컨셉인듯 하다.
+Web Assembly 익스플로잇해서 admin bot의 쿠키 탈취가 목적이다.
+Wasm 취약점 분석은 처음 해봐서 생소했다.
+admin-bot.js 파일과 dockerfile, app.py, index.wasm 등이 주어진다.
+Analysis admin-bot.js import flag from &amp;#39;./flag.txt&amp;#39;; function sleep(time) { return new Promise(resolve =&amp;gt; { setTimeout(resolve, time); }); } export default { id: &amp;#39;painter&amp;#39;, name: &amp;#39;painter&amp;#39;, urlRegex: /^https:\/\/painter\.tjc\.tf\//, timeout: 10000, handler: async (url, ctx) =&amp;gt; { const page = await ctx.newPage(); await page.goto(&amp;#39;https://painter.tjc.tf&amp;#39;, { waitUntil: &amp;#39;domcontentloaded&amp;#39; }); await page.</description>
+    </item>
+    
+  </channel>
+</rss>

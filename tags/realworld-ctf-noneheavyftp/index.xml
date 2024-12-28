@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>RealWorld CTF NoneheavyFTP on msh1307</title>
+    <link>https://msh1307.kr/tags/realworld-ctf-noneheavyftp/</link>
+    <description>Recent content in RealWorld CTF NoneheavyFTP on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 07 Jan 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/realworld-ctf-noneheavyftp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RealWorld CTF 2023 - NoneHeavyFTP</title>
+      <link>https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/</link>
+      <pubDate>Sat, 07 Jan 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/</guid>
+      <description>NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.
+Analysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.
+/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.
+https://github.com/hfiref0x/LightFTP
+그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.
+탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.
+소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.
+// positive sp value has been detected, the output may be wrong!</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>CODEGATE 2023 Quals on msh1307</title>
+    <link>https://msh1307.kr/tags/codegate-2023-quals/</link>
+    <description>Recent content in CODEGATE 2023 Quals on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 24 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/codegate-2023-quals/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CODEGATE 2023 Quals</title>
+      <link>https://msh1307.kr/blog/codegate_junior_2023_quals/</link>
+      <pubDate>Sat, 24 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/codegate_junior_2023_quals/</guid>
+      <description>PCPU 대회 끝나기 2시간정도 전에 잡았었는데, 분석하기 빡세고 구조체도 많아서 시간내로 못풀었다.
+나중에 끝나고 천천히 풀어봤다.
+파이프라이닝이 적용된 VCPU 컨셉의 문제다.
+Analysis __int64 __fastcall main(int a1, char **a2, char **a3) { init_(); input_validchk(); // opcode(1byte) | operands(3bytes) while ( PC &amp;lt;= instr_sz ) { run_cycle(); ++PC; } run_cycle(); run_cycle(); run_cycle(); print_cycle(); return 0LL; } int init_() { unsigned int v0; // eax v0 = time(0LL); srand(v0); setvbuf(stdin, 0LL, 2, 0LL); setvbuf(stdout, 0LL, 2, 0LL); IF_NODE = malloc(0x10uLL); ID_NODE = malloc(0x10uLL); OF_NODE = malloc(0x10uLL); EX_NODE = malloc(0x10uLL); REG = malloc(0x20uLL); memset(REG, 0, sizeof(REG_SETS)); init_m(IF_NODE); init_m(ID_NODE); init_m(OF_NODE); init_m(EX_NODE); ANON.</description>
+    </item>
+    
+  </channel>
+</rss>

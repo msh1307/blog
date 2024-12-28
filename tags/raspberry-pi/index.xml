@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Raspberry pi on msh1307</title>
+    <link>https://msh1307.kr/tags/raspberry-pi/</link>
+    <description>Recent content in Raspberry pi on msh1307</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 28 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/tags/raspberry-pi/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Raspberry pi server setup</title>
+      <link>https://msh1307.kr/blog/raspberry_pi_setup/</link>
+      <pubDate>Sun, 28 Jan 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/raspberry_pi_setup/</guid>
+      <description>setup raspi-img &amp;amp; switch 평소에 포트포워딩해서 개인 nas겸 CTF시 request bin 같은걸로 잘 쓰고 있었는데, 본딩을 설정하다가 서버가 죽어버렸다.
+라즈베리파이 5도 구매해서 4랑 같이 처음부터 밀고 다시 세팅했다.
+기존에 WiFi로만 동작하던 서버를 이더넷이 끊켰을때만 WiFi를 사용하도록 바꿨다.
+cat.5e 랜선을 연결하고 1Gbps를 지원하는 스위칭 허브를 구매하여 연결했다.
+라즈베리파이 pcie 인터페이스에 WD SN770을 연결했는데 제대로 동작하지 않았다.
+중국산 500기가 ssd 연결하니 잘 동작해서 usb3.0으로 연결했다.
+network interface #!/bin/bash if [ -z &amp;#34;$1&amp;#34; ]; then DELAY=&amp;#34;30&amp;#34; else DELAY=&amp;#34;$1&amp;#34; fi sleep $DELAY EthAddr=$(ip addr show eth0 | grep &amp;#34;inet\b&amp;#34; | awk &amp;#39;{print $2}&amp;#39; | cut -d/ -f1) WiFiAddr=$(ip addr show wlan0 | grep &amp;#34;inet\b&amp;#34; | awk &amp;#39;{print $2}&amp;#39; | cut -d/ -f1) if [ -z $EthAddr ]; then echo &amp;#34;Using WiFi&amp;#34; echo &amp;#34;wlan0 IP=$WiFiAddr&amp;#34; else echo &amp;#34;Using Ethernet!</description>
+    </item>
+    
+  </channel>
+</rss>
