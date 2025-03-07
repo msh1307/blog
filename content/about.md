@@ -44,7 +44,7 @@ showToc: false
 > 2023
 > - 2nd, 선린 고등해커 페스티벌 2023 (Team 냥코)
 > - 2nd, Dreamhack KAPO, KAIST-POSTECH CTF 2023
-> - 1st, ABB CTF 2023 (₩1,000,000) (Team 냥코대전쟁)
+> - 1st, ABB CTF 2023 (Team 냥코대전쟁)
 > - 1st, Cyber Guardians CTF 2023 (Team 냥코대전쟁)
 > - 2nd, WITHCON, Whitehat Contest Junior 2023 (Team 뿡빵띠)
 > - 3rd, WACON, Whitehat Attack Contest Junior 2023 (Team 옆집 서현이 때문에 어느샌가 블랙해커로 타락한 사연)
