@@ -6,7 +6,22 @@
     <description>Recent content in Blogs on msh1307</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 19 Dec 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/blog/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 16 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Google Kernel ctf exp204</title>
+      <link>https://msh1307.kr/blog/exp204/</link>
+      <pubDate>Mon, 16 Jun 2025 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/exp204/</guid>
+      <description>작년 고3때 제출했던 exp204로 dothack 2025 컨퍼런스에서 발표를 진행했다.
+sechack이랑 나랑 각자 CVE-2023-6931, CVE-2023-5717을 맡았다.
+발표 당시에만 하더라도 딱히 연락온게 없었는데, 최근에 half 먼저 지급하겠다고 메일이 왔다.
+mitigation instance의 경우 exploit reliability 70%를 넘겨야 mitigation 우회로 인정해줘서 안정성 높히는데 많은 시간을 썼다.
+익스 자체는 고3때 끝내긴 했었는데, 무슨짓을 해도 70%를 못넘겨서 좀 오래 걸렸다.
+카이스트 입학하고 2월달 쯤부터 기숙사에서 익스 안정성 높히는데 시간을 많이 썼다.
+challenges 안정성 높히려고 익스를 많이 고쳤다.</description>
+    </item>
+    
     <item>
       <title>goyang2</title>
       <link>https://msh1307.kr/blog/geunhwang/</link>
