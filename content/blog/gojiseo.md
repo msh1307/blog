@@ -249,4 +249,4 @@ public static Map get_user_data() {
 ```
 READ_PHONE_STATE 같은 권한이 있으면 전화번호도 읽고, 기기 모델명 같은 여러 정보들을 수집한다.
 전화번호도 가공하는 함수들을 보면 010, 011, 016 이런 prefix 가진 애들을 걸러서 저장하는 것 같다.
-updateUserLong 엔드포인트로 보내지는 것을 확인할 수 있다.
+updateUserLong 엔드포인트로 보내는 것을 확인할 수 있다.
