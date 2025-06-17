@@ -6,7 +6,22 @@
     <description>Recent content on msh1307</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 16 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 17 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://msh1307.kr/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Android Malware Analysis</title>
+      <link>https://msh1307.kr/blog/gojiseo/</link>
+      <pubDate>Tue, 17 Jun 2025 00:00:00 +0000</pubDate>
+      
+      <guid>https://msh1307.kr/blog/gojiseo/</guid>
+      <description>Overview 운전면허도 없는데, 고지서가 발부되었다길래 궁금해서 분석해보았다.
+잠깐 본거라 분석은 많이 안했는데, 중요한건 대충 다 한 것 같다.
+미리 요약하자면 이 앱은 통신사, 전화번호, 폰 모델명 같은 것들을 탈취해서 173.234.30.133로 열심히 보내고 문자 메세지 내용이나 타이틀을 수집해서 그대로 서버로 보낸다.
+또한 앱을 키면, 대놓고 이름과 생년월일도 친절하게 묻는다.
+C2 서버에 접속해보면 저렇게 admin page를 열어두고 있다.
+저기뿐만 아니라 74.121.188.19 같은 곳에서도 같은 페이지가 열려있다.
+sms-serverV2-name_password 라는 laravel로 만든 자기들만의 php 프로젝트로 보인다.</description>
+    </item>
+    
     <item>
       <title>Dothack 2025 &amp; Kernel ctf</title>
       <link>https://msh1307.kr/blog/exp204/</link>

