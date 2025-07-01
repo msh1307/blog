@@ -25,7 +25,7 @@ showToc: false
 - 현대오토에버 화이트해커 양성교육 (2022.07 ~ 2022.11)
 - KITRI BoB 12th Vulnerability Analysis (2023.07 ~ 2024.03)
 - Theori Security Researcher Intern (2024.07 ~ 2025.01)
-- Dothack 2025 Speaker
+- Dothack 2025 Speaker (첫 Kernel CTF exploit)
 
 ## CTF & Award
 ---

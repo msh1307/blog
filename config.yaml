@@ -50,7 +50,7 @@ params:
   profileMode:
     enabled: true
     title: "msh1307"
-    subtitle: Sunrin High School 117th
+    subtitle:  KAIST 25
     imageUrl: "home/macat.jpeg"
     imageWidth: 280
     imageHeight: auto
