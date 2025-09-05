@@ -26,24 +26,24 @@ showToc: false
 - KITRI BoB 12th Vulnerability Analysis (2023.07 ~ 2024.03)
 - Theori Security Researcher Intern (2024.07 ~ 2025.01)
 - Dothack 2025 Speaker (첫 Kernel CTF exploit)
+- Google Kernel CTF Mitigation bypass exp204 ($21,000)
 
 ## CTF & Award
 ---
-> 2024
+> - 2nd, CCUNICTF 2025 (Team N1E3N5)
+> - 3rd, HACKSIUM 2025 (Team 숭실 보라 피크 민)
+> - DEFCON33 Finalist (Team Cold Fusion)
 > - 1st, CODEGATE Junior 2024
-> - 9th, DEFCON 32 Finals (Team Cold Fusion)
-> - 6th, DEFCON 32 Quals (Team Cold Fusion)
+> - DEFCON32 Finalist (Team Cold Fusion)
 > - Whitehat 10, Best of the Best
 > - 1st, 육군 Cyber Security challenge (Team 냥코)
 > - 1st, WITHCON, Whitehat Contest Junior 2024 (Team 야옹)
 > - 1st, 한양대 HCTF 2024 (Team 한양대특기자권율)
 > - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (Team 냥코)
 > - 미래기술연구소 장학생 선정 
-> - 4th, YISF CTF 2024 
+> - 4th, YISF CTF 2024
 > - 7th, LINE CTF 2024 (Team Cold Fusion)
 > - 1st, Cyber Apocalypse 2024: Hacker Royale
-
-> 2023
 > - 2nd, 선린 고등해커 페스티벌 2023 (Team 냥코)
 > - 2nd, Dreamhack KAPO, KAIST-POSTECH CTF 2023
 > - 1st, ABB CTF 2023 (Team 냥코대전쟁)
@@ -56,8 +56,6 @@ showToc: false
 > - 2nd, JBU CTF 2023 (Team 달)
 > - Finalist, Codegate Junior 2023
 > - 1st, 선린 모의해킹방어대회 2023
-
-> 2022
 > - 2nd, 선린 고등해커 페스티벌 2022 (Team Sechack)
 > - 2nd, 현대오토에버 화이트해커 경진대회 2022
 > - 2nd, Cyber Guardians CTF 2022
