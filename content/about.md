@@ -54,7 +54,7 @@ showToc: false
 > - 3rd, KOSPO CTF 2023 (Team cats save the world)
 > - 3rd, CCE, Cyber Conflict Exercise Junior 2023 (Team 가끔씩 툭하고 어셈블리어로 부끄러워하는 옆자리의 서현 군)
 > - 2nd, JBU CTF 2023 (Team 달)
-> - Finalist, Codegate Junior 2023
+> - Codegate 2023 Junior Finalist
 > - 1st, 선린 모의해킹방어대회 2023
 > - 2nd, 선린 고등해커 페스티벌 2022 (Team Sechack)
 > - 2nd, 현대오토에버 화이트해커 경진대회 2022
