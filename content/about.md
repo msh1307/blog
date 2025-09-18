@@ -30,6 +30,7 @@ showToc: false
 
 ## CTF & Award
 ---
+> - 2nd, WooriCON 2025 (Team 숭카이)
 > - 2nd, CCUNICTF 2025 (Team N1E3N5)
 > - 3rd, HACKSIUM 2025 (Team 숭실 보라 피크 민)
 > - DEFCON33 Finalist (Team Cold Fusion)
