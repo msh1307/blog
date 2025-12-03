@@ -30,6 +30,9 @@ showToc: false
 
 ## CTF & Award
 ---
+> - 3rd, Whitehat Contest University 2025 (Team 다이아몬드100개캐기)
+> - 3rd, FIESTA 2025 (Team 다이아몬드10개캐기)
+> - 2nd, 영남권 사이버 공격 방어 대회 (Team 보라핑크민)
 > - 2nd, WooriCON 2025 (Team 숭카이)
 > - 2nd, CCUNICTF 2025 (Team N1E3N5)
 > - 3rd, HACKSIUM 2025 (Team 숭실 보라 피크 민)
@@ -38,7 +41,7 @@ showToc: false
 > - DEFCON32 Finalist (Team Cold Fusion)
 > - Whitehat 10, Best of the Best
 > - 1st, 육군 Cyber Security challenge (Team 냥코)
-> - 1st, WITHCON, Whitehat Contest Junior 2024 (Team 야옹)
+> - 1st, Whitehat Contest Junior 2024 (Team 야옹)
 > - 1st, 한양대 HCTF 2024 (Team 한양대특기자권율)
 > - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (Team 냥코)
 > - 미래기술연구소 장학생 선정 
@@ -49,7 +52,7 @@ showToc: false
 > - 2nd, Dreamhack KAPO, KAIST-POSTECH CTF 2023
 > - 1st, ABB CTF 2023 (Team 냥코대전쟁)
 > - 1st, Cyber Guardians CTF 2023 (Team 냥코대전쟁)
-> - 2nd, WITHCON, Whitehat Contest Junior 2023 (Team 뿡빵띠)
+> - 2nd, Whitehat Contest Junior 2023 (Team 뿡빵띠)
 > - 3rd, WACON, Whitehat Attack Contest Junior 2023 (Team 옆집 서현이 때문에 어느샌가 블랙해커로 타락한 사연)
 > - 4th, YISF CTF 2023 
 > - 3rd, KOSPO CTF 2023 (Team cats save the world)
