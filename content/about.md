@@ -45,7 +45,6 @@ showToc: false
 > - 1st, 한양대 HCTF 2024 (Team 한양대특기자권율)
 > - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (Team 냥코)
 > - 미래기술연구소 장학생 선정 
-> - 4th, YISF CTF 2024
 > - 7th, LINE CTF 2024 (Team Cold Fusion)
 > - 1st, Cyber Apocalypse 2024: Hacker Royale
 > - 2nd, 선린 고등해커 페스티벌 2023 (Team 냥코)
@@ -54,17 +53,13 @@ showToc: false
 > - 1st, Cyber Guardians CTF 2023 (Team 냥코대전쟁)
 > - 2nd, Whitehat Contest Junior 2023 (Team 뿡빵띠)
 > - 3rd, WACON, Whitehat Attack Contest Junior 2023 (Team 옆집 서현이 때문에 어느샌가 블랙해커로 타락한 사연)
-> - 4th, YISF CTF 2023 
 > - 3rd, KOSPO CTF 2023 (Team cats save the world)
 > - 3rd, CCE, Cyber Conflict Exercise Junior 2023 (Team 가끔씩 툭하고 어셈블리어로 부끄러워하는 옆자리의 서현 군)
-> - 2nd, JBU CTF 2023 (Team 달)
 > - Codegate 2023 Junior Finalist
 > - 1st, 선린 모의해킹방어대회 2023
 > - 2nd, 선린 고등해커 페스티벌 2022 (Team Sechack)
 > - 2nd, 현대오토에버 화이트해커 경진대회 2022
 > - 2nd, Cyber Guardians CTF 2022
-> - 3rd, LOGCON CTF 2022
-> - 4th, Dreamhack Christmas CTF 2022
 > - 5th, Whitehat Contest Junior 2022
 > - 5th, CCE, Cyber Conflict Exercise Junior 2022
 > - 한림장학재단 장학생 선정 
