@@ -7,7 +7,7 @@ showToc: false
 
 # Profile
 ---
-맹서현 / 2006.02.17
+맹서현 / 2006
 ## Affiliation 
 ---
 - Sunrin Internet High School InfoSec 117th
@@ -44,9 +44,6 @@ showToc: false
 > - 1st, Whitehat Contest Junior 2024 (Team 야옹)
 > - 1st, 한양대 HCTF 2024 (Team 한양대특기자권율)
 > - 2nd, CCE, Cyber Conflict Exercise Junior 2024 (Team 냥코)
-> - 미래기술연구소 장학생 선정 
-> - 7th, LINE CTF 2024 (Team Cold Fusion)
-> - 1st, Cyber Apocalypse 2024: Hacker Royale
 > - 2nd, 선린 고등해커 페스티벌 2023 (Team 냥코)
 > - 2nd, Dreamhack KAPO, KAIST-POSTECH CTF 2023
 > - 1st, ABB CTF 2023 (Team 냥코대전쟁)
@@ -60,6 +57,3 @@ showToc: false
 > - 2nd, 선린 고등해커 페스티벌 2022 (Team Sechack)
 > - 2nd, 현대오토에버 화이트해커 경진대회 2022
 > - 2nd, Cyber Guardians CTF 2022
-> - 5th, Whitehat Contest Junior 2022
-> - 5th, CCE, Cyber Conflict Exercise Junior 2022
-> - 한림장학재단 장학생 선정 
